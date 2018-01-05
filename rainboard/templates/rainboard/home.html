@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Gepetto RainBoard</h1>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-5">
+      <h2>Namespaces</h2>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+        </tr>
+        {% for namespace in namespaces %}
+        {% include 'rainboard/namespace.html' with namespace=namespace %}
+        {% endfor %}
+      </table>
+    </div>
+
+
+    <div class="col-md-7">
+      <h2>Forges</h2>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>URL</th>
+        </tr>
+        {% for forge in forges %}
+        {% include 'rainboard/forge.html' with forge=forge %}
+        {% endfor %}
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+<h2>Projects</h2>
+<table class="table table-striped">
+  <tr>
+    <th>Namespace</th>
+    <th>Name</th>
+    <th>License</th>
+    <th>Homepage</th>
+  </tr>
+  {% for project in projects %}
+  {% include 'rainboard/project.html' with project=project %}
+  {% endfor %}
+</table>
+
+
+{% endblock %}
