@@ -9,6 +9,7 @@ chardet==3.0.4            # via requests
 https://github.com/nim65s/django-autoslug/archive/master.zip#egg=django-autoslug
 https://github.com/nim65s/ndh/archive/master.zip#egg=ndh
 django-bootstrap3==9.1.0
+django-tables2==1.17.1
 django==2.0.1
 idna==2.6                 # via requests
 psycopg2==2.7.3.2

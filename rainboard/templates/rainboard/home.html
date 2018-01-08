@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load django_tables2 %}
 
 {% block content %}
 
@@ -39,17 +40,7 @@
 
 
 <h2>Projects</h2>
-<table class="table table-striped">
-  <tr>
-    <th>Namespace</th>
-    <th>Name</th>
-    <th>License</th>
-    <th>Homepage</th>
-  </tr>
-  {% for project in projects %}
-  {% include 'rainboard/project.html' with project=project %}
-  {% endfor %}
-</table>
+{% render_table projects %}
 
 
 {% endblock %}
