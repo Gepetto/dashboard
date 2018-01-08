@@ -1,7 +1,8 @@
 from django.db import models
+from django.urls import reverse
 
 from autoslug import AutoSlugField
-from ndh.models import NamedModel, TimeStampedModel
+from ndh.models import NamedModel, TimeStampedModel, Links
 from ndh.utils import enum_to_choices, query_sum
 
 import requests
@@ -22,18 +23,24 @@ class License(NamedModel):
         return self.spdx_id or self.name
 
 
-class Project(NamedModel, TimeStampedModel):
+class Project(Links, NamedModel, TimeStampedModel):
     private = models.BooleanField(default=False)
     main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
 
+    def get_absolute_url(self):
+        return reverse('rainboard:project', kwargs={'slug': self.slug})
 
-class Forge(NamedModel):
+
+class Forge(Links, NamedModel):
     source = models.PositiveSmallIntegerField(choices=enum_to_choices(SOURCES))
     url = models.URLField(max_length=200)
     token = models.CharField(max_length=50, blank=True, null=True)
     verify = models.BooleanField(default=True)
+
+    def get_absolute_url(self):
+        return self.url
 
     def api_data(self, url=''):
         return requests.get(self.api_url() + url, verify=self.verify, headers=self.headers()).json()

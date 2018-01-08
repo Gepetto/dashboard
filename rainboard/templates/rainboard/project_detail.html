@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load django_tables2 bootstrap3 %}
+
+{% block content %}
+
+<div class="clearfix">
+  {% if project.main_namespace %}<h2 class="pull-right">{{ project.main_namespace }}</h2>{% endif %}
+  <h1>{{ project }}</h1>
+
+  <div class="pull-right">
+  {% if project.license %}
+  {% bootstrap_label project.license label_class='label label-primary' %}
+  {% else %}
+  {% bootstrap_label 'UNLICENSED' label_class='label label-warning' %}
+  {% endif %}
+
+  {% if project.private %}
+  {% bootstrap_label 'private' label_class='label label-danger' %}
+  {% else %}
+  {% bootstrap_label 'public' label_class='label label-success' %}
+  {% endif %}
+  </div>
+
+  {% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% endif %}
+</div>
+
+{% render_table repos %}
+
+{% endblock %}
