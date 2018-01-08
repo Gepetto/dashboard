@@ -12,7 +12,8 @@ class Command(BaseCommand):
         github = Forge.objects.get(name='Github')
 
         for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
-            License.objects.create(github_key=data['key'], **{key: data[key] for key in ['name', 'spdx_id', 'url']})
+            License.objects.get_or_create(github_key=data['key'],
+                                          **{key: data[key] for key in ['name', 'spdx_id', 'url']})
 
         for forge in Forge.objects.all():
             forge.get_projects()
