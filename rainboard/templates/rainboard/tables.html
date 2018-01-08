@@ -1,0 +1,6 @@
+{% extends 'django_tables2/bootstrap.html' %}
+{% load bootstrap3 %}
+
+{% block pagination %}
+{% bootstrap_pagination table.page %}
+{% endblock %}
