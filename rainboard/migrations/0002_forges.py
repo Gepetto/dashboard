@@ -17,8 +17,8 @@ def forges(apps, schema_editor):
                          token=os.getenv('GITHUB_TOKEN'))
     Forge.objects.create(name='Redmine', source=SOURCES.redmine, url='https://redmine.laas.fr',
                          token=os.getenv('REDMINE_TOKEN'))
-    # Forge.objects.create(name='Openrobots', source=SOURCES.redmine, url='https://git.openrobots.org',
-                         # token=os.getenv('OPENROB_TOKEN'))
+    Forge.objects.create(name='Openrobots', source=SOURCES.redmine, url='https://git.openrobots.org',
+                         token=os.getenv('OPENROB_TOKEN'))
 
 
 class Migration(migrations.Migration):

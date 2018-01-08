@@ -25,7 +25,7 @@ SECRET_KEY = 'mgun706*g8lq6voa#1n*)cfk7t4m%8s@4my^al#@8tzis+#v5e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['hagurosan', 'hagurosan.laas.fr']
 
 
 # Application definition
