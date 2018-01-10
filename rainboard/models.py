@@ -97,15 +97,26 @@ class Forge(Links, NamedModel):
                 project.save()
 
     def get_projects_gitlab(self):
-        for data in self.api_data('/projects'):
+        def update_gitlab(data):
             project, created = Project.objects.get_or_create(name=data['name'])
             namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
-            if created and not 'forked_from_project' in data:
-                project.main_namespace = namespace
-
             repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
                                                  defaults={'repo_id': data['id'], 'name': data['name'],
                                                            'url': data['web_url']})
+            if 'forked_from_project' in data:
+                repo.forked_from = data['forked_from_project']['id']
+                repo.save()
+            elif created or project.main_namespace is None:
+                project.main_namespace = namespace
+                project.save()
+
+        api = self.api_data('/projects')
+        for data in api:
+            update_gitlab(data)
+
+        for orphan in Project.objects.filter(main_namespace=None):
+            repo = orphan.repo_set.get(forge__source=SOURCES.gitlab)
+            update_gitlab(self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
         pass  # TODO
@@ -124,6 +135,7 @@ class Repo(TimeStampedModel):
     open_issues = models.PositiveSmallIntegerField(blank=True, null=True)
     open_pr = models.PositiveSmallIntegerField(blank=True, null=True)
     repo_id = models.PositiveIntegerField()
+    forked_from = models.PositiveIntegerField(blank=True, null=True)
 
     def api_url(self):
         if self.forge.source == SOURCES.github:

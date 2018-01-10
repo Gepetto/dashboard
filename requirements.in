@@ -1,5 +1,6 @@
 Django
 django-bootstrap3
+django-filter
 django-tables2
 psycopg2
 requests
