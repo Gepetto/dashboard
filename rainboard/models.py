@@ -1,3 +1,5 @@
+import logging
+
 from django.db import models
 from django.urls import reverse
 
@@ -9,9 +11,11 @@ import requests
 
 from .utils import SOURCES, TARGETS
 
+logger = logging.getLogger('rainboard.models')
+
 
 class Namespace(NamedModel):
-    pass
+    group = models.BooleanField(default=False)
 
 
 class License(NamedModel):
@@ -43,7 +47,9 @@ class Forge(Links, NamedModel):
         return self.url
 
     def api_data(self, url=''):
-        return requests.get(self.api_url() + url, verify=self.verify, headers=self.headers()).json()
+        logger.info(f'requesting api {self}{url}')
+        req = requests.get(self.api_url() + url, verify=self.verify, headers=self.headers())
+        return req.json() if req.status_code == 200 else []
 
     def headers(self):
         if self.source == SOURCES.github:
@@ -68,35 +74,54 @@ class Forge(Links, NamedModel):
         if self.source == SOURCES.redmine:
             return self.get_projects_redmine()
 
-    def get_projects_github(self):
-        for namespace in Namespace.objects.all():
-            for data in self.api_data(f'/orgs/{namespace.slug}/repos'):
-                if not 'name' in data:
-                    continue
-                project, _ = Project.objects.get_or_create(name=data['name'],
-                                                           defaults={'homepage': data['homepage'],
-                                                                     'main_namespace': namespace})
-                repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
-                                                     defaults={'repo_id': data['id'], 'name': data['name']})
-                repo.homepage = data['homepage']
-                repo.url = data['html_url']
-                repo.repo_id = data['id']
-                repo.default_branch = data['default_branch']
-                repo.open_issues = data['open_issues']
+    def get_namespaces_github(self):
+        for namespace in Namespace.objects.filter(group=True):
+            for data in self.api_data(f'/orgs/{namespace.slug}/members'):
+                Namespace.objects.get_or_create(slug=data['login'],
+                                                defaults={'name': data['login'], 'group': False})
 
-                repo_data = repo.api_data()
-                if 'license' in repo_data and repo_data['license']:
-                    license_data = repo_data['license']
-                    license, _ = License.objects.get_or_create(name=license_data['name'],
-                                                               defaults={'github_key': license_data['key']})
-                    repo.license = license
-                    if not project.license:
-                        project.license = license
-                repo.open_pr = len(repo.api_data('/pulls'))
-                repo.save()
-                project.save()
+    def get_projects_github(self):
+        def update_github(namespace, data):
+            project, _ = Project.objects.get_or_create(name=data['name'],
+                                                       defaults={'homepage': data['homepage'],
+                                                                 'main_namespace': namespace})
+            repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
+                                                 defaults={'repo_id': data['id'], 'name': data['name']})
+            repo.homepage = data['homepage']
+            repo.url = data['html_url']
+            repo.repo_id = data['id']
+            repo.default_branch = data['default_branch']
+            repo.open_issues = data['open_issues']
+
+            repo_data = repo.api_data()
+            if 'license' in repo_data and repo_data['license']:
+                license_data = repo_data['license']
+                license, _ = License.objects.get_or_create(name=license_data['name'],
+                                                           defaults={'github_key': license_data['key']})
+                repo.license = license
+                if not project.license:
+                    project.license = license
+            repo.open_pr = len(repo.api_data('/pulls'))
+            repo.save()
+            project.save()
+
+        self.get_namespaces_github()
+        for org in Namespace.objects.filter(group=True):
+            for data in self.api_data(f'/orgs/{org.slug}/repos'):
+                update_github(org, data)
+        for user in Namespace.objects.filter(group=False):
+            for data in self.api_data(f'/users/{user.slug}/repos'):
+                if not Project.objects.filter(name=data['name']).exists():
+                    continue
+                update_github(user, data)
+
+    def get_namespaces_gitlab(self):
+        for data in self.api_data('/namespaces'):
+            Namespace.objects.get_or_create(slug=data['path'],
+                                            defaults={'name': data['name'], 'group': data['kind'] == 'group'})
 
     def get_projects_gitlab(self):
+        self.get_namespaces_gitlab()
         def update_gitlab(data):
             project, created = Project.objects.get_or_create(name=data['name'])
             namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
@@ -110,8 +135,7 @@ class Forge(Links, NamedModel):
                 project.main_namespace = namespace
                 project.save()
 
-        api = self.api_data('/projects')
-        for data in api:
+        for data in self.api_data('/projects'):
             update_gitlab(data)
 
         for orphan in Project.objects.filter(main_namespace=None):
@@ -169,6 +193,7 @@ class Repo(TimeStampedModel):
         if 'forked_from_project' in data:
             self.forked_from = data['forked_from_project']['id']
         self.save()
+
 
 
 class Commit(NamedModel, TimeStampedModel):
