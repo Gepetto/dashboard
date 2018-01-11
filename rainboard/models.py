@@ -136,15 +136,39 @@ class Repo(TimeStampedModel):
     open_pr = models.PositiveSmallIntegerField(blank=True, null=True)
     repo_id = models.PositiveIntegerField()
     forked_from = models.PositiveIntegerField(blank=True, null=True)
+    # TODO gitlab:
+    # description = models.TextField()
+    # created_at = models.DateTimeField()
+    # last_activity_at = models.DateTimeField()
+
+    def __str__(self):
+        return self.name
 
     def api_url(self):
         if self.forge.source == SOURCES.github:
             return f'{self.forge.api_url()}/repos/{self.namespace.slug}/{self.slug}'
         if self.forge.source == SOURCES.redmine:
             return f'{self.forge.api_url()}/projects/{self.repo_id}.json'
+        if self.forge.source == SOURCES.gitlab:
+            return f'{self.forge.api_url()}/projects/{self.repo_id}'
 
     def api_data(self, url=''):
         return requests.get(self.api_url() + url, verify=self.forge.verify, headers=self.forge.headers()).json()
+
+    def api_update(self):
+        if self.forge.source == SOURCES.gitlab:
+            self.api_update_gitlab(self.api_data())
+
+    def api_update_gitlab(self, data):
+        # TODO Missing: license, homepage, open_pr
+        self.name = data['name']
+        self.slug = data['path']
+        self.url = data['web_url']
+        self.open_issues = data['open_issues_count']
+        self.default_branch = data['default_branch']
+        if 'forked_from_project' in data:
+            self.forked_from = data['forked_from_project']['id']
+        self.save()
 
 
 class Commit(NamedModel, TimeStampedModel):
