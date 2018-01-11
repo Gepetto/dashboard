@@ -9,6 +9,10 @@ Get Python3.6, create a virtualenv, and install dependencies:
 ## Launch
 
 ```
+export GITHUB_TOKEN=xxx
+export GITLAB_TOKEN=xxx
+export REDMINE_TOKEN=xxx
+export OPENROB_TOKEN=xxx
 ./manage.py migrate
 ./manage.py populate
 ./manage.py runserver
