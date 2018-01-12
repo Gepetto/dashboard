@@ -168,6 +168,7 @@ class Repo(TimeStampedModel):
     open_pr = models.PositiveSmallIntegerField(blank=True, null=True)
     repo_id = models.PositiveIntegerField()
     forked_from = models.PositiveIntegerField(blank=True, null=True)
+    clone_url = models.URLField(max_length=200, blank=True, null=True)
     # TODO gitlab:
     # description = models.TextField()
     # created_at = models.DateTimeField()
@@ -206,6 +207,7 @@ class Repo(TimeStampedModel):
         self.default_branch = data['default_branch']
         if 'forked_from_project' in data:
             self.forked_from = data['forked_from_project']['id']
+        self.clone_url = data['http_url_to_repo']
         self.save()
 
     def api_update_github(self, data):
@@ -220,6 +222,8 @@ class Repo(TimeStampedModel):
         self.repo_id = data['id']
         if 'source' in data:
             self.forked_from = data['source']['id']
+        self.clone_url = data['clone_url']
+        self.save()
 
 
 class Commit(NamedModel, TimeStampedModel):
