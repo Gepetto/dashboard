@@ -2,22 +2,38 @@ from django.utils.safestring import mark_safe
 
 import django_tables2 as tables
 
-from .models import Project, Repo
+from . import models
 
 
-class ProjectTable(tables.Table):
+class StrippedTable(tables.Table):
     class Meta:
-        model = Project
-        fields = ('main_namespace', 'name', 'license', 'homepage')
         attrs = {'class': 'table table-striped'}
+
+
+class ForgeTable(StrippedTable):
+    class Meta:
+        model = models.Forge
+        fields = ('name', 'url')
+
+
+class NamespaceTable(StrippedTable):
+    class Meta:
+        model = models.Namespace
+        fields = ('group', 'name')
+
+
+class ProjectTable(StrippedTable):
+    class Meta:
+        model = models.Project
+        fields = ('main_namespace', 'name', 'license', 'homepage')
 
     def render_name(self, record):
         return record.get_link()
 
 
-class RepoTable(tables.Table):
+class RepoTable(StrippedTable):
     class Meta:
-        model = Repo
+        model = models.Repo
         fields = ('forge', 'namespace', 'license', 'homepage', 'default_branch', 'open_issues', 'open_pr')
 
     def render_forge(self, value):
