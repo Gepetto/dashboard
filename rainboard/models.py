@@ -1,17 +1,25 @@
 import logging
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
-from autoslug import AutoSlugField
-from ndh.models import NamedModel, TimeStampedModel, Links
-from ndh.utils import enum_to_choices, query_sum
-
 import requests
+
+from autoslug import AutoSlugField
+from ndh.models import Links, NamedModel, TimeStampedModel
+from ndh.utils import enum_to_choices, query_sum
 
 from .utils import SOURCES, TARGETS
 
 logger = logging.getLogger('rainboard.models')
+
+
+class Article(NamedModel):
+    authors = models.ManyToManyField(User)
+    year = models.PositiveSmallIntegerField()
+    url = models.URLField(max_length=200)
+    pdf = models.URLField(max_length=200)
 
 
 class Namespace(NamedModel):
@@ -32,6 +40,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
+    articles = models.ManyToManyField(Article)
 
     def get_absolute_url(self):
         return reverse('rainboard:project', kwargs={'slug': self.slug})

@@ -2,9 +2,9 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from rainboard.models import Forge, License, Repo
-
 import requests
+
+from rainboard.models import Forge, License, Repo
 
 LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'
 logger = logging.getLogger('rainboard.management.populate')

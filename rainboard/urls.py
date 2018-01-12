@@ -1,9 +1,8 @@
 from django.urls import path
-
 from django.views.generic import ListView
 
-from .models import Forge, Namespace, Project
 from . import views
+from .models import Forge, Namespace, Project
 
 app_name = 'rainboard'
 urlpatterns = [
