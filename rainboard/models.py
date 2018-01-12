@@ -103,7 +103,6 @@ class Forge(Links, NamedModel):
 
             repo_data = repo.api_data()
             if repo_data and 'license' in repo_data and repo_data['license']:
-                print(repo_data['license'])
                 if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
                     license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
                     repo.license = license
