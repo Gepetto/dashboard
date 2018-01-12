@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView
 
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
@@ -8,6 +8,16 @@ from django_tables2.views import SingleTableMixin, SingleTableView
 from . import models
 from . import tables
 from .filters import ProjectFilter
+
+
+class ArticlesView(SingleTableView):
+    model = models.Article
+    table_class = tables.ArticleTable
+
+
+class ArticleCreateView(CreateView):
+    model = models.Article
+    fields = ('name', 'authors', 'year', 'url', 'pdf')
 
 
 class ForgesView(SingleTableView):
