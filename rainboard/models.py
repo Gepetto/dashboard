@@ -5,10 +5,9 @@ from django.db import models
 from django.urls import reverse
 
 import requests
-
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
-from ndh.utils import enum_to_choices, query_sum
+from ndh.utils import enum_to_choices
 
 from .utils import SOURCES, TARGETS
 
@@ -130,7 +129,6 @@ class Forge(Links, NamedModel):
                                             defaults={'name': data['name'], 'group': data['kind'] == 'group'})
 
     def get_projects_gitlab(self):
-        self.get_namespaces_gitlab()
         def update_gitlab(data):
             project, created = Project.objects.get_or_create(name=data['name'])
             namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
@@ -143,6 +141,8 @@ class Forge(Links, NamedModel):
             elif created or project.main_namespace is None:
                 project.main_namespace = namespace
                 project.save()
+
+        self.get_namespaces_gitlab()
 
         for data in self.api_data('/projects'):
             update_gitlab(data)
@@ -221,7 +221,6 @@ class Repo(TimeStampedModel):
         self.repo_id = data['id']
         if 'source' in data:
             self.forked_from = data['source']['id']
-
 
 
 class Commit(NamedModel, TimeStampedModel):
