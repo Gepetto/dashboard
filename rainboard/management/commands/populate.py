@@ -6,19 +6,24 @@ from rainboard.models import Forge, License, Repo
 
 import requests
 
+LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'
 logger = logging.getLogger('rainboard.management.populate')
 
 class Command(BaseCommand):
     help = 'populates licenses, projets, namespaces and repos from forges'
 
     def handle(self, *args, **options):
-        github = Forge.objects.get(name='Github')
+        # github = Forge.objects.get(name='Github')
 
         logger.info(f'updating licenses')
-        for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
+        for data in requests.get(LICENSES).json()['licenses']:
             logger.info(f' updating license {data["name"]}')
-            License.objects.get_or_create(github_key=data['key'],
-                                          defaults={key: data[key] for key in ['name', 'spdx_id', 'url']})
+            License.objects.get_or_create(spdx_id=data['licenseId'],
+                                          defaults={'name': data['name'], 'url': data['detailsUrl']})
+        # for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
+            # logger.info(f' updating license {data["name"]}')
+            # License.objects.get_or_create(spdx_id=data['spdx_id'],
+                                          # defaults={key: data[key] for key in ['name', 'url']})
 
         logger.info(f'updating forges')
         for forge in Forge.objects.all():

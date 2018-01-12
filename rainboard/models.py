@@ -18,9 +18,9 @@ class Namespace(NamedModel):
     group = models.BooleanField(default=False)
 
 
-class License(NamedModel):
-    github_key = models.CharField(max_length=50)
-    spdx_id = models.CharField(max_length=50)
+class License(models.Model):
+    name = models.CharField(max_length=200)
+    spdx_id = models.CharField(max_length=50, unique=True)
     url = models.URLField(max_length=200)
 
     def __str__(self):
@@ -94,13 +94,13 @@ class Forge(Links, NamedModel):
             repo.open_issues = data['open_issues']
 
             repo_data = repo.api_data()
-            if 'license' in repo_data and repo_data['license']:
-                license_data = repo_data['license']
-                license, _ = License.objects.get_or_create(name=license_data['name'],
-                                                           defaults={'github_key': license_data['key']})
-                repo.license = license
-                if not project.license:
-                    project.license = license
+            if repo_data and 'license' in repo_data and repo_data['license']:
+                print(repo_data['license'])
+                if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
+                    license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
+                    repo.license = license
+                    if not project.license:
+                        project.license = license
             repo.open_pr = len(repo.api_data('/pulls'))
             repo.save()
             project.save()
@@ -177,11 +177,17 @@ class Repo(TimeStampedModel):
             return f'{self.forge.api_url()}/projects/{self.repo_id}'
 
     def api_data(self, url=''):
-        return requests.get(self.api_url() + url, verify=self.forge.verify, headers=self.forge.headers()).json()
+        logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}')
+        req = requests.get(self.api_url() + url, verify=self.forge.verify, headers=self.forge.headers())
+        return req.json() if req.status_code == 200 else []
 
     def api_update(self):
-        if self.forge.source == SOURCES.gitlab:
-            self.api_update_gitlab(self.api_data())
+        data = self.api_data()
+        if data:
+            if self.forge.source == SOURCES.gitlab:
+                return self.api_update_gitlab(data)
+            if self.forge.source == SOURCES.github:
+                return self.api_update_github(data)
 
     def api_update_gitlab(self, data):
         # TODO Missing: license, homepage, open_pr
@@ -193,6 +199,19 @@ class Repo(TimeStampedModel):
         if 'forked_from_project' in data:
             self.forked_from = data['forked_from_project']['id']
         self.save()
+
+    def api_update_github(self, data):
+        # TODO Missing: open_pr
+        self.name = data['name']
+        if data['license'] is not None:
+            self.license = License.objects.filter(spdx_id=data['license']['spdx_id']).first()
+        self.homepage = data['homepage']
+        self.url = data['url']
+        self.default_branch = data['default_branch']
+        self.open_issues = data['open_issues_count']
+        self.repo_id = data['id']
+        if 'source' in data:
+            self.forked_from = data['source']['id']
 
 
 
