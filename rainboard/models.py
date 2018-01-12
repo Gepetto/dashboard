@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -15,7 +15,7 @@ logger = logging.getLogger('rainboard.models')
 
 
 class Article(NamedModel):
-    authors = models.ManyToManyField(User)
+    authors = models.ManyToManyField(settings.AUTH_USER_MODEL)
     year = models.PositiveSmallIntegerField()
     url = models.URLField(max_length=200)
     pdf = models.URLField(max_length=200)
