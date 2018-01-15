@@ -2,6 +2,7 @@ Django
 django-bootstrap3
 django-filter
 django-tables2
+gitpython
 psycopg2
 requests
 https://github.com/nim65s/ndh/archive/master.zip#egg=ndh

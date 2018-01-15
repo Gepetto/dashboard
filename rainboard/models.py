@@ -8,6 +8,7 @@ import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices
+import git
 
 from .utils import SOURCES, TARGETS
 
@@ -43,6 +44,13 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('rainboard:project', kwargs={'slug': self.slug})
+
+    def git(self):
+        path = settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
+        if not path.exists():
+            logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
+            return git.Repo.init(path)
+        return git.Repo(str(path / '.git'))
 
 
 class Forge(Links, NamedModel):
@@ -147,7 +155,7 @@ class Forge(Links, NamedModel):
             update_gitlab(data)
 
         for orphan in Project.objects.filter(main_namespace=None):
-            repo = orphan.repo_set.get(forge__source=SOURCES.gitlab)
+            repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
             update_gitlab(self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
@@ -224,6 +232,20 @@ class Repo(TimeStampedModel):
             self.forked_from = data['source']['id']
         self.clone_url = data['clone_url']
         self.save()
+
+    def get_clone_url(self):
+        if self.forge.source == SOURCES.gitlab:
+            return self.clone_url.replace('://', f'://gitlab-ci-token:{self.forge.token}@')
+        return self.clone_url
+
+    def git(self):
+        git = self.project.git()
+        remote = f'{self.forge.slug}/{self.namespace.slug}'
+        try:
+            return git.remote(remote)
+        except ValueError:
+            logger.info(f'Creating remote {self.forge.slug}/{self.namespace.slug}/{self.project.slug}')
+            return git.create_remote(remote, self.get_clone_url())
 
 
 class Commit(NamedModel, TimeStampedModel):
