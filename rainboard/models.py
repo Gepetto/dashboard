@@ -10,7 +10,7 @@ from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices
 import git
 
-from .utils import SOURCES, TARGETS
+from .utils import SOURCES, TARGETS, slugify_with_dots
 
 logger = logging.getLogger('rainboard.models')
 
@@ -165,7 +165,7 @@ class Forge(Links, NamedModel):
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='name')
+    slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
     forge = models.ForeignKey(Forge, on_delete=models.CASCADE)
     namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -245,7 +245,7 @@ class Repo(TimeStampedModel):
         try:
             return git.remote(remote)
         except ValueError:
-            logger.info(f'Creating remote {self.forge.slug}/{self.namespace.slug}/{self.project.slug}')
+            logger.info(f'Creating remote {remote}')
             return git.create_remote(remote, self.get_clone_url())
 
 
