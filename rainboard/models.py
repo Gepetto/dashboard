@@ -1,5 +1,6 @@
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -163,6 +164,15 @@ class Project(Links, NamedModel, TimeStampedModel):
             return git.Repo.init(path)
         return git.Repo(str(path / '.git'))
 
+    def main_repo(self):
+        try:
+            return self.repo_set.get(forge=self.main_forge, namespace=self.main_namespace)
+        except ObjectDoesNotExist:
+            repo = Repo.objects.create(name=self.name, forge=self.main_forge, namespace=self.main_namespace,
+                                       project=self, default_branch='master', repo_id=0)
+            repo.api_update()
+            return repo
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
@@ -240,9 +250,12 @@ class Repo(TimeStampedModel):
             return self.clone_url.replace('://', f'://gitlab-ci-token:{self.forge.token}@')
         return self.clone_url
 
+    def git_remote(self):
+        return f'{self.forge.slug}/{self.namespace.slug}'
+
     def git(self):
         git = self.project.git()
-        remote = f'{self.forge.slug}/{self.namespace.slug}'
+        remote = self.git_remote()
         try:
             return git.remote(remote)
         except ValueError:
