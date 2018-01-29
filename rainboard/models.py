@@ -41,6 +41,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
     articles = models.ManyToManyField(Article)
+    # TODO: release github ↔ robotpkg
 
     def get_absolute_url(self):
         return reverse('rainboard:project', kwargs={'slug': self.slug})
