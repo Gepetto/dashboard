@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from rainboard.models import Repo
+from rainboard.models import Project
 
 logger = logging.getLogger('rainboard.management.fetch')
 
@@ -11,6 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         logger.info(f'Fetching all repos')
-        for repo in Repo.objects.all():
-            logger.info(f' fetching {repo}')
-            repo.git().fetch()
+        for project in Project.objects.all():
+            logger.info(f' fetching repos for {project}')
+            for repo in project.repo_set.all():
+                logger.info(f'  fetching {repo.forge} - {repo.namespace}')
+                repo.git().fetch()

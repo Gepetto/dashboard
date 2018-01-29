@@ -35,25 +35,6 @@ class License(models.Model):
         return self.spdx_id or self.name
 
 
-class Project(Links, NamedModel, TimeStampedModel):
-    private = models.BooleanField(default=False)
-    main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
-    license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
-    homepage = models.URLField(max_length=200, blank=True, null=True)
-    articles = models.ManyToManyField(Article)
-    # TODO: release github ↔ robotpkg
-
-    def get_absolute_url(self):
-        return reverse('rainboard:project', kwargs={'slug': self.slug})
-
-    def git(self):
-        path = settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
-        if not path.exists():
-            logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
-            return git.Repo.init(path)
-        return git.Repo(str(path / '.git'))
-
-
 class Forge(Links, NamedModel):
     source = models.PositiveSmallIntegerField(choices=enum_to_choices(SOURCES))
     url = models.URLField(max_length=200)
@@ -161,6 +142,26 @@ class Forge(Links, NamedModel):
 
     def get_projects_redmine(self):
         pass  # TODO
+
+
+class Project(Links, NamedModel, TimeStampedModel):
+    private = models.BooleanField(default=False)
+    main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
+    main_forge = models.ForeignKey(Forge, on_delete=models.SET_NULL, null=True, blank=True)
+    license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
+    homepage = models.URLField(max_length=200, blank=True, null=True)
+    articles = models.ManyToManyField(Article)
+    # TODO: release github ↔ robotpkg
+
+    def get_absolute_url(self):
+        return reverse('rainboard:project', kwargs={'slug': self.slug})
+
+    def git(self):
+        path = settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
+        if not path.exists():
+            logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
+            return git.Repo.init(path)
+        return git.Repo(str(path / '.git'))
 
 
 class Repo(TimeStampedModel):
