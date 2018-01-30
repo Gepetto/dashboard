@@ -15,6 +15,8 @@ from .utils import SOURCES, TARGETS, slugify_with_dots
 
 logger = logging.getLogger('rainboard.models')
 
+MAIN_BRANCHES = ['master', 'devel']
+
 
 class Article(NamedModel):
     authors = models.ManyToManyField(settings.AUTH_USER_MODEL)
@@ -165,13 +167,33 @@ class Project(Links, NamedModel, TimeStampedModel):
         return git.Repo(str(path / '.git'))
 
     def main_repo(self):
-        try:
-            return self.repo_set.get(forge=self.main_forge, namespace=self.main_namespace)
-        except ObjectDoesNotExist:
-            repo = Repo.objects.create(name=self.name, forge=self.main_forge, namespace=self.main_namespace,
-                                       project=self, default_branch='master', repo_id=0)
+        repo, created = Repo.objects.get_or_create(forge=self.main_forge, namespace=self.main_namespace, project=self,
+                                                   defaults={'name': self.name, 'default_branch': 'master',
+                                                             'repo_id': 0})
+        if created:
             repo.api_update()
-            return repo
+        return repo
+
+    def update_branches(self, main=True):
+        branches = MAIN_BRANCHES if main else [b[2:] for b in self.git().git.branch('-a', '--no-color').split('\n')]
+        for branch in branches:
+            if branch in MAIN_BRANCHES:
+                if branch not in self.git().heads:
+                    continue
+                instance, created = Branch.objects.get_or_create(name=branch, project=self)
+                if created:
+                    instance.update_ab()
+            else:
+                name = '/'.join(branch.split('/')[1:])
+                forge, namespace = name.split('/')[:2]
+                repo, created = Repo.objects.get_or_create(forge__slug=forge, namespace__slug=namespace, project=self,
+                                                   defaults={'name': self.name, 'default_branch': 'master',
+                                                             'repo_id': 0})
+                if created:
+                    repo.api_update()
+                instance, created = Branch.objects.get_or_create(name=name, project=self)
+                if created:
+                    instance.update_ab()
 
 
 class Repo(TimeStampedModel):
@@ -267,12 +289,33 @@ class Commit(NamedModel, TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
-class Branch(NamedModel, TimeStampedModel):
-    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
-    commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
+class Branch(TimeStampedModel):
+    name = models.CharField(max_length=200)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    ahead = models.PositiveSmallIntegerField(blank=True, null=True)
+    behind = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.repo}/{self.name}'
+        return self.name
+
+    class Meta:
+        unique_together = ('project', 'name')
+
+    def get_ahead(self, branch='master'):
+        return len(self.project.git().git.rev_list(f'{self}..{branch}').split('\n'))
+
+    def get_behind(self, branch='master'):
+        return len(self.project.git().git.rev_list(f'{branch}..{self}').split('\n'))
+
+    def update_ab(self):
+        self.project.main_repo().git().fetch()
+        if self.name not in MAIN_BRANCHES:
+            forge, namespace = self.name.split('/')[:2]
+            Repo.objects.get(forge__slug=forge, namespace__slug=namespace, project=self.project).git().fetch()
+        main_branch = 'devel' if 'devel' in self.project.git().heads else 'master'
+        self.ahead = self.get_ahead(main_branch)
+        self.behind = self.get_behind(main_branch)
+        self.save()
 
 
 class Test(TimeStampedModel):

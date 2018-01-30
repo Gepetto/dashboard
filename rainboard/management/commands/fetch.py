@@ -16,3 +16,15 @@ class Command(BaseCommand):
             for repo in project.repo_set.all():
                 logger.info(f'  fetching {repo.forge} - {repo.namespace}')
                 repo.git().fetch()
+            logger.info(f' fetching devel & master for {project}')
+            git = project.git()
+            remote = git.remote(project.main_repo().git_remote())
+            if 'devel' not in git.heads:
+                try:
+                    git.create_head('devel', remote.refs.devel).set_tracking_branch(remote.refs.devel).checkout()
+                except AttributeError:
+                    pass
+            if 'master' not in git.heads:
+                git.create_head('master', remote.refs.master).set_tracking_branch(remote.refs.master).checkout()
+            logger.info(f' updating branches for {project}')
+            project.update_branches()
