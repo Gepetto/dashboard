@@ -38,6 +38,8 @@ class ProjectTable(StrippedTable):
 
 
 class RepoTable(StrippedTable):
+    diff = tables.Column(accessor='diff', orderable=False)
+
     class Meta:
         model = models.Repo
         fields = ('forge', 'namespace', 'license', 'homepage', 'default_branch', 'open_issues', 'open_pr')

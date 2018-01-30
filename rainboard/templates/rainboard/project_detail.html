@@ -4,26 +4,40 @@
 {% block content %}
 
 <div class="clearfix">
-  {% if project.main_namespace %}<h2 class="pull-right">{{ project.main_namespace }}</h2>{% endif %}
   <h1>{{ project }}</h1>
 
   <div class="pull-right">
-  {% if project.license %}
-  {% bootstrap_label project.license label_class='label label-primary' %}
-  {% else %}
-  {% bootstrap_label 'UNLICENSED' label_class='label label-warning' %}
-  {% endif %}
+    {% if project.license %}
+    {% bootstrap_label project.license label_class='label label-primary' %}
+    {% else %}
+    {% bootstrap_label 'UNLICENSED' label_class='label label-warning' %}
+    {% endif %}
 
-  {% if project.private %}
-  {% bootstrap_label 'private' label_class='label label-danger' %}
-  {% else %}
-  {% bootstrap_label 'public' label_class='label label-success' %}
-  {% endif %}
+    {% if project.private %}
+    {% bootstrap_label 'private' label_class='label label-danger' %}
+    {% else %}
+    {% bootstrap_label 'public' label_class='label label-success' %}
+    {% endif %}
   </div>
 
   {% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% endif %}
+
+  <dl class="dl-horizontal">
+    <dt>Homepage</dt>
+    <dd>{{ project.homepage|default:"—" }}</dd>
+    <dt>Main forge</dt>
+    <dd>{{ project.main_forge }}</dd>
+    <dt>Main namespace</dt>
+    <dd>{{ project.main_namespace }}</dd>
+    <dt>Main branch</dt>
+    <dd>{{ project.main_branch }}</dd>
+  </dl>
 </div>
 
+<h2>Répos</h2>
+
 {% render_table repos %}
+
+<h2>Robotpkg</h2>
 
 {% endblock %}

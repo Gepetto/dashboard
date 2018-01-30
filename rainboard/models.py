@@ -175,11 +175,11 @@ class Project(Links, NamedModel, TimeStampedModel):
         return repo
 
     def update_branches(self, main=True):
-        branches = MAIN_BRANCHES if main else [b[2:] for b in self.git().git.branch('-a', '--no-color').split('\n')]
+        branches = [b[2:] for b in self.git().git.branch('-a', '--no-color').split('\n')]
+        if main:
+            branches = [b for b in branches if b.endswith('master') or b.endswith('devel')]
         for branch in branches:
             if branch in MAIN_BRANCHES:
-                if branch not in self.git().heads:
-                    continue
                 instance, created = Branch.objects.get_or_create(name=branch, project=self)
                 if created:
                     instance.update_ab()
@@ -194,6 +194,9 @@ class Project(Links, NamedModel, TimeStampedModel):
                 instance, created = Branch.objects.get_or_create(name=name, project=self)
                 if created:
                     instance.update_ab()
+
+    def main_branch(self):
+        return 'devel' if 'devel' in self.git().heads else 'master'
 
 
 class Repo(TimeStampedModel):
@@ -284,6 +287,19 @@ class Repo(TimeStampedModel):
             logger.info(f'Creating remote {remote}')
             return git.create_remote(remote, self.get_clone_url())
 
+    def main_branch(self):
+        return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
+
+    def diff(self):
+        branch = self.main_branch()
+        if branch.ahead and branch.behind:
+            return f'+{branch.ahead} / -{branch.behind}'
+        if branch.ahead:
+            return f'+{branch.ahead}'
+        if branch.behind:
+            return f'-{branch.behind}'
+        return ''
+
 
 class Commit(NamedModel, TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -302,17 +318,17 @@ class Branch(TimeStampedModel):
         unique_together = ('project', 'name')
 
     def get_ahead(self, branch='master'):
-        return len(self.project.git().git.rev_list(f'{self}..{branch}').split('\n'))
+        return len(self.project.git().git.rev_list(f'{branch}..{self}').split('\n'))
 
     def get_behind(self, branch='master'):
-        return len(self.project.git().git.rev_list(f'{branch}..{self}').split('\n'))
+        return len(self.project.git().git.rev_list(f'{self}..{branch}').split('\n'))
 
     def update_ab(self):
         self.project.main_repo().git().fetch()
         if self.name not in MAIN_BRANCHES:
             forge, namespace = self.name.split('/')[:2]
             Repo.objects.get(forge__slug=forge, namespace__slug=namespace, project=self.project).git().fetch()
-        main_branch = 'devel' if 'devel' in self.project.git().heads else 'master'
+        main_branch = self.project.main_branch()
         self.ahead = self.get_ahead(main_branch)
         self.behind = self.get_behind(main_branch)
         self.save()
