@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -16,6 +17,7 @@ from .utils import SOURCES, TARGETS, slugify_with_dots
 logger = logging.getLogger('rainboard.models')
 
 MAIN_BRANCHES = ['master', 'devel']
+CMAKE_FIELDS = {'name': 'name', 'description': 'description', 'url': 'homepage', 'version': 'version'}
 
 
 class Article(NamedModel):
@@ -154,13 +156,18 @@ class Project(Links, NamedModel, TimeStampedModel):
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
     articles = models.ManyToManyField(Article)
+    description = models.TextField()
+    version = models.CharField(max_length=20, blank=True, null=True)
     # TODO: release github ↔ robotpkg
 
     def get_absolute_url(self):
         return reverse('rainboard:project', kwargs={'slug': self.slug})
 
+    def git_path(self):
+        return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
+
     def git(self):
-        path = settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
+        path = self.git_path()
         if not path.exists():
             logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
             return git.Repo.init(path)
@@ -197,6 +204,18 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def main_branch(self):
         return 'devel' if 'devel' in self.git().heads else 'master'
+
+    def cmake(self):
+        filename = self.git_path() / 'CMakeLists.txt'
+        if not filename.exists():
+            return
+        with filename.open() as f:
+            content = f.read()
+        for key, value in CMAKE_FIELDS.items():
+            search = re.search(f'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
+            if search:
+                self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
+                self.save()
 
 
 class Repo(TimeStampedModel):

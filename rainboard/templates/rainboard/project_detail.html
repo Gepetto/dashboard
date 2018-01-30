@@ -20,17 +20,13 @@
     {% endif %}
   </div>
 
-  {% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% endif %}
-
   <dl class="dl-horizontal">
-    <dt>Homepage</dt>
-    <dd>{{ project.homepage|default:"—" }}</dd>
-    <dt>Main forge</dt>
-    <dd>{{ project.main_forge }}</dd>
-    <dt>Main namespace</dt>
-    <dd>{{ project.main_namespace }}</dd>
-    <dt>Main branch</dt>
-    <dd>{{ project.main_branch }}</dd>
+        <dt>Main forge</dt> <dd>{{ project.main_forge.get_link }}</dd>
+    <dt>Main namespace</dt> <dd>{{ project.main_namespace }}</dd>
+       <dt>Main branch</dt> <dd>{{ project.main_branch }}</dd>
+       <dt>Description</dt> <dd>{{ project.description }}</dd>
+           <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
+          <dt>Homepage</dt> <dd>{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
   </dl>
 </div>
 
