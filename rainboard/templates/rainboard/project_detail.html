@@ -27,6 +27,7 @@
        <dt>Description</dt> <dd>{{ project.description }}</dd>
            <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
           <dt>Homepage</dt> <dd>{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
+          <dt>Updated</dt> <dd>{{ project.updated }}</dd>
   </dl>
 </div>
 

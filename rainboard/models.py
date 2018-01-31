@@ -163,6 +163,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     articles = models.ManyToManyField(Article)
     description = models.TextField()
     version = models.CharField(max_length=20, blank=True, null=True)
+    updated = models.DateTimeField(blank=True, null=True)
     # TODO: release github ↔ robotpkg
 
     def get_absolute_url(self):
@@ -221,6 +222,20 @@ class Project(Links, NamedModel, TimeStampedModel):
             if search:
                 self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
                 self.save()
+
+    def repos(self):
+        return self.repo_set.count()
+
+    def rpkgs(self):
+        return self.robotpkg_set.count()
+
+    def update(self, pull=True):
+        git_repo = self.git()
+        if pull:
+            for repo in self.repo_set.all():
+                repo.git().fetch()
+        self.updated = git_repo.commit().authored_datetime
+        self.save()
 
 
 class Repo(TimeStampedModel):

@@ -29,9 +29,12 @@ class NamespaceTable(StrippedTable):
 
 
 class ProjectTable(StrippedTable):
+    repos = tables.Column(accessor='repos', orderable=False)
+    rpkgs = tables.Column(accessor='rpkgs', orderable=False)
+
     class Meta:
         model = models.Project
-        fields = ('main_namespace', 'name', 'license', 'homepage')
+        fields = ('main_namespace', 'name', 'license', 'homepage', 'updated')
 
     def render_name(self, record):
         return record.get_link()
