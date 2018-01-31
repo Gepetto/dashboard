@@ -27,4 +27,4 @@ class Command(BaseCommand):
             if 'master' not in git.heads:
                 git.create_head('master', remote.refs.master).set_tracking_branch(remote.refs.master).checkout()
             logger.info(f' updating branches for {project}')
-            project.update_branches()
+            project.update_branches(main=False)
