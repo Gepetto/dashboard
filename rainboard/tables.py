@@ -52,3 +52,9 @@ class RepoTable(StrippedTable):
 
     def render_namespace(self, record):
         return mark_safe(f'<a href="{record.url}">{record.namespace}</a>')
+
+
+class BranchTable(StrippedTable):
+    class Meta:
+        model = models.Branch
+        fields = ('name', 'ahead', 'behind', 'updated')

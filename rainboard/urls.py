@@ -13,4 +13,5 @@ urlpatterns = [
     path('namespaces', views.NamespacesView.as_view(), name='namespaces'),
     path('projects', views.ProjectsView.as_view(), name='projects'),
     path('project/<str:slug>', views.ProjectView.as_view(), name='project'),
+    path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='branches'),
 ]

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load django_tables2 bootstrap3 %}
+{# TODO DRY project_detail.html #}
 
 {% block content %}
 
@@ -31,34 +32,8 @@
   </dl>
 </div>
 
-<h2>Robotpkg</h2>
+<h2>Branches</h2>
 
-{% for rpkg in project.robotpkg_set.all %}
-
-<h3>{{ rpkg.category }} / {{ rpkg }}</h3>
-
-{{ rpkg.description }}
-
-<dl class="dl-horizontal">
-               <dt>Base</dt> <dd>{{ rpkg.pkgbase }}</dd>
-            <dt>Version</dt> <dd>{{ rpkg.pkgversion }}</dd>
-       <dt>Master Sites</dt> <dd>{{ rpkg.master_sites }}</dd>
-  <dt>Master Repository</dt> <dd>{{ rpkg.master_repository }}</dd>
-         <dt>Maintainer</dt> <dd>{{ rpkg.maintainer }}</dd>
-            <dt>Comment</dt> <dd>{{ rpkg.comment }}</dd>
-            <dt>License</dt> <dd>{{ rpkg.license }}</dd>
-            <dt>Updated</dt> <dd>{{ rpkg.updated }}</dd>
-          <dt>Main page</dt> <dd>{% if rpkg.main_page %}<a href="{{ rpkg.main_page }}">{{ rpkg.main_page }}</a>{% else %}—{% endif %}</dd>
-         <dt>Build page</dt> <dd><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
-</dl>
-
-{% endfor %}
-
-
-<h2>Répos</h2>
-
-{% render_table repos %}
-
-<h2><a href="{% url 'rainboard:branches' slug=project.slug %}">Branches</a></h2>
+{% render_table branches %}
 
 {% endblock %}

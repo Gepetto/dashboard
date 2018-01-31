@@ -45,3 +45,15 @@ class ProjectView(DetailView):
         RequestConfig(self.request).configure(repos)
         ctx['repos'] = repos
         return ctx
+
+
+class ProjectBranchesView(DetailView):
+    model = models.Project
+    template_name = 'rainboard/project_detail_branches.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        branches = tables.BranchTable(self.object.branch_set.all())
+        RequestConfig(self.request).configure(branches)
+        ctx['branches'] = branches
+        return ctx
