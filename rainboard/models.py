@@ -195,7 +195,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             if branch in MAIN_BRANCHES:
                 instance, created = Branch.objects.get_or_create(name=branch, project=self)
                 if created:
-                    instance.update_ab()
+                    instance.update()
             else:
                 name = '/'.join(branch.split('/')[1:])
                 forge, namespace = name.split('/')[:2]
@@ -206,7 +206,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                     repo.api_update()
                 instance, created = Branch.objects.get_or_create(name=name, project=self)
                 if created:
-                    instance.update_ab()
+                    instance.update()
 
     def main_branch(self):
         return 'devel' if 'devel' in self.git().heads else 'master'
@@ -229,12 +229,8 @@ class Project(Links, NamedModel, TimeStampedModel):
     def rpkgs(self):
         return self.robotpkg_set.count()
 
-    def update(self, pull=True):
-        git_repo = self.git()
-        if pull:
-            for repo in self.repo_set.all():
-                repo.git().fetch()
-        self.updated = git_repo.commit().authored_datetime
+    def update(self):
+        self.updated = self.branch_set.order_by('-updated').first().updated
         self.save()
 
 
@@ -349,6 +345,7 @@ class Branch(TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     ahead = models.PositiveSmallIntegerField(blank=True, null=True)
     behind = models.PositiveSmallIntegerField(blank=True, null=True)
+    updated = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -362,14 +359,28 @@ class Branch(TimeStampedModel):
     def get_behind(self, branch='master'):
         return len(self.project.git().git.rev_list(f'{self}..{branch}').split('\n'))
 
-    def update_ab(self):
-        self.project.main_repo().git().fetch()
-        if self.name not in MAIN_BRANCHES:
-            forge, namespace = self.name.split('/')[:2]
-            Repo.objects.get(forge__slug=forge, namespace__slug=namespace, project=self.project).git().fetch()
+    def remote(self):
+        # TODO: ForeignKey to Repo
+        forge, namespace, branch = self.name.split('/', maxsplit=2)
+        return Repo.objects.get(forge__slug=forge, namespace__slug=namespace, project=self.project).git()
+
+    def git(self):
+        git_repo = self.project.git()
+        if self.name not in git_repo.branches:
+            remote = self.remote()
+            _, _, branch = self.name.split('/', maxsplit=2)
+            git_repo.create_head(self.name, remote.refs[branch]).set_tracking_branch(remote.refs[branch])
+        return git_repo.branches[self.name]
+
+    def update(self, pull=True):
+        if pull:
+            self.project.main_repo().git().fetch()
+            if self.name not in MAIN_BRANCHES:
+                self.remote().fetch()
         main_branch = self.project.main_branch()
         self.ahead = self.get_ahead(main_branch)
         self.behind = self.get_behind(main_branch)
+        self.updated = self.git().commit.authored_datetime
         self.save()
 
 
