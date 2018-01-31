@@ -1,5 +1,6 @@
 import logging
 import re
+from subprocess import check_output
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -17,7 +18,11 @@ from .utils import SOURCES, TARGETS, slugify_with_dots
 logger = logging.getLogger('rainboard.models')
 
 MAIN_BRANCHES = ['master', 'devel']
-CMAKE_FIELDS = {'name': 'name', 'description': 'description', 'url': 'homepage', 'version': 'version'}
+RPKG_URL = 'http://robotpkg.openrobots.org'
+RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'MIT', 'gnu-gpl-v3': 'GPL-3.0',
+                 '2-clause-bsd': 'BSD-2-Clause'}
+RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
+CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
 
 
 class Article(NamedModel):
@@ -298,13 +303,13 @@ class Repo(TimeStampedModel):
         return f'{self.forge.slug}/{self.namespace.slug}'
 
     def git(self):
-        git = self.project.git()
+        git_repo = self.project.git()
         remote = self.git_remote()
         try:
-            return git.remote(remote)
+            return git_repo.remote(remote)
         except ValueError:
             logger.info(f'Creating remote {remote}')
-            return git.create_remote(remote, self.get_clone_url())
+            return git_repo.create_remote(remote, self.get_clone_url())
 
     def main_branch(self):
         return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
@@ -368,14 +373,56 @@ class SystemDependency(NamedModel):
     target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
 
 
-class RobotpkgDependency(NamedModel):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-
-
 class Robotpkg(NamedModel):
-    project = models.OneToOneField(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    category = models.CharField(max_length=50)
+
+    pkgbase = models.CharField(max_length=50, default='')
+    pkgversion = models.CharField(max_length=20, default='')
+    master_sites = models.CharField(max_length=200, default='')
+    master_repository = models.CharField(max_length=200, default='')
+    maintainer = models.CharField(max_length=200, default='')
+    comment = models.TextField()
+    homepage = models.URLField(max_length=200, default='')
+
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
-    homepage = models.URLField(max_length=200, blank=True, null=True)
+    private = models.BooleanField(default=False)
+    description = models.TextField()
+    updated = models.DateTimeField(blank=True, null=True)
+
+    def main_page(self):
+        if self.category != 'wip':
+            return f'{RPKG_URL}/robotpkg/{self.category}/{self.name}'
+
+    def build_page(self):
+        path = '-wip/wip' if self.category == 'wip' else f'/{self.category}'
+        return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
+
+    def update(self, pull=True):
+        path = settings.RAINBOARD_RPKG
+        repo = git.Repo(str(path / 'wip' / '.git' if self.category == 'wip' else path / '.git'))
+        if pull:
+            repo.remotes.origin.pull()
+
+        cwd = path / self.category / self.name
+        for field in RPKG_FIELDS:
+            cmd = ['make', 'show-var', f'VARNAME={field}']
+            self.__dict__[field.lower()] = check_output(cmd, cwd=cwd).decode().strip()
+
+        repo_path = self.name if self.category == 'wip' else f'{self.category}/{self.name}'
+        last_commit = next(repo.iter_commits(paths=repo_path, max_count=1))
+        self.updated = last_commit.authored_datetime
+
+        license = check_output(['make', 'show-var', f'VARNAME=LICENSE'], cwd=cwd).decode().strip()
+        if license in RPKG_LICENSES:
+            self.license = License.objects.get(spdx_id=RPKG_LICENSES[license])
+        else:
+            logger.warning(f'Unknown robotpkg license: {license}')
+        self.private = bool(check_output(['make', 'show-var', f'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
+        with (cwd / 'DESCR').open() as f:
+            self.description = f.read().strip()
+
+        self.save()
 
 
 class RobotpkgBuild(TimeStampedModel):
