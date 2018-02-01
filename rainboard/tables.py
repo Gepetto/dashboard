@@ -41,7 +41,8 @@ class ProjectTable(StrippedTable):
 
 
 class RepoTable(StrippedTable):
-    diff = tables.Column(accessor='diff', orderable=False)
+    ahead = tables.Column(accessor='ahead', orderable=False)
+    behind = tables.Column(accessor='behind', orderable=False)
 
     class Meta:
         model = models.Repo

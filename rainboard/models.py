@@ -327,15 +327,11 @@ class Repo(TimeStampedModel):
     def main_branch(self):
         return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
 
-    def diff(self):
-        branch = self.main_branch()
-        if branch.ahead and branch.behind:
-            return f'+{branch.ahead} / -{branch.behind}'
-        if branch.ahead:
-            return f'+{branch.ahead}'
-        if branch.behind:
-            return f'-{branch.behind}'
-        return ''
+    def ahead(self):
+        return self.main_branch().ahead
+
+    def behind(self):
+        return self.main_branch().behind
 
 
 class Commit(NamedModel, TimeStampedModel):
@@ -356,10 +352,12 @@ class Branch(TimeStampedModel):
         unique_together = ('project', 'name')
 
     def get_ahead(self, branch='master'):
-        return len(self.project.git().git.rev_list(f'{branch}..{self}').split('\n'))
+        commits = self.project.git().git.rev_list(f'{branch}..{self}')
+        return len(commits.split('\n')) if commits else 0
 
     def get_behind(self, branch='master'):
-        return len(self.project.git().git.rev_list(f'{self}..{branch}').split('\n'))
+        commits = self.project.git().git.rev_list(f'{self}..{branch}')
+        return len(commits.split('\n')) if commits else 0
 
     def remote(self):
         # TODO: ForeignKey to Repo
