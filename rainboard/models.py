@@ -230,7 +230,9 @@ class Project(Links, NamedModel, TimeStampedModel):
         return self.robotpkg_set.count()
 
     def update(self):
-        self.updated = self.branch_set.order_by('-updated').first().updated
+        robotpkg = self.robotpkg_set.order_by('-updated').first()
+        branch = self.branch_set.order_by('-updated').first().updated
+        self.updated = max(branch, robotpkg.updated) if robotpkg else branch
         self.save()
 
 
