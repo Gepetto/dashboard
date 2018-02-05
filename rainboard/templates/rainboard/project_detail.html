@@ -31,6 +31,13 @@
   </dl>
 </div>
 
+<ul class="nav nav-tabs">
+  <li role="presentation" {% if 'robotpkg' in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project' slug=project.slug %}">Robotpkg</a></h2></li>
+  <li role="presentation" {% if 'repos' in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-repos' slug=project.slug %}">Repos</a></h2></li>
+  <li role="presentation" {% if 'branches' in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-branches' slug=project.slug %}">Branches</a></h2></li>
+</ul>
+
+{% block project_detail_content %}
 <h2>Robotpkg</h2>
 
 {% for rpkg in project.robotpkg_set.all %}
@@ -53,12 +60,6 @@
 </dl>
 
 {% endfor %}
-
-
-<h2>Répos</h2>
-
-{% render_table repos %}
-
-<h2><a href="{% url 'rainboard:branches' slug=project.slug %}">Branches</a></h2>
+{% endblock %}
 
 {% endblock %}

@@ -39,6 +39,10 @@ class ProjectsView(SingleTableMixin, FilterView):
 class ProjectView(DetailView):
     model = models.Project
 
+
+class ProjectReposView(ProjectView):
+    template_name = 'rainboard/project_detail_repos.html'
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         repos = tables.RepoTable(self.object.repo_set.all())
@@ -47,8 +51,7 @@ class ProjectView(DetailView):
         return ctx
 
 
-class ProjectBranchesView(DetailView):
-    model = models.Project
+class ProjectBranchesView(ProjectView):
     template_name = 'rainboard/project_detail_branches.html'
 
     def get_context_data(self, **kwargs):

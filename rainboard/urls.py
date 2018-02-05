@@ -12,6 +12,7 @@ urlpatterns = [
     path('article/create', views.ArticleCreateView.as_view(), name='article-new'),
     path('namespaces', views.NamespacesView.as_view(), name='namespaces'),
     path('projects', views.ProjectsView.as_view(), name='projects'),
-    path('project/<str:slug>', views.ProjectView.as_view(), name='project'),
-    path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='branches'),
+    path('project/<str:slug>/robotpkg', views.ProjectView.as_view(), name='project'),
+    path('project/<str:slug>/repos', views.ProjectReposView.as_view(), name='project-repos'),
+    path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='project-branches'),
 ]
