@@ -65,6 +65,8 @@ class Forge(Links, NamedModel):
                              'application/vnd.github.drax-preview+json'},
             SOURCES.gitlab: {'Private-Token': self.token},
             SOURCES.redmine: {'X-Redmine-API-Key': self.token},
+            SOURCES.travis: {'Authorization': f'token {self.token}',
+                             'TRAVIS-API-Version': '3'},
         }[self.source]
 
     def api_url(self):
@@ -72,6 +74,7 @@ class Forge(Links, NamedModel):
             SOURCES.github: 'https://api.github.com',
             SOURCES.gitlab: f'{self.url}/api/v4',
             SOURCES.redmine: self.url,
+            SOURCES.travis: 'https://api.travis-ci.org',
         }[self.source]
 
     def get_projects(self):
@@ -246,6 +249,7 @@ class Repo(TimeStampedModel):
     repo_id = models.PositiveIntegerField()
     forked_from = models.PositiveIntegerField(blank=True, null=True)
     clone_url = models.URLField(max_length=200, blank=True, null=True)
+    travis_id = models.PositiveIntegerField(blank=True, null=True)
     # TODO gitlab:
     # description = models.TextField()
     # created_at = models.DateTimeField()
