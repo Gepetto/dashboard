@@ -60,27 +60,22 @@ class Forge(Links, NamedModel):
         return req.json() if req.status_code == 200 else []
 
     def headers(self):
-        if self.source == SOURCES.github:
-            return {'Authorization': f'token {self.token}', 'Accept': 'application/vnd.github.drax-preview+json'}
-        if self.source == SOURCES.gitlab:
-            return {'Private-Token': self.token}
-        if self.source == SOURCES.redmine:
-            return {'X-Redmine-API-Key': self.token}
+        return {
+            SOURCES.github: {'Authorization': f'token {self.token}', 'Accept':
+                             'application/vnd.github.drax-preview+json'},
+            SOURCES.gitlab: {'Private-Token': self.token},
+            SOURCES.redmine: {'X-Redmine-API-Key': self.token},
+        }[self.source]
 
     def api_url(self):
-        if self.source == SOURCES.github:
-            return 'https://api.github.com'
-        if self.source == SOURCES.gitlab:
-            return f'{self.url}/api/v4'
-        return self.url
+        return {
+            SOURCES.github: 'https://api.github.com',
+            SOURCES.gitlab: f'{self.url}/api/v4',
+            SOURCES.redmine: self.url,
+        }[self.source]
 
-    def get_projects(self):  # TODO auto
-        if self.source == SOURCES.github:
-            return self.get_projects_github()
-        if self.source == SOURCES.gitlab:
-            return self.get_projects_gitlab()
-        if self.source == SOURCES.redmine:
-            return self.get_projects_redmine()
+    def get_projects(self):
+        return getattr(self, f'get_projects_{self.get_source_display()}')()
 
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
@@ -260,12 +255,11 @@ class Repo(TimeStampedModel):
         return self.name
 
     def api_url(self):
-        if self.forge.source == SOURCES.github:
-            return f'{self.forge.api_url()}/repos/{self.namespace.slug}/{self.slug}'
-        if self.forge.source == SOURCES.redmine:
-            return f'{self.forge.api_url()}/projects/{self.repo_id}.json'
-        if self.forge.source == SOURCES.gitlab:
-            return f'{self.forge.api_url()}/projects/{self.repo_id}'
+        return {
+            SOURCES.github: f'{self.forge.api_url()}/repos/{self.namespace.slug}/{self.slug}',
+            SOURCES.redmine: f'{self.forge.api_url()}/projects/{self.repo_id}.json',
+            SOURCES.gitlab: f'{self.forge.api_url()}/projects/{self.repo_id}',
+        }[self.forge.source]
 
     def api_data(self, url=''):
         logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}')
@@ -275,10 +269,7 @@ class Repo(TimeStampedModel):
     def api_update(self):
         data = self.api_data()
         if data:
-            if self.forge.source == SOURCES.gitlab:
-                return self.api_update_gitlab(data)
-            if self.forge.source == SOURCES.github:
-                return self.api_update_github(data)
+            return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
 
     def api_update_gitlab(self, data):
         # TODO Missing: license, homepage, open_pr
