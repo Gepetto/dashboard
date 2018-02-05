@@ -344,6 +344,7 @@ class Branch(TimeStampedModel):
     ahead = models.PositiveSmallIntegerField(blank=True, null=True)
     behind = models.PositiveSmallIntegerField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -359,15 +360,10 @@ class Branch(TimeStampedModel):
         commits = self.project.git().git.rev_list(f'{self}..{branch}')
         return len(commits.split('\n')) if commits else 0
 
-    def remote(self):
-        # TODO: ForeignKey to Repo
-        forge, namespace, branch = self.name.split('/', maxsplit=2)
-        return Repo.objects.get(forge__slug=forge, namespace__slug=namespace, project=self.project).git()
-
     def git(self):
         git_repo = self.project.git()
         if self.name not in git_repo.branches:
-            remote = self.remote()
+            remote = self.repo.git()
             _, _, branch = self.name.split('/', maxsplit=2)
             git_repo.create_head(self.name, remote.refs[branch]).set_tracking_branch(remote.refs[branch])
         return git_repo.branches[self.name]
@@ -376,7 +372,7 @@ class Branch(TimeStampedModel):
         if pull:
             self.project.main_repo().git().fetch()
             if self.name not in MAIN_BRANCHES:
-                self.remote().fetch()
+                self.repo.git().fetch()
         main_branch = self.project.main_branch()
         self.ahead = self.get_ahead(main_branch)
         self.behind = self.get_behind(main_branch)
