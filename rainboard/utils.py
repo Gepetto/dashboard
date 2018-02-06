@@ -1,11 +1,11 @@
-from enum import IntEnum
-import unicodedata
 import re
+import unicodedata
+from enum import IntEnum
 
 from django.utils.safestring import mark_safe
 
 SOURCES = IntEnum('Sources', 'github gitlab redmine robotpkg travis')
-TARGETS = IntEnum('Targets', '12.04 14.04 16.04 dubnium')
+TARGETS = IntEnum('Targets', '14.04 16.04 17.10 18.04 dubnium')
 
 
 def slugify_with_dots(value):

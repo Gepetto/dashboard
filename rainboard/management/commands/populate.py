@@ -4,10 +4,11 @@ from django.core.management.base import BaseCommand
 
 import requests
 
-from rainboard.models import Forge, License, Repo
+from rainboard.models import Forge, License, Repo, Project
 
 LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'
 logger = logging.getLogger('rainboard.management.populate')
+
 
 class Command(BaseCommand):
     help = 'populates licenses, projets, namespaces and repos from forges'
@@ -23,10 +24,10 @@ class Command(BaseCommand):
         # for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
             # logger.info(f' updating license {data["name"]}')
             # License.objects.get_or_create(spdx_id=data['spdx_id'],
-                                          # defaults={key: data[key] for key in ['name', 'url']})
+            #                               defaults={key: data[key] for key in ['name', 'url']})
 
         logger.info(f'updating forges')
-        for forge in Forge.objects.all():
+        for forge in Forge.objects.order_by('source'):
             logger.info(f' updating {forge}')
             forge.get_projects()
 
@@ -34,3 +35,6 @@ class Command(BaseCommand):
         for repo in Repo.objects.all():
             logger.info(f' updating {repo}')
             repo.api_update()
+
+        logger.info(f'removing unwanted projects')
+        Project.objects.filter(main_namespace__group=False).delete()

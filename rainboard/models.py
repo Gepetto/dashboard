@@ -2,16 +2,17 @@ import logging
 import re
 from subprocess import check_output
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils.dateparse import parse_datetime
+from django.utils.safestring import mark_safe
 
+import git
 import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices
-import git
 
 from .utils import SOURCES, TARGETS, slugify_with_dots
 
@@ -23,6 +24,8 @@ RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'M
                  '2-clause-bsd': 'BSD-2-Clause'}
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
 CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
+TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
+GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None}
 
 
 class Article(NamedModel):
@@ -88,9 +91,8 @@ class Forge(Links, NamedModel):
 
     def get_projects_github(self):
         def update_github(namespace, data):
-            project, _ = Project.objects.get_or_create(name=data['name'],
-                                                       defaults={'homepage': data['homepage'],
-                                                                 'main_namespace': namespace})
+            project, _ = Project.objects.get_or_create(name=data['name'], defaults={
+                'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': self})
             repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
                                                  defaults={'repo_id': data['id'], 'name': data['name']})
             repo.homepage = data['homepage']
@@ -127,7 +129,7 @@ class Forge(Links, NamedModel):
 
     def get_projects_gitlab(self):
         def update_gitlab(data):
-            project, created = Project.objects.get_or_create(name=data['name'])
+            project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': self})
             namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
             repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
                                                  defaults={'repo_id': data['id'], 'name': data['name'],
@@ -152,6 +154,17 @@ class Forge(Links, NamedModel):
         pass  # TODO
 
 
+def get_default_forge(project):
+    for forge in Forge.objects.order_by('source'):
+        if project.repo_set.filter(forge=forge).exists():
+            logger.info(f'default forge for {project} set to {forge}')
+            project.main_forge = forge
+            project.save()
+            return forge
+    else:
+        logger.error(f'NO DEFAULT FORGE for {project}')
+
+
 class Project(Links, NamedModel, TimeStampedModel):
     private = models.BooleanField(default=False)
     main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
@@ -168,6 +181,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         return reverse('rainboard:project', kwargs={'slug': self.slug})
 
     def git_path(self):
+        logger.info(f'git_path for {self} in {self.main_namespace}')
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
 
     def git(self):
@@ -178,7 +192,8 @@ class Project(Links, NamedModel, TimeStampedModel):
         return git.Repo(str(path / '.git'))
 
     def main_repo(self):
-        repo, created = Repo.objects.get_or_create(forge=self.main_forge, namespace=self.main_namespace, project=self,
+        forge = self.main_forge if self.main_forge else get_default_forge(self)
+        repo, created = Repo.objects.get_or_create(forge=forge, namespace=self.main_namespace, project=self,
                                                    defaults={'name': self.name, 'default_branch': 'master',
                                                              'repo_id': 0})
         if created:
@@ -190,21 +205,22 @@ class Project(Links, NamedModel, TimeStampedModel):
         if main:
             branches = [b for b in branches if b.endswith('master') or b.endswith('devel')]
         for branch in branches:
+            logger.info(f'update branch {branch}')
             if branch in MAIN_BRANCHES:
                 instance, created = Branch.objects.get_or_create(name=branch, project=self)
-                if created:
-                    instance.update()
             else:
-                name = '/'.join(branch.split('/')[1:])
-                forge, namespace = name.split('/')[:2]
-                repo, created = Repo.objects.get_or_create(forge__slug=forge, namespace__slug=namespace, project=self,
-                                                   defaults={'name': self.name, 'default_branch': 'master',
-                                                             'repo_id': 0})
+                if branch.startswith('remotes/'):
+                    branch = branch[8:]
+                forge, namespace, name = branch.split('/', maxsplit=2)
+                namespace, _ = Namespace.objects.get_or_creat(slug=namespace)
+                repo, created = Repo.objects.get_or_create(forge__slug=forge, namespace=namespace, project=self,
+                                                           defaults={'name': self.name, 'default_branch': 'master',
+                                                                     'repo_id': 0})
                 if created:
                     repo.api_update()
-                instance, created = Branch.objects.get_or_create(name=name, project=self)
-                if created:
-                    instance.update()
+                instance, created = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
+            if created:
+                instance.update()
 
     def main_branch(self):
         return 'devel' if 'devel' in self.git().heads else 'master'
@@ -227,10 +243,22 @@ class Project(Links, NamedModel, TimeStampedModel):
     def rpkgs(self):
         return self.robotpkg_set.count()
 
+    def update_tags(self):
+        for tag in self.git().tags:
+            Tag.objects.get_or_create(name=str(tag), project=self)
+
     def update(self):
+        self.update_tags()
+        self.version = self.tag_set.filter(name__startswith='v').last().name
         robotpkg = self.robotpkg_set.order_by('-updated').first()
-        branch = self.branch_set.order_by('-updated').first().updated
-        self.updated = max(branch, robotpkg.updated) if robotpkg else branch
+        branch = self.branch_set.order_by('-updated').first()
+        if branch is not None or robotpkg is not None:
+            if robotpkg is None:
+                self.updated = branch.updated
+            elif branch is None:
+                self.updated = robotpkg.updated
+            else:
+                self.updated = max(branch.updated, robotpkg.updated)
         self.save()
 
 
@@ -328,9 +356,62 @@ class Repo(TimeStampedModel):
     def behind(self):
         return self.main_branch().behind
 
+    def get_builds(self):
+        return getattr(self, f'get_builds_{self.forge.get_source_display()}')()
+
+    def get_builds_gitlab(self):
+        for pipeline in self.api_data('/pipelines'):
+            pid, ref = pipeline['id'], pipeline['ref']
+            if self.project.tag_set.filter(name=ref).exists():
+                continue
+            data = self.api_data(f'/pipelines/{pid}')
+            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
+            branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+            if created:
+                branch.update()
+            CIBuild.objects.get_or_create(repo=self, build_id=pid, defaults={
+                'passed': GITLAB_STATUS[pipeline['status']],
+                'started': parse_datetime(data['created_at']),
+                'branch': branch,
+            })
+
+    def get_builds_github(self):
+        if self.travis_id is not None:
+            travis = Forge.objects.get(source=SOURCES.travis)
+            for build in travis.api_data(f'/repo/{self.travis_id}/builds')['builds']:
+                if self.project.tag_set.filter(name=build['branch']['name']).exists():
+                    continue
+                branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
+                branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+                if created:
+                    try:
+                        branch.update()
+                    except git.exc.GitCommandError:
+                        # Some guys might delete some branches…
+                        # eg. https://travis-ci.org/stack-of-tasks/dynamic-graph/builds/246184885
+                        logger.error(f' DELETED BRANCH for {self.project}: {branch_name}')
+                        branch.delete()
+                        continue
+                started = build['started_at'] if build['started_at'] is not None else build['finished_at']
+                CIBuild.objects.get_or_create(repo=self, build_id=build['id'], defaults={
+                    'passed': TRAVIS_STATE[build['state']],
+                    'started': parse_datetime(started),
+                    'branch': branch,
+                })
+
+    def update(self, pull=True):
+        self.project.update_tags()
+        if pull:
+            self.git().fetch()
+        self.api_update()
+        self.get_builds()
+
 
 class Commit(NamedModel, TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('project', 'name')
 
 
 class Branch(TimeStampedModel):
@@ -339,7 +420,7 @@ class Branch(TimeStampedModel):
     ahead = models.PositiveSmallIntegerField(blank=True, null=True)
     behind = models.PositiveSmallIntegerField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
-    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -373,6 +454,13 @@ class Branch(TimeStampedModel):
         self.behind = self.get_behind(main_branch)
         self.updated = self.git().commit.authored_datetime
         self.save()
+
+    def ci(self):
+        build = self.cibuild_set.last()
+        if build is None:
+            return ''
+        status = {True: '✓', False: '✗', None: '?'}[build.passed]
+        return mark_safe(f'<a href="{build.url()}">{status}</a>')
 
 
 class Test(TimeStampedModel):
@@ -447,6 +535,32 @@ class RobotpkgBuild(TimeStampedModel):
     target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
     passed = models.BooleanField(default=False)
 
+
+class CIBuild(models.Model):
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
+    passed = models.NullBooleanField()
+    build_id = models.PositiveIntegerField()
+    started = models.DateTimeField()
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ('started',)
+
+    def url(self):
+        if self.repo.forge.source == SOURCES.github:
+            return f'https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}/builds/{self.build_id}'
+        if self.repo.forge.source == SOURCES.gitlab:
+            return f'{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}/pipelines/{self.build_id}'
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=200)
+    slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ('name',)
+        unique_together = ('name', 'project')
 
 # TODO: later
 # class Dockerfile(NamedModel, TimeStampedModel):

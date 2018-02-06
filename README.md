@@ -15,7 +15,14 @@ export REDMINE_TOKEN=xxx
 export OPENROB_TOKEN=xxx
 ./manage.py migrate
 ./manage.py populate
+./manage.py fetch
+./manage.py robotpkg
+./manage.py cmake
+./manage.py travis
+./manage.py update
 ./manage.py runserver
 ```
+
+or, as a shortcut, `./launch.sh`
 
 You can go to http://localhost:8000

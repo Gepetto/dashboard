@@ -1,12 +1,10 @@
-from django.shortcuts import render
-from django.views.generic import DetailView, CreateView
+from django.views.generic import CreateView, DetailView
 
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
 
-from . import models
-from . import tables
+from . import models, tables
 from .filters import ProjectFilter
 
 

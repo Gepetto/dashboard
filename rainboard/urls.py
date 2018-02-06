@@ -1,8 +1,7 @@
 from django.urls import path
-from django.views.generic import ListView, RedirectView
+from django.views.generic import RedirectView
 
 from . import views
-from .models import Forge, Namespace, Project, Article
 
 app_name = 'rainboard'
 urlpatterns = [

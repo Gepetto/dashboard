@@ -56,6 +56,8 @@ class RepoTable(StrippedTable):
 
 
 class BranchTable(StrippedTable):
+    ci = tables.Column(accessor='ci', orderable=False)
+
     class Meta:
         model = models.Branch
         fields = ('name', 'ahead', 'behind', 'updated')

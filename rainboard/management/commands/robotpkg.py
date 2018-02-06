@@ -1,11 +1,11 @@
 import logging
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
-
-from rainboard.models import Project, Robotpkg
+from django.core.management.base import BaseCommand
 
 import git
+
+from rainboard.models import Project, Robotpkg
 
 logger = logging.getLogger('rainboard.robotpkg')
 

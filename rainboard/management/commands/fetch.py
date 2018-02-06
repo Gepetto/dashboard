@@ -6,6 +6,7 @@ from rainboard.models import Project
 
 logger = logging.getLogger('rainboard.management.fetch')
 
+
 class Command(BaseCommand):
     help = 'Fetch all remotes'
 

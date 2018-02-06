@@ -3,9 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand
 
-import requests
-
-from rainboard.models import Repo, Namespace, Forge, SOURCES, Project
+from rainboard.models import SOURCES, Forge, Namespace, Project, Repo
 
 logger = logging.getLogger('rainboard.management.travis')
 
