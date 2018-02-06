@@ -14,7 +14,7 @@ from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices
 
-from .utils import SOURCES, TARGETS, slugify_with_dots
+from .utils import SOURCES, TARGETS, slugify_with_dots, api_next
 
 logger = logging.getLogger('rainboard.models')
 
@@ -57,10 +57,21 @@ class Forge(Links, NamedModel):
     def get_absolute_url(self):
         return self.url
 
-    def api_data(self, url=''):
-        logger.info(f'requesting api {self}{url}')
-        req = requests.get(self.api_url() + url, verify=self.verify, headers=self.headers())
-        return req.json() if req.status_code == 200 else []
+    def api_data(self, url='', name=None, paginate=True):
+        page = 1
+        while page:
+            logger.info(f'requesting api {self} {url}, page {page}')
+            req = requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+            if req.status_code != 200:
+                return []  # TODO
+            data = req.json()
+            if name is not None:
+                data = data[name]
+            if not paginate:
+                return data
+            for item in data:
+                yield item
+            page = api_next(self.source, req)
 
     def headers(self):
         return {
@@ -101,14 +112,14 @@ class Forge(Links, NamedModel):
             repo.default_branch = data['default_branch']
             repo.open_issues = data['open_issues']
 
-            repo_data = repo.api_data()
+            repo_data = repo.api_data(paginate=False)
             if repo_data and 'license' in repo_data and repo_data['license']:
                 if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
                     license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
                     repo.license = license
                     if not project.license:
                         project.license = license
-            repo.open_pr = len(repo.api_data('/pulls'))
+            repo.open_pr = len(list(repo.api_data('/pulls')))
             repo.save()
             project.save()
 
@@ -148,7 +159,7 @@ class Forge(Links, NamedModel):
 
         for orphan in Project.objects.filter(main_namespace=None):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
-            update_gitlab(self.api_data(f'/projects/{repo.forked_from}'))
+            update_gitlab(self.api_data(f'/projects/{repo.forked_from}', paginate=False))
 
     def get_projects_redmine(self):
         pass  # TODO
@@ -293,13 +304,25 @@ class Repo(TimeStampedModel):
             SOURCES.gitlab: f'{self.forge.api_url()}/projects/{self.repo_id}',
         }[self.forge.source]
 
-    def api_data(self, url=''):
-        logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}')
-        req = requests.get(self.api_url() + url, verify=self.forge.verify, headers=self.forge.headers())
-        return req.json() if req.status_code == 200 else []
+    def api_data(self, url='', name=None, paginate=True):
+        page = 1
+        while page:
+            logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
+            req = requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
+                               headers=self.forge.headers())
+            if req.status_code != 200:
+                return []  # TODO
+            data = req.json()
+            if name is not None:
+                data = data[name]
+            if not paginate:
+                return data
+            for item in data:
+                yield item
+            page = api_next(self.forge.source, req)
 
     def api_update(self):
-        data = self.api_data()
+        data = self.api_data(paginate=False)
         if data:
             return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
 
@@ -364,7 +387,7 @@ class Repo(TimeStampedModel):
             pid, ref = pipeline['id'], pipeline['ref']
             if self.project.tag_set.filter(name=ref).exists():
                 continue
-            data = self.api_data(f'/pipelines/{pid}')
+            data = self.api_data(f'/pipelines/{pid}', paginate=False)
             branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
@@ -378,7 +401,7 @@ class Repo(TimeStampedModel):
     def get_builds_github(self):
         if self.travis_id is not None:
             travis = Forge.objects.get(source=SOURCES.travis)
-            for build in travis.api_data(f'/repo/{self.travis_id}/builds')['builds']:
+            for build in travis.api_data(f'/repo/{self.travis_id}/builds', name='builds'):
                 if self.project.tag_set.filter(name=build['branch']['name']).exists():
                     continue
                 branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'

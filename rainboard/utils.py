@@ -15,3 +15,14 @@ def slugify_with_dots(value):
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s\.-]', '', value).strip().lower()
     return mark_safe(re.sub(r'[-\s]+', '-', value))
+
+
+def api_next(source, req):
+    if source == SOURCES.github:
+        if 'Link' in req.headers:
+            for link in req.headers['Link'].split(','):
+                if 'next' in link:
+                    return int(re.search('page=(\d+)', link).group(1))
+    if source == SOURCES.gitlab:
+        if 'X-Next-Page' in req.headers and req.headers['X-Next-Page']:
+            return int(req.headers['X-Next-Page'])
