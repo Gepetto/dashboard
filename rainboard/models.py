@@ -57,20 +57,24 @@ class Forge(Links, NamedModel):
     def get_absolute_url(self):
         return self.url
 
-    def api_data(self, url='', name=None, paginate=True):
+    def api_req(self, url='', name=None, page=1):
+        logger.info(f'requesting api {self} {url}, page {page}')
+        return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+
+    def api_data(self, url=''):
+        req = self.api_req(url)
+        return req.json() if req.status_code == 200 else []  # TODO
+
+    def api_list(self, url='', name=None):
         page = 1
         while page:
-            logger.info(f'requesting api {self} {url}, page {page}')
-            req = requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+            req = self.api_req(url, name, page)
             if req.status_code != 200:
                 return []  # TODO
             data = req.json()
             if name is not None:
                 data = data[name]
-            if not paginate:
-                return data
-            for item in data:
-                yield item
+            yield from data
             page = api_next(self.source, req)
 
     def headers(self):
@@ -96,12 +100,13 @@ class Forge(Links, NamedModel):
 
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
-            for data in self.api_data(f'/orgs/{namespace.slug}/members'):
+            for data in self.api_list(f'/orgs/{namespace.slug}/members'):
                 Namespace.objects.get_or_create(slug=data['login'],
                                                 defaults={'name': data['login'], 'group': False})
 
     def get_projects_github(self):
         def update_github(namespace, data):
+            logger.info(f'update {data["name"]}')
             project, _ = Project.objects.get_or_create(name=data['name'], defaults={
                 'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': self})
             repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
@@ -112,39 +117,41 @@ class Forge(Links, NamedModel):
             repo.default_branch = data['default_branch']
             repo.open_issues = data['open_issues']
 
-            repo_data = repo.api_data(paginate=False)
+            repo_data = repo.api_data()
             if repo_data and 'license' in repo_data and repo_data['license']:
                 if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
                     license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
                     repo.license = license
                     if not project.license:
                         project.license = license
-            repo.open_pr = len(list(repo.api_data('/pulls')))
+            repo.open_pr = len(list(repo.api_list('/pulls')))
             repo.save()
             project.save()
 
         self.get_namespaces_github()
         for org in Namespace.objects.filter(group=True):
-            for data in self.api_data(f'/orgs/{org.slug}/repos'):
+            for data in self.api_list(f'/orgs/{org.slug}/repos'):
                 update_github(org, data)
         for user in Namespace.objects.filter(group=False):
-            for data in self.api_data(f'/users/{user.slug}/repos'):
+            for data in self.api_list(f'/users/{user.slug}/repos'):
                 if not Project.objects.filter(name=data['name']).exists():
                     continue
                 update_github(user, data)
 
     def get_namespaces_gitlab(self):
-        for data in self.api_data('/namespaces'):
+        for data in self.api_list('/namespaces'):
             Namespace.objects.get_or_create(slug=data['path'],
                                             defaults={'name': data['name'], 'group': data['kind'] == 'group'})
 
     def get_projects_gitlab(self):
         def update_gitlab(data):
+            logger.info(f'update {data["name"]}')
             project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': self})
             namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
             repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
                                                  defaults={'repo_id': data['id'], 'name': data['name'],
                                                            'url': data['web_url']})
+            # TODO license, open_pr
             if 'forked_from_project' in data:
                 repo.forked_from = data['forked_from_project']['id']
                 repo.save()
@@ -154,12 +161,12 @@ class Forge(Links, NamedModel):
 
         self.get_namespaces_gitlab()
 
-        for data in self.api_data('/projects'):
+        for data in self.api_list('/projects'):
             update_gitlab(data)
 
         for orphan in Project.objects.filter(main_namespace=None):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
-            update_gitlab(self.api_data(f'/projects/{repo.forked_from}', paginate=False))
+            update_gitlab(self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
         pass  # TODO
@@ -192,7 +199,6 @@ class Project(Links, NamedModel, TimeStampedModel):
         return reverse('rainboard:project', kwargs={'slug': self.slug})
 
     def git_path(self):
-        logger.info(f'git_path for {self} in {self.main_namespace}')
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
 
     def git(self):
@@ -223,7 +229,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 if branch.startswith('remotes/'):
                     branch = branch[8:]
                 forge, namespace, name = branch.split('/', maxsplit=2)
-                namespace, _ = Namespace.objects.get_or_creat(slug=namespace)
+                namespace, _ = Namespace.objects.get_or_create(slug=namespace)
                 repo, created = Repo.objects.get_or_create(forge__slug=forge, namespace=namespace, project=self,
                                                            defaults={'name': self.name, 'default_branch': 'master',
                                                                      'repo_id': 0})
@@ -304,25 +310,29 @@ class Repo(TimeStampedModel):
             SOURCES.gitlab: f'{self.forge.api_url()}/projects/{self.repo_id}',
         }[self.forge.source]
 
-    def api_data(self, url='', name=None, paginate=True):
+    def api_req(self, url='', name=None, page=1):
+        logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
+        return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
+                            headers=self.forge.headers())
+
+    def api_data(self, url=''):
+        req = self.api_req(url)
+        return req.json() if req.status_code == 200 else []  # TODO
+
+    def api_list(self, url='', name=None):
         page = 1
         while page:
-            logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
-            req = requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
-                               headers=self.forge.headers())
+            req = self.api_req(url, name, page)
             if req.status_code != 200:
                 return []  # TODO
             data = req.json()
             if name is not None:
                 data = data[name]
-            if not paginate:
-                return data
-            for item in data:
-                yield item
+            yield from data
             page = api_next(self.forge.source, req)
 
     def api_update(self):
-        data = self.api_data(paginate=False)
+        data = self.api_data()
         if data:
             return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
 
@@ -383,11 +393,11 @@ class Repo(TimeStampedModel):
         return getattr(self, f'get_builds_{self.forge.get_source_display()}')()
 
     def get_builds_gitlab(self):
-        for pipeline in self.api_data('/pipelines'):
+        for pipeline in self.api_list('/pipelines'):
             pid, ref = pipeline['id'], pipeline['ref']
             if self.project.tag_set.filter(name=ref).exists():
                 continue
-            data = self.api_data(f'/pipelines/{pid}', paginate=False)
+            data = self.api_data(f'/pipelines/{pid}')
             branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
@@ -401,7 +411,7 @@ class Repo(TimeStampedModel):
     def get_builds_github(self):
         if self.travis_id is not None:
             travis = Forge.objects.get(source=SOURCES.travis)
-            for build in travis.api_data(f'/repo/{self.travis_id}/builds', name='builds'):
+            for build in travis.api_list(f'/repo/{self.travis_id}/builds', name='builds'):
                 if self.project.tag_set.filter(name=build['branch']['name']).exists():
                     continue
                 branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
