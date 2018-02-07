@@ -254,10 +254,6 @@ class Repo(TimeStampedModel):
     forked_from = models.PositiveIntegerField(blank=True, null=True)
     clone_url = models.URLField(max_length=200, blank=True, null=True)
     travis_id = models.PositiveIntegerField(blank=True, null=True)
-    # TODO gitlab:
-    # description = models.TextField()
-    # created_at = models.DateTimeField()
-    # last_activity_at = models.DateTimeField()
 
     def __str__(self):
         return self.name
