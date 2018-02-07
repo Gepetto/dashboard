@@ -36,6 +36,3 @@ class Command(BaseCommand):
         for repo in Repo.objects.all():
             logger.info(f' updating {repo}')
             repo.api_update()
-
-        logger.info(f'removing unwanted projects:')
-        logger.info(str(Project.objects.filter(main_namespace__group=False).delete()))
