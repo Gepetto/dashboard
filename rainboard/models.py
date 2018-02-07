@@ -340,13 +340,13 @@ class Repo(TimeStampedModel):
             return git_repo.create_remote(remote, self.get_clone_url())
 
     def fetch(self):
-        git = self.git()
-        logger.info(f'fetching {self.forge} - {self.namespace}')
+        git_repo = self.git()
+        logger.debug(f'fetching {self.forge} / {self.namespace} / {self.project}')
         try:
-            git.fetch()
+            git_repo.fetch()
         except git.exc.GitCommandError:
-            logger.warning(f'fetching {self.forge} - {self.namespace} - SECOND TRY')
-            git.fetch()
+            logger.warning(f'fetching {self.forge} / {self.namespace} / {self.project} - SECOND TRY')
+            git_repo.fetch()
 
     def main_branch(self):
         return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
@@ -449,9 +449,9 @@ class Branch(TimeStampedModel):
 
     def update(self, pull=True):
         if pull:
-            self.project.main_repo().fetch()
-            if self.name not in MAIN_BRANCHES:
-                self.repo.fetch()
+            self.repo.fetch()
+            if self.repo != self.project.main_repo():
+                self.project.main_repo().fetch()
         main_branch = self.project.main_branch()
         if main_branch is not None:
             self.ahead = self.get_ahead(main_branch)
