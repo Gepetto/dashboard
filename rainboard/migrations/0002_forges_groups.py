@@ -22,8 +22,8 @@ def forges(apps, schema_editor):
 
 def groups(apps, schema_editor):
     Namespace = apps.get_model('rainboard', 'Namespace')
-    Namespace.objects.create(name='Humanoid Path Planner', group=True)
     Namespace.objects.create(name='Stack Of Tasks', group=True)
+    Namespace.objects.create(name='Humanoid Path Planner', group=True)
     Namespace.objects.create(name='Gepetto', group=True)
     Namespace.objects.create(name='Pyrène Dev', group=True)
 

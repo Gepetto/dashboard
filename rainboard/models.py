@@ -58,7 +58,7 @@ class Forge(Links, NamedModel):
         return self.url
 
     def api_req(self, url='', name=None, page=1):
-        logger.info(f'requesting api {self} {url}, page {page}')
+        logger.debug(f'requesting api {self} {url}, page {page}')
         return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
 
     def api_data(self, url=''):
@@ -95,92 +95,42 @@ class Forge(Links, NamedModel):
             SOURCES.travis: 'https://api.travis-ci.org',
         }[self.source]
 
-    def get_projects(self):
-        return getattr(self, f'get_projects_{self.get_source_display()}')()
-
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
             for data in self.api_list(f'/orgs/{namespace.slug}/members'):
                 Namespace.objects.get_or_create(slug=data['login'],
                                                 defaults={'name': data['login'], 'group': False})
 
-    def get_projects_github(self):
-        def update_github(namespace, data):
-            logger.info(f'update {data["name"]}')
-            project, _ = Project.objects.get_or_create(name=data['name'], defaults={
-                'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': self})
-            repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
-                                                 defaults={'repo_id': data['id'], 'name': data['name']})
-            repo.homepage = data['homepage']
-            repo.url = data['html_url']
-            repo.repo_id = data['id']
-            repo.default_branch = data['default_branch']
-            repo.open_issues = data['open_issues']
-
-            repo_data = repo.api_data()
-            if repo_data and 'license' in repo_data and repo_data['license']:
-                if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
-                    license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
-                    repo.license = license
-                    if not project.license:
-                        project.license = license
-            repo.open_pr = len(list(repo.api_list('/pulls')))
-            repo.save()
-            project.save()
-
-        self.get_namespaces_github()
-        for org in Namespace.objects.filter(group=True):
-            for data in self.api_list(f'/orgs/{org.slug}/repos'):
-                update_github(org, data)
-        for user in Namespace.objects.filter(group=False):
-            for data in self.api_list(f'/users/{user.slug}/repos'):
-                if not Project.objects.filter(name=data['name']).exists():
-                    continue
-                update_github(user, data)
-
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
             Namespace.objects.get_or_create(slug=data['path'],
                                             defaults={'name': data['name'], 'group': data['kind'] == 'group'})
+        for data in self.api_list('/users'):
+            Namespace.objects.get_or_create(slug=data['username'], defaults={'name': data['name']})
+
+    def get_projects(self):
+        getattr(self, f'get_namespaces_{self.get_source_display()}')()
+        return getattr(self, f'get_projects_{self.get_source_display()}')()
+
+    def get_projects_github(self):
+        for org in Namespace.objects.filter(group=True):
+            for data in self.api_list(f'/orgs/{org.slug}/repos'):
+                update_github(self, org, data)
+        for user in Namespace.objects.filter(group=False):
+            for data in self.api_list(f'/users/{user.slug}/repos'):
+                if Project.objects.filter(name=data['name']).exists():
+                    update_github(self, user, data)
 
     def get_projects_gitlab(self):
-        def update_gitlab(data):
-            logger.info(f'update {data["name"]}')
-            project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': self})
-            namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
-            repo, _ = Repo.objects.get_or_create(forge=self, namespace=namespace, project=project,
-                                                 defaults={'repo_id': data['id'], 'name': data['name'],
-                                                           'url': data['web_url']})
-            # TODO license, open_pr
-            if 'forked_from_project' in data:
-                repo.forked_from = data['forked_from_project']['id']
-                repo.save()
-            elif created or project.main_namespace is None:
-                project.main_namespace = namespace
-                project.save()
-
-        self.get_namespaces_gitlab()
-
         for data in self.api_list('/projects'):
-            update_gitlab(data)
+            update_gitlab(self, data)
 
         for orphan in Project.objects.filter(main_namespace=None):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
-            update_gitlab(self.api_data(f'/projects/{repo.forked_from}'))
+            update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
         pass  # TODO
-
-
-def get_default_forge(project):
-    for forge in Forge.objects.order_by('source'):
-        if project.repo_set.filter(forge=forge).exists():
-            logger.info(f'default forge for {project} set to {forge}')
-            project.main_forge = forge
-            project.save()
-            return forge
-    else:
-        logger.error(f'NO DEFAULT FORGE for {project}')
 
 
 class Project(Links, NamedModel, TimeStampedModel):
@@ -240,7 +190,12 @@ class Project(Links, NamedModel, TimeStampedModel):
                 instance.update()
 
     def main_branch(self):
-        return 'devel' if 'devel' in self.git().heads else 'master'
+        heads = self.git().heads
+        if heads:
+            for branch in MAIN_BRANCHES:
+                if branch in heads:
+                    return branch
+            return heads[0]
 
     def cmake(self):
         filename = self.git_path() / 'CMakeLists.txt'
@@ -311,7 +266,7 @@ class Repo(TimeStampedModel):
         }[self.forge.source]
 
     def api_req(self, url='', name=None, page=1):
-        logger.info(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
+        logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
         return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
                             headers=self.forge.headers())
 
@@ -380,14 +335,25 @@ class Repo(TimeStampedModel):
             logger.info(f'Creating remote {remote}')
             return git_repo.create_remote(remote, self.get_clone_url())
 
+    def fetch(self):
+        git = self.git()
+        logger.info(f'fetching {self.forge} - {self.namespace}')
+        try:
+            git.fetch()
+        except git.exc.GitCommandError:
+            logger.warning(f'fetching {self.forge} - {self.namespace} - SECOND TRY')
+            git.fetch()
+
     def main_branch(self):
         return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
 
     def ahead(self):
-        return self.main_branch().ahead
+        main_branch = self.main_branch()
+        return main_branch.ahead if main_branch is not None else 0
 
     def behind(self):
-        return self.main_branch().behind
+        main_branch = self.main_branch()
+        return main_branch.behind if main_branch is not None else 0
 
     def get_builds(self):
         return getattr(self, f'get_builds_{self.forge.get_source_display()}')()
@@ -435,7 +401,7 @@ class Repo(TimeStampedModel):
     def update(self, pull=True):
         self.project.update_tags()
         if pull:
-            self.git().fetch()
+            self.fetch()
         self.api_update()
         self.get_builds()
 
@@ -479,12 +445,13 @@ class Branch(TimeStampedModel):
 
     def update(self, pull=True):
         if pull:
-            self.project.main_repo().git().fetch()
+            self.project.main_repo().fetch()
             if self.name not in MAIN_BRANCHES:
-                self.repo.git().fetch()
+                self.repo.fetch()
         main_branch = self.project.main_branch()
-        self.ahead = self.get_ahead(main_branch)
-        self.behind = self.get_behind(main_branch)
+        if main_branch is not None:
+            self.ahead = self.get_ahead(main_branch)
+            self.behind = self.get_behind(main_branch)
         self.updated = self.git().commit.authored_datetime
         self.save()
 
@@ -599,3 +566,54 @@ class Tag(models.Model):
 # class Dockerfile(NamedModel, TimeStampedModel):
     # project = models.ForeignKey(Project, on_delete=models.CASCADE)
     # target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
+
+
+def get_default_forge(project):
+    for forge in Forge.objects.order_by('source'):
+        if project.repo_set.filter(forge=forge).exists():
+            logger.info(f'default forge for {project} set to {forge}')
+            project.main_forge = forge
+            project.save()
+            return forge
+    else:
+        logger.error(f'NO DEFAULT FORGE for {project}')
+
+
+def update_gitlab(forge, data):
+    logger.info(f'update {data["name"]} from {forge}')
+    project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': forge})
+    namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
+    repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
+                                         defaults={'repo_id': data['id'], 'name': data['name'],
+                                                   'url': data['web_url']})
+    # TODO license, open_pr
+    if 'forked_from_project' in data:
+        repo.forked_from = data['forked_from_project']['id']
+        repo.save()
+    elif created or project.main_namespace is None:
+        project.main_namespace = namespace
+        project.save()
+
+
+def update_github(forge, namespace, data):
+    logger.info(f'update {data["name"]} from {forge}')
+    project, _ = Project.objects.get_or_create(name=data['name'], defaults={
+        'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': forge})
+    repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
+                                         defaults={'repo_id': data['id'], 'name': data['name']})
+    repo.homepage = data['homepage']
+    repo.url = data['html_url']
+    repo.repo_id = data['id']
+    repo.default_branch = data['default_branch']
+    repo.open_issues = data['open_issues']
+
+    repo_data = repo.api_data()
+    if repo_data and 'license' in repo_data and repo_data['license']:
+        if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
+            license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
+            repo.license = license
+            if not project.license:
+                project.license = license
+    repo.open_pr = len(list(repo.api_list('/pulls')))
+    repo.save()
+    project.save()
