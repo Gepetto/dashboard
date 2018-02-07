@@ -108,6 +108,9 @@ class Forge(Links, NamedModel):
         for data in self.api_list('/users'):
             Namespace.objects.get_or_create(slug=data['username'], defaults={'name': data['name']})
 
+    def get_namespaces_redmine(self):
+        pass  # TODO
+
     def get_projects(self):
         getattr(self, f'get_namespaces_{self.get_source_display()}')()
         return getattr(self, f'get_projects_{self.get_source_display()}')()

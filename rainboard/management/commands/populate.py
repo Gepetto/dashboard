@@ -18,9 +18,10 @@ class Command(BaseCommand):
 
         logger.info(f'updating licenses')
         for data in requests.get(LICENSES).json()['licenses']:
-            logger.info(f' updating license {data["name"]}')
-            License.objects.get_or_create(spdx_id=data['licenseId'],
-                                          defaults={'name': data['name'], 'url': data['detailsUrl']})
+            instance, created = License.objects.get_or_create(spdx_id=data['licenseId'], defaults={
+                'name': data['name'], 'url': data['detailsUrl']})
+            if created:
+                logger.info(f' creating license {data["name"]}')
         # for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
             # logger.info(f' updating license {data["name"]}')
             # License.objects.get_or_create(spdx_id=data['spdx_id'],
@@ -36,5 +37,5 @@ class Command(BaseCommand):
             logger.info(f' updating {repo}')
             repo.api_update()
 
-        logger.info(f'removing unwanted projects')
-        Project.objects.filter(main_namespace__group=False).delete()
+        logger.info(f'removing unwanted projects:')
+        logger.info(str(Project.objects.filter(main_namespace__group=False).delete()))
