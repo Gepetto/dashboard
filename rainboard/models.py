@@ -170,7 +170,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             repo.api_update()
         return repo
 
-    def update_branches(self, main=True):
+    def update_branches(self, main=True, pull=True):
         branches = [b[2:] for b in self.git().git.branch('-a', '--no-color').split('\n')]
         if main:
             branches = [b for b in branches if b.endswith('master') or b.endswith('devel')]
@@ -183,14 +183,15 @@ class Project(Links, NamedModel, TimeStampedModel):
                     branch = branch[8:]
                 forge, namespace, name = branch.split('/', maxsplit=2)
                 namespace, _ = Namespace.objects.get_or_create(slug=namespace)
-                repo, created = Repo.objects.get_or_create(forge__slug=forge, namespace=namespace, project=self,
+                forge = Forge.objects.get(slug=forge)
+                repo, created = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=self,
                                                            defaults={'name': self.name, 'default_branch': 'master',
                                                                      'repo_id': 0})
                 if created:
                     repo.api_update()
                 instance, created = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
             if created:
-                instance.update()
+                instance.update(pull=pull)
 
     def main_branch(self):
         heads = self.git().heads

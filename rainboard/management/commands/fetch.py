@@ -30,4 +30,4 @@ class Command(BaseCommand):
                 except AttributeError:
                     logger.warning(f'Project {project} has no master branch')
             logger.info(f' updating branches for {project}')
-            project.update_branches(main=False)
+            project.update_branches(main=False, pull=False)

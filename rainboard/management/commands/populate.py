@@ -18,10 +18,10 @@ class Command(BaseCommand):
 
         logger.info(f'updating licenses')
         for data in requests.get(LICENSES).json()['licenses']:
-            instance, created = License.objects.get_or_create(spdx_id=data['licenseId'], defaults={
-                'name': data['name'], 'url': data['detailsUrl']})
+            _, created = License.objects.get_or_create(spdx_id=data['licenseId'],
+                                                       defaults={'name': data['name'], 'url': data['detailsUrl']})
             if created:
-                logger.info(f' creating license {data["name"]}')
+                logger.info(f' created license {data["name"]}')
         # for data in requests.get(f'{github.api_url()}/licenses', headers=github.headers()).json():
             # logger.info(f' updating license {data["name"]}')
             # License.objects.get_or_create(spdx_id=data['spdx_id'],
