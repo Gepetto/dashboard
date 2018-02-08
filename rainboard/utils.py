@@ -26,3 +26,16 @@ def api_next(source, req):
     if source == SOURCES.gitlab:
         if 'X-Next-Page' in req.headers and req.headers['X-Next-Page']:
             return int(req.headers['X-Next-Page'])
+
+
+def domain(url):
+    """
+    Extracts the domain of an url
+    """
+    if '://' in url or url.startswith('//'):
+        url = url.split('//')[1]
+    return url.split('/')[0]
+
+def domain_link(url):
+    dn = domain(url)
+    return mark_safe(f'<a href="{url}">{dn}</a>')

@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 import django_tables2 as tables
 
-from . import models
+from . import models, utils
 
 
 class StrippedTable(tables.Table):
@@ -39,6 +39,9 @@ class ProjectTable(StrippedTable):
 
     def render_name(self, record):
         return record.get_link()
+
+    def render_homepage(self, value):
+        return utils.domain_link(value)
 
 
 class RepoTable(StrippedTable):
