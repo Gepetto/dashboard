@@ -225,7 +225,9 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def update(self):
         self.update_tags()
-        self.version = self.tag_set.filter(name__startswith='v').last().name
+        tag = self.tag_set.filter(name__startswith='v').last()
+        if tag is not None:
+            self.version = tag.name[1:]
         robotpkg = self.robotpkg_set.order_by('-updated').first()
         branch = self.branch_set.order_by('-updated').first()
         if branch is not None or robotpkg is not None:
