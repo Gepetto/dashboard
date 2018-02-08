@@ -3,9 +3,8 @@ import logging
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-import git
-
 from rainboard.models import Branch, Project, Repo, Robotpkg
+from rainboard.utils import update_robotpkg
 
 logger = logging.getLogger('rainboard.management.update')
 
@@ -25,8 +24,7 @@ class Command(BaseCommand):
             branch.update(pull=False)
 
         logger.info(f'\nPulling Robotpkg\n')
-        git.Repo(str(settings.RAINBOARD_RPKG / '.git')).remotes.origin.pull()
-        git.Repo(str(settings.RAINBOARD_RPKG / 'wip' / '.git')).remotes.origin.pull()
+        update_robotpkg(settings.RAINBOARD_RPKG)
 
         logger.info(f'\nUpdating Robotpkg\n')
         for robotpkg in Robotpkg.objects.all():

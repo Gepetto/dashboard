@@ -3,9 +3,8 @@ import logging
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-import git
-
 from rainboard.models import Project, Robotpkg
+from rainboard.utils import update_robotpkg
 
 logger = logging.getLogger('rainboard.robotpkg')
 
@@ -17,8 +16,7 @@ class Command(BaseCommand):
         path = settings.RAINBOARD_RPKG
 
         logger.info('Pulling Robotpkg repositories')
-        git.Repo(str(path / '.git')).remotes.origin.pull()
-        git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()
+        update_robotpkg(path)
 
         for project in Project.objects.all():
             for pkg in path.glob(f'*/{project.slug}'):

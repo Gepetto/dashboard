@@ -2,8 +2,6 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-import requests
-
 from rainboard.models import Project
 
 LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'

@@ -1,8 +1,13 @@
+import logging
 import re
 import unicodedata
 from enum import IntEnum
 
 from django.utils.safestring import mark_safe
+
+import git
+
+logger = logging.getLogger('rainboard.utils')
 
 SOURCES = IntEnum('Sources', 'github gitlab redmine robotpkg travis')
 TARGETS = IntEnum('Targets', '14.04 16.04 17.10 18.04 dubnium')
@@ -36,6 +41,20 @@ def domain(url):
         url = url.split('//')[1]
     return url.split('/')[0]
 
+
 def domain_link(url):
     dn = domain(url)
     return mark_safe(f'<a href="{url}">{dn}</a>')
+
+
+def update_robotpkg(path):
+    try:
+        git.Repo(str(path / '.git')).remotes.origin.pull()
+    except git.exc.GitCommandError:
+        logger.error('Network error, retrying…')
+        git.Repo(str(path / '.git')).remotes.origin.pull()
+    try:
+        git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()
+    except git.exc.GitCommandError:
+        logger.error('Network error, retrying…')
+        git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()

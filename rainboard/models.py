@@ -4,7 +4,6 @@ from subprocess import check_output
 
 from django.conf import settings
 from django.db import models
-from django.urls import reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
@@ -14,7 +13,7 @@ from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, TARGETS, slugify_with_dots, api_next
+from .utils import SOURCES, TARGETS, api_next, slugify_with_dots
 
 logger = logging.getLogger('rainboard.models')
 
@@ -59,7 +58,11 @@ class Forge(Links, NamedModel):
 
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self} {url}, page {page}')
-        return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+        try:
+            return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+        except requests.exceptions.ConnectionError:
+            logger.error(f'requesting api {self} {url}, page {page} - SECOND TRY')
+            return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
@@ -247,7 +250,6 @@ class Project(Links, NamedModel, TimeStampedModel):
         return query_sum(self.repo_set, 'open_pr')
 
 
-
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
@@ -277,8 +279,13 @@ class Repo(TimeStampedModel):
 
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
-        return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
-                            headers=self.forge.headers())
+        try:
+            return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
+                                headers=self.forge.headers())
+        except requests.exceptions.ConnectionError:
+            logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
+            return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
+                                headers=self.forge.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
