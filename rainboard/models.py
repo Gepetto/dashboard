@@ -12,7 +12,7 @@ import git
 import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
-from ndh.utils import enum_to_choices
+from ndh.utils import enum_to_choices, query_sum
 
 from .utils import SOURCES, TARGETS, slugify_with_dots, api_next
 
@@ -242,6 +242,13 @@ class Project(Links, NamedModel, TimeStampedModel):
     def commits_since(self):
         commits = self.git().git.rev_list(f'{self.version}..{self.main_branch()}')
         return len(commits.split('\n')) if commits else 0
+
+    def open_issues(self):
+        return query_sum(self.repo_set, 'open_issues')
+
+    def open_pr(self):
+        return query_sum(self.repo_set, 'open_pr')
+
 
 
 class Repo(TimeStampedModel):
