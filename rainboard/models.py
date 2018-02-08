@@ -239,6 +239,10 @@ class Project(Links, NamedModel, TimeStampedModel):
                 self.updated = max(branch.updated, robotpkg.updated)
         self.save()
 
+    def commits_since(self):
+        commits = self.git().git.rev_list(f'{self.version}..{self.main_branch()}')
+        return len(commits.split('\n')) if commits else 0
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)

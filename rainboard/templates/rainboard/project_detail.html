@@ -25,9 +25,10 @@
     <dt>Main namespace</dt> <dd>{{ project.main_namespace }}</dd>
        <dt>Main branch</dt> <dd>{{ project.main_branch }}</dd>
        <dt>Description</dt> <dd>{{ project.description }}</dd>
-           <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
           <dt>Homepage</dt> <dd>{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
-          <dt>Updated</dt> <dd>{{ project.updated }}</dd>
+           <dt>Updated</dt> <dd>{{ project.updated }}</dd>
+           <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
+     <dt>Commits since</dt> <dd>{{ project.commits_since }}</dd>
   </dl>
 </div>
 

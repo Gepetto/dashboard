@@ -29,12 +29,13 @@ class NamespaceTable(StrippedTable):
 
 
 class ProjectTable(StrippedTable):
+    commits_since = tables.Column(accessor='commits_since', orderable=False)
     repos = tables.Column(accessor='repos', orderable=False)
     rpkgs = tables.Column(accessor='rpkgs', orderable=False)
 
     class Meta:
         model = models.Project
-        fields = ('main_namespace', 'name', 'license', 'homepage', 'updated')
+        fields = ('main_namespace', 'name', 'license', 'homepage', 'updated', 'version')
 
     def render_name(self, record):
         return record.get_link()
