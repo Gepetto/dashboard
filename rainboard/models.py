@@ -148,9 +148,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     # TODO: release github ↔ robotpkg
 
-    def get_absolute_url(self):
-        return reverse('rainboard:project', kwargs={'slug': self.slug})
-
     def git_path(self):
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
 
@@ -225,7 +222,7 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def update(self):
         self.update_tags()
-        tag = self.tag_set.filter(name__startswith='v').last()
+        tag = self.tag_set.filter(name__startswith='v').last()  # TODO: implement SQL ordering for semver
         if tag is not None:
             self.version = tag.name[1:]
         robotpkg = self.robotpkg_set.order_by('-updated').first()
