@@ -26,3 +26,14 @@ export OPENROB_TOKEN=xxx
 or, as a shortcut, `./launch.sh`
 
 You can go to http://localhost:8000
+
+## TODO
+
+- supprimer le besoin de delete_perso
+- populate public/private field
+- fix interaction between pagination & filtering
+- retrieve dependencies
+    - classify system / rpkg
+    - get their version depending on the target os
+- dockerfile
+    - generic Vs. using dependencies
