@@ -114,6 +114,9 @@ class Forge(Links, NamedModel):
     def get_namespaces_redmine(self):
         pass  # TODO
 
+    def get_namespaces_travis(self):
+        pass
+
     def get_projects(self):
         getattr(self, f'get_namespaces_{self.get_source_display()}')()
         return getattr(self, f'get_projects_{self.get_source_display()}')()
@@ -137,6 +140,12 @@ class Forge(Links, NamedModel):
 
     def get_projects_redmine(self):
         pass  # TODO
+
+    def get_projects_travis(self):
+        for namespace in Namespace.objects.all():
+            for repository in self.api_list(f'/owner/{namespace.slug}/repos', 'repositories'):
+                if repository['active']:
+                    update_travis(namespace, repository)
 
 
 class Project(Links, NamedModel, TimeStampedModel):
@@ -299,7 +308,10 @@ class Repo(TimeStampedModel):
                 return []  # TODO
             data = req.json()
             if name is not None:
-                data = data[name]
+                if name in data:
+                    data = data[name]
+                else:
+                    return []  # TODO
             yield from data
             page = api_next(self.forge.source, req)
 
@@ -635,3 +647,17 @@ def update_github(forge, namespace, data):
     repo.open_pr = len(list(repo.api_list('/pulls')))
     repo.save()
     project.save()
+
+
+def update_travis(namespace, data):
+    project = Project.objects.filter(name=data['name']).first()
+    if project is None:
+        return
+    forge = Forge.objects.get(source=SOURCES.github)
+    repo, created = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
+                                               defaults={'name': data['name'], 'repo_id': 0, 'travis_id': data['id']})
+    if created:
+        repo.api_update()
+    else:
+        repo.travis_id = data['id']
+        repo.save()

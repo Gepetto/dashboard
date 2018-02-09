@@ -34,5 +34,3 @@ class Command(BaseCommand):
         call_command('fetch')
         call_command('robotpkg')
         call_command('cmake')
-        call_command('travis')
-        call_command('delete_perso')
