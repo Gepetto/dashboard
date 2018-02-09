@@ -610,7 +610,9 @@ def get_default_forge(project):
 
 def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
-    project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': forge})
+    private = data['visibility'] in ['private', 'internal']
+    project, created = Project.objects.get_or_create(name=data['name'],
+                                                     defaults={'main_forge': forge, 'private': private})
     namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
                                                    defaults={'name': data['namespace']['name']})
     repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
