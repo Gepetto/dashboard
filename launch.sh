@@ -16,4 +16,3 @@ source .env
 ./manage.py delete_perso
 ./manage.py update
 ./manage.py delete_perso
-./manage.py runserver
