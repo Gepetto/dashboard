@@ -23,7 +23,6 @@ You can then go to http://localhost:8000
 
 ## TODO
 
-- fix interaction between pagination & filtering
 - retrieve dependencies
     - classify system / rpkg
     - get their version depending on the target os
