@@ -19,6 +19,8 @@ def forges(apps, schema_editor):
                          token=os.getenv('REDMINE_TOKEN'))
     Forge.objects.create(name='Openrobots', source=SOURCES.redmine, url='https://git.openrobots.org',
                          token=os.getenv('OPENROB_TOKEN'))
+    Forge.objects.create(name='Travis', source=SOURCES.travis, url='https://travis-ci.org',
+                         token=os.getenv('TRAVIS_TOKEN'))
 
 def groups(apps, schema_editor):
     Namespace = apps.get_model('rainboard', 'Namespace')

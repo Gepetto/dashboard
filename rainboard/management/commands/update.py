@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from rainboard.models import Branch, Project, Repo, Robotpkg
@@ -35,3 +36,5 @@ class Command(BaseCommand):
         for project in Project.objects.all():
             logger.info(f' {project}')
             project.update()
+
+        call_command('delete_perso')

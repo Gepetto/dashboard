@@ -15,12 +15,12 @@ def update_travis_id(data):
     namespace = Namespace.objects.get(slug=namespace)
     project, _ = Project.objects.get_or_create(name=data['name'], defaults={'main_namespace': namespace})
     repo, created = Repo.objects.get_or_create(forge=GITHUB, namespace=namespace, project=project,
-                                               defaults={'name': data['name'], 'repo_id': 0})
+                                               defaults={'name': data['name'], 'repo_id': 0, 'travis_id': data['id']})
     if created:
         repo.api_update()
-
-    repo.travis_id = data['id']
-    repo.save()
+    else:
+        repo.travis_id = data['id']
+        repo.save()
 
 
 class Command(BaseCommand):
@@ -28,9 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         logger.info('Adding Travis Forge if needed')
-        travis, created = Forge.objects.get_or_create(source=SOURCES.travis, defaults={
-            'name': 'Travis', 'url': 'https://travis-ci.org/', 'token': os.getenv('TRAVIS_TOKEN')
-        })
+        travis = Forge.objects.get(source=SOURCES.travis)
 
         logger.info('Gettings travis_id')
         for namespace in Namespace.objects.all():
