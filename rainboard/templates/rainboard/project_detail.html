@@ -13,10 +13,10 @@
     {% bootstrap_label 'UNLICENSED' label_class='label label-warning' %}
     {% endif %}
 
-    {% if project.private %}
-    {% bootstrap_label 'private' label_class='label label-danger' %}
-    {% else %}
+    {% if project.public %}
     {% bootstrap_label 'public' label_class='label label-success' %}
+    {% else %}
+    {% bootstrap_label 'private' label_class='label label-danger' %}
     {% endif %}
   </div>
 

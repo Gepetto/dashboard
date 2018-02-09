@@ -149,7 +149,7 @@ class Forge(Links, NamedModel):
 
 
 class Project(Links, NamedModel, TimeStampedModel):
-    private = models.BooleanField(default=False)
+    public = models.BooleanField(default=True)
     main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
     main_forge = models.ForeignKey(Forge, on_delete=models.SET_NULL, null=True, blank=True)
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
@@ -520,7 +520,7 @@ class Robotpkg(NamedModel):
     homepage = models.URLField(max_length=200, default='')
 
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
-    private = models.BooleanField(default=False)
+    public = models.BooleanField(default=True)
     description = models.TextField()
     updated = models.DateTimeField(blank=True, null=True)
 
@@ -552,7 +552,7 @@ class Robotpkg(NamedModel):
             self.license = License.objects.get(spdx_id=RPKG_LICENSES[license])
         else:
             logger.warning(f'Unknown robotpkg license: {license}')
-        self.private = bool(check_output(['make', 'show-var', f'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
+        self.public = not bool(check_output(['make', 'show-var', f'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
         with (cwd / 'DESCR').open() as f:
             self.description = f.read().strip()
 
@@ -610,9 +610,9 @@ def get_default_forge(project):
 
 def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
-    private = data['visibility'] in ['private', 'internal']
+    public = data['visibility'] not in ['private', 'internal']
     project, created = Project.objects.get_or_create(name=data['name'],
-                                                     defaults={'main_forge': forge, 'private': private})
+                                                     defaults={'main_forge': forge, 'public': public})
     namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
                                                    defaults={'name': data['namespace']['name']})
     repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
