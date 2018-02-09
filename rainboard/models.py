@@ -177,7 +177,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         for branch in branches:
             logger.info(f'update branch {branch}')
             if branch in MAIN_BRANCHES:
-                instance, created = Branch.objects.get_or_create(name=branch, project=self)
+                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self)
             else:
                 if branch.startswith('remotes/'):
                     branch = branch[8:]
@@ -189,8 +189,8 @@ class Project(Links, NamedModel, TimeStampedModel):
                                                                      'repo_id': 0})
                 if created:
                     repo.api_update()
-                instance, created = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
-            if created:
+                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
+            if bcreated:
                 instance.update(pull=pull)
 
     def main_branch(self):
@@ -599,7 +599,8 @@ def get_default_forge(project):
 def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
     project, created = Project.objects.get_or_create(name=data['name'], defaults={'main_forge': forge})
-    namespace, _ = Namespace.objects.get_or_create(name=data['namespace']['name'])
+    namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
+                                                   defaults={'name': data['namespace']['name']})
     repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
                                          defaults={'repo_id': data['id'], 'name': data['name'],
                                                    'url': data['web_url']})
