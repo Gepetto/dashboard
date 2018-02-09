@@ -240,7 +240,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         self.save()
 
     def commits_since(self):
-        commits = self.git().git.rev_list(f'{self.version}..{self.main_branch()}')
+        commits = self.git().git.rev_list(f'v{self.version}..{self.main_branch()}')
         return len(commits.split('\n')) if commits else 0
 
     def open_issues(self):
