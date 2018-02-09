@@ -249,8 +249,11 @@ class Project(Links, NamedModel, TimeStampedModel):
         self.save()
 
     def commits_since(self):
-        commits = self.git().git.rev_list(f'v{self.version}..{self.main_branch()}')
-        return len(commits.split('\n')) if commits else 0
+        try:
+            commits = self.git().git.rev_list(f'v{self.version}..{self.main_branch()}')
+            return len(commits.split('\n')) if commits else 0
+        except git.exc.GitCommandError:
+            pass
 
     def open_issues(self):
         return query_sum(self.repo_set, 'open_issues')
