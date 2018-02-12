@@ -12,23 +12,22 @@ cache:
   paths:
     - build/ccache
 
-.common:
+.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   before_script:
     - mkdir -p build/ccache
     - cd build
     - export CCACHE_BASEDIR=${PWD}
     - export CCACHE_DIR=${PWD}/ccache
+  script:
+    - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
+    - echo "REPOSITORY=git ${CI_PROJECT_DIR}" >> Makefile
+    - make checkout
+    - make install
+    - cd work.*/${PROJECT}*/
+    - make test
   retry: 2
   except:
     - gh-pages
-
-.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
-  <<: *common
-  script:
-    - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
-    - make install
-    - cd work.*/${ROBOTPKG}*/
-    - make test
 
 {% for image in robotpkg.valid_images %}
 robotpkg-{{ image }}:
