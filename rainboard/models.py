@@ -263,6 +263,9 @@ class Project(Links, NamedModel, TimeStampedModel):
     def open_pr(self):
         return query_sum(self.repo_set, 'open_pr')
 
+    def gitlabciyml(self):
+        return get_template('rainboard/gitlab-ci.yml').render({'project': self})
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
@@ -557,9 +560,6 @@ class Robotpkg(NamedModel):
 
     def valid_images(self):
         return self.image_set.filter(created__isnull=False)
-
-    def gitlabciyml(self):
-        return get_template('rainboard/gitlab-ci.yml').render({'robotpkg': self})
 
 
 class RobotpkgBuild(TimeStampedModel):

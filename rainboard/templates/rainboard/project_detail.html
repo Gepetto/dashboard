@@ -75,12 +75,13 @@
          <dt>Build page</dt> <dd><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
 </dl>
 
-<h4>generated .gitlab-ci.yml</h4>
+{% endfor %}
+
+<h3>generated .gitlab-ci.yml</h3>
 <pre>
-{{ rpkg.gitlabciyml }}
+{{ project.gitlabciyml }}
 </pre>
 
-{% endfor %}
 {% endif %}
 
 {% endblock %}

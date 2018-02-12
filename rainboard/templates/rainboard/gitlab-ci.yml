@@ -2,17 +2,19 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
   GIT_SUBMODULE_STRATEGY: "recursive"
   GIT_DEPTH: "3"
-  NAMESPACE: {{ robotpkg.project.main_namespace.slug }}
-  PROJECT: {{ robotpkg.project }}
-  ROBOTPKG: {{ robotpkg }}
-  CATEGORY: {{ robotpkg.category }}
+  NAMESPACE: {{ project.main_namespace.slug }}
+  PROJECT: {{ project }}
   IMAGE: "${CI_REGISTRY}/${NAMESPACE}/${PROJECT}"
 
 cache:
   paths:
     - build/ccache
 
+{% for robotpkg in project.robotpkg_set.all %}
 .robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
+  variables:
+    ROBOTPKG: {{ robotpkg }}
+    CATEGORY: {{ robotpkg.category }}
   before_script:
     - mkdir -p build/ccache
     - cd build
@@ -20,7 +22,7 @@ cache:
     - export CCACHE_DIR=${PWD}/ccache
   script:
     - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
-    - echo "REPOSITORY=git ${CI_PROJECT_DIR}" >> Makefile
+    - echo "MASTER_REPOSITORY=git ${CI_PROJECT_DIR}" >> Makefile
     - make checkout
     - make install
     - cd work.*/${PROJECT}*/
@@ -33,4 +35,6 @@ cache:
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
   image: ${IMAGE}:{{ image.get_target_display }}
+{% endfor %}
+
 {% endfor %}
