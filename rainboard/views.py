@@ -54,7 +54,7 @@ class ProjectBranchesView(ProjectView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        branches = tables.BranchTable(self.object.branch_set.all())
+        branches = tables.BranchTable(self.object.branch_set.all(), order_by='-updated')
         RequestConfig(self.request).configure(branches)
         ctx['branches'] = branches
         return ctx

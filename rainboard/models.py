@@ -276,7 +276,7 @@ class Repo(TimeStampedModel):
     open_pr = models.PositiveSmallIntegerField(blank=True, null=True)
     repo_id = models.PositiveIntegerField()
     forked_from = models.PositiveIntegerField(blank=True, null=True)
-    clone_url = models.URLField(max_length=200, blank=True, null=True)
+    clone_url = models.URLField(max_length=200)
     travis_id = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
@@ -324,31 +324,10 @@ class Repo(TimeStampedModel):
             return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
 
     def api_update_gitlab(self, data):
-        # TODO Missing: license, homepage, open_pr
-        self.name = data['name']
-        self.slug = data['path']
-        self.url = data['web_url']
-        self.open_issues = data['open_issues_count']
-        self.default_branch = data['default_branch']
-        if 'forked_from_project' in data:
-            self.forked_from = data['forked_from_project']['id']
-        self.clone_url = data['http_url_to_repo']
-        self.save()
+        update_gitlab(self.forge, data)
 
     def api_update_github(self, data):
-        # TODO Missing: open_pr
-        self.name = data['name']
-        if data['license'] is not None:
-            self.license = License.objects.filter(spdx_id=data['license']['spdx_id']).first()
-        self.homepage = data['homepage']
-        self.url = data['url']
-        self.default_branch = data['default_branch']
-        self.open_issues = data['open_issues_count']
-        self.repo_id = data['id']
-        if 'source' in data:
-            self.forked_from = data['source']['id']
-        self.clone_url = data['clone_url']
-        self.save()
+        update_github(self.forge, self.namespace, data)
 
     def get_clone_url(self):
         if self.forge.source == SOURCES.gitlab:
@@ -494,6 +473,14 @@ class Branch(TimeStampedModel):
         status = {True: '✓', False: '✗', None: '?'}[build.passed]
         return mark_safe(f'<a href="{build.url()}">{status}</a>')
 
+    def forge(self):
+        if self.repo:
+            return self.repo.forge
+
+    def namespace(self):
+        if self.repo:
+            return self.repo.namespace
+
 
 class Test(TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -619,15 +606,23 @@ def update_gitlab(forge, data):
     namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
                                                    defaults={'name': data['namespace']['name']})
     repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
-                                         defaults={'repo_id': data['id'], 'name': data['name'],
-                                                   'url': data['web_url']})
-    # TODO license, open_pr
+                                         defaults={'repo_id': data['id'], 'name': data['name'], 'url': data['web_url'],
+                                                   'default_branch': data['default_branch'],
+                                                   'clone_url': data['http_url_to_repo']})
+    repo.name = data['name']
+    repo.slug = data['path']
+    repo.url = data['web_url']
+    repo.repo_id = data['id']
+    repo.clone_url = data['http_url_to_repo']
+    repo.open_issues = data['open_issues_count']
+    repo.default_branch = data['default_branch']
+    # TODO license, open_pr, homepage
     if 'forked_from_project' in data:
         repo.forked_from = data['forked_from_project']['id']
-        repo.save()
     elif created or project.main_namespace is None:
         project.main_namespace = namespace
         project.save()
+    repo.save()
 
 
 def update_github(forge, namespace, data):
@@ -635,7 +630,8 @@ def update_github(forge, namespace, data):
     project, _ = Project.objects.get_or_create(name=data['name'], defaults={
         'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': forge})
     repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
-                                         defaults={'repo_id': data['id'], 'name': data['name']})
+                                         defaults={'repo_id': data['id'], 'name': data['name'],
+                                                   'clone_url': data['clone_url']})
     repo.homepage = data['homepage']
     repo.url = data['html_url']
     repo.repo_id = data['id']
@@ -649,6 +645,10 @@ def update_github(forge, namespace, data):
             repo.license = license
             if not project.license:
                 project.license = license
+        if 'source' in repo_data:
+            repo.forked_from = repo_data['source']['id']
+    repo.open_issues = repo_data['open_issues_count']
+    repo.clone_url = data['clone_url']
     repo.open_pr = len(list(repo.api_list('/pulls')))
     repo.save()
     project.save()

@@ -142,7 +142,7 @@ class Migration(migrations.Migration):
                 ('open_pr', models.PositiveSmallIntegerField(blank=True, null=True)),
                 ('repo_id', models.PositiveIntegerField()),
                 ('forked_from', models.PositiveIntegerField(blank=True, null=True)),
-                ('clone_url', models.URLField(blank=True, null=True)),
+                ('clone_url', models.URLField()),
                 ('travis_id', models.PositiveIntegerField(blank=True, null=True)),
                 ('forge', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Forge')),
                 ('license', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.License')),

@@ -62,8 +62,28 @@ class RepoTable(StrippedTable):
 
 
 class BranchTable(StrippedTable):
+    forge = tables.Column(accessor='forge', orderable=False)
+    namespace = tables.Column(accessor='namespace', orderable=False)
     ci = tables.Column(accessor='ci', orderable=False)
 
     class Meta:
         model = models.Branch
-        fields = ('name', 'ahead', 'behind', 'updated')
+        fields = ('forge', 'namespace', 'name', 'ahead', 'behind', 'updated')
+
+    def render_name(self, record, value):
+        if record.repo is None:
+            return value
+        name = record.name.split('/', maxsplit=2)[2]
+        return mark_safe(f'<a href="{record.repo.url}/tree/{name}">{name}</a>')
+
+    def render_forge(self, value):
+        if value:
+            return value.get_link()
+
+    def render_namespace(self, record, value):
+        if value:
+            return mark_safe(f'<a href="{record.repo.url}">{value}</a>')
+
+    # TODO: this works, but we have to hide the pinned from the main dataset
+    # def get_top_pinned_data(self):
+        # return self.data.data.filter(name__in=models.MAIN_BRANCHES)
