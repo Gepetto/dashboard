@@ -19,8 +19,9 @@ class Command(BaseCommand):
         update_robotpkg(path)
 
         for project in Project.objects.all():
-            for pkg in path.glob(f'*/{project.slug}'):
-                logger.info(f'{project} found in {pkg}')
-                obj, created = Robotpkg.objects.get_or_create(name=pkg.name, category=pkg.parent.name, project=project)
-                if created:
-                    obj.update(pull=False)
+            for slug in [project.slug, project.slug.replace('_', '-')]:
+                for pkg in path.glob(f'*/{slug}'):
+                    obj, created = Robotpkg.objects.get_or_create(name=pkg.name, category=pkg.parent.name, project=project)
+                    if created:
+                        logger.info(f'{project} found in {pkg}')
+                        obj.update(pull=False)

@@ -44,9 +44,12 @@
 {% render_table table %}
 {% if 'images' in request.path %}
 <pre>
-{% for image in object_list %}
-{{ image.build }}
-{% endfor %}
+# Pull {% for image in object_list %}
+{{ image.pull|join:' ' }}{% endfor %}
+# Build {% for image in object_list %}
+{{ image.build|join:' ' }}{% endfor %}
+# Push {% for image in object_list %}
+{{ image.push|join:' ' }}{% endfor %}
 </pre>
 {% endif %}
 
@@ -72,6 +75,11 @@
           <dt>Main page</dt> <dd>{% if rpkg.main_page %}<a href="{{ rpkg.main_page }}">{{ rpkg.main_page }}</a>{% else %}—{% endif %}</dd>
          <dt>Build page</dt> <dd><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
 </dl>
+
+<h4>gitlab-ci configuration</h4>
+<pre>
+{{ rpkg.gitlabciyml }}
+</pre>
 
 {% endfor %}
 {% endif %}

@@ -7,10 +7,6 @@ FROM ${REGISTRY}/${FROM}:${TARGET}
 ARG ROBOTPKG
 ARG ROBOTPKG_DEPS=true
 ARG ADDITIONAL_DEPENDENCIES=""
+ARG CHECKOUT=false
 
-RUN /get_deps.sh robotpkg-${ROBOTPKG}
-
-RUN apt-get update -qq && apt-get install -qqy \
-   $(sort -u /system_deps $(${ROBOTPKG_DEPS} && echo /robotpkg_deps)) \
-   ${ADDITIONAL_DEPENDENCIES} \
-   && rm -rf /var/lib/apt/lists/*
+RUN /get_deps.sh robotpkg-${ROBOTPKG} $CHECKOUT

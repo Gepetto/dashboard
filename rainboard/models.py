@@ -5,6 +5,7 @@ from subprocess import check_output, CalledProcessError
 
 from django.conf import settings
 from django.db import models
+from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
@@ -554,6 +555,12 @@ class Robotpkg(NamedModel):
 
         self.save()
 
+    def valid_images(self):
+        return self.image_set.filter(created__isnull=False)
+
+    def gitlabciyml(self):
+        return get_template('rainboard/gitlab-ci.yml').render({'robotpkg': self})
+
 
 class RobotpkgBuild(TimeStampedModel):
     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
@@ -583,15 +590,20 @@ class Image(models.Model):
     def build(self):
         args = self.get_build_args()
         build_args = sum((['--build-arg', f'{key}={value}'] for key, value in args.items()), list())
-        cmd = ['docker', 'build', '-t', self.get_image_name()] + build_args + ['.']
-        return ' '.join(cmd)
+        return ['docker', 'build', '-t', self.get_image_name()] + build_args + ['.']
+
+    def pull(self):
+        return ['docker', 'pull', self.get_image_name()]
+
+    def push(self):
+        return ['docker', 'push', self.get_image_name()]
 
     def update(self):
         image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
         if not image:
             try:
                 logger.info(f' pulling {self}')
-                check_output(['docker', 'pull', self.get_image_name()])
+                check_output(self.pull())
                 image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
             except CalledProcessError:
                 return

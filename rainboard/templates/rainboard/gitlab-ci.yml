@@ -1,0 +1,34 @@
+variables:
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_SUBMODULE_STRATEGY: "recursive"
+  GIT_DEPTH: "3"
+  NAMESPACE: {{ robotpkg.project.main_namespace.slug }}
+  PROJECT: {{ robotpkg.project }}
+  ROBOTPKG: {{ robotpkg }}
+  CATEGORY: {{ robotpkg.category }}
+  IMAGE: "${CI_REGISTRY}/${NAMESPACE}/${PROJECT}"
+
+cache:
+  paths:
+    - build/ccache
+
+.build: &build
+  before_script:
+    - mkdir -p build/ccache
+    - cd build
+    - export CCACHE_BASEDIR=${PWD}
+    - export CCACHE_DIR=${PWD}/ccache
+  script:
+    - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
+    - make install
+    - cd work.*/${ROBOTPKG}*/
+    - make test
+  retry: 2
+  except:
+    - gh-pages
+
+{% for image in robotpkg.valid_images %}
+{{ image }}:
+  <<: *build
+  image: ${IMAGE}:{{ image.get_target_display }}
+{% endfor %}
