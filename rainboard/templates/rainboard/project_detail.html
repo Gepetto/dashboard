@@ -66,8 +66,10 @@
 <dl class="dl-horizontal">
                <dt>Base</dt> <dd>{{ rpkg.pkgbase }}</dd>
             <dt>Version</dt> <dd>{{ rpkg.pkgversion }}</dd>
+{% if project.public and not request.user.is_staff %}
        <dt>Master Sites</dt> <dd>{{ rpkg.master_sites }}</dd>
   <dt>Master Repository</dt> <dd>{{ rpkg.master_repository }}</dd>
+{% endif %}
          <dt>Maintainer</dt> <dd>{{ rpkg.maintainer }}</dd>
             <dt>Comment</dt> <dd>{{ rpkg.comment }}</dd>
             <dt>License</dt> <dd>{{ rpkg.license }}</dd>
@@ -76,7 +78,7 @@
          <dt>Build page</dt> <dd><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
 </dl>
 
-<h4>gitlab-ci configuration</h4>
+<h4>generated .gitlab-ci.yml</h4>
 <pre>
 {{ rpkg.gitlabciyml }}
 </pre>
