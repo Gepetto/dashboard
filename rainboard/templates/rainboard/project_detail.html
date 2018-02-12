@@ -43,14 +43,11 @@
 
 {% render_table table %}
 {% if 'images' in request.path %}
-<pre>
-# Pull {% for image in object_list %}
-{{ image.pull|join:' ' }}{% endfor %}
-# Build {% for image in object_list %}
-{{ image.build|join:' ' }}{% endfor %}
-# Push {% for image in object_list %}
-{{ image.push|join:' ' }}{% endfor %}
-</pre>
+<pre>{% for image in object_list %}
+{{ image.pull|join:' ' }}
+{{ image.build|join:' ' }}
+{{ image.push|join:' ' }}
+{% endfor %}</pre>
 {% endif %}
 
 {% else %}

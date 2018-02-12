@@ -12,23 +12,26 @@ cache:
   paths:
     - build/ccache
 
-.build: &build
+.common:
   before_script:
     - mkdir -p build/ccache
     - cd build
     - export CCACHE_BASEDIR=${PWD}
     - export CCACHE_DIR=${PWD}/ccache
+  retry: 2
+  except:
+    - gh-pages
+
+.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
+  <<: *common
   script:
     - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
     - make install
     - cd work.*/${ROBOTPKG}*/
     - make test
-  retry: 2
-  except:
-    - gh-pages
 
 {% for image in robotpkg.valid_images %}
-{{ image }}:
-  <<: *build
+robotpkg-{{ image }}:
+  <<: *robotpkg-{{ robotpkg }}
   image: ${IMAGE}:{{ image.get_target_display }}
 {% endfor %}
