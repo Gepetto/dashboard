@@ -1,6 +1,7 @@
+import json
 import logging
 import re
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 from django.conf import settings
 from django.db import models
@@ -546,6 +547,11 @@ class Robotpkg(NamedModel):
         with (cwd / 'DESCR').open() as f:
             self.description = f.read().strip()
 
+        for target in TARGETS:
+            image, created = Image.objects.get_or_create(robotpkg=self, target=target)
+            if created:
+                image.update()
+
         self.save()
 
 
@@ -553,6 +559,45 @@ class RobotpkgBuild(TimeStampedModel):
     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
     target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
     passed = models.BooleanField(default=False)
+
+
+class Image(models.Model):
+    robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
+    target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
+    created = models.DateTimeField(blank=True, null=True)
+    image = models.CharField(max_length=12, blank=True, null=True)
+
+    class Meta:
+        unique_together = ('robotpkg', 'target')
+
+    def __str__(self):
+        return f'{self.robotpkg}-{self.get_target_display()}'
+
+    def get_build_args(self):
+        return {'TARGET': self.get_target_display(), 'ROBOTPKG': self.robotpkg}
+
+    def get_image_name(self):
+        project = self.robotpkg.project
+        return f'{settings.REGISTRY}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
+
+    def build(self):
+        args = self.get_build_args()
+        build_args = sum((['--build-arg', f'{key}={value}'] for key, value in args.items()), list())
+        cmd = ['docker', 'build', '-t', self.get_image_name()] + build_args + ['.']
+        return ' '.join(cmd)
+
+    def update(self):
+        image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
+        if not image:
+            try:
+                logger.info(f' pulling {self}')
+                check_output(['docker', 'pull', self.get_image_name()])
+                image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
+            except CalledProcessError:
+                return
+        self.image = image
+        self.created = parse_datetime(json.loads(check_output(['docker', 'inspect', image]))[0]['Created'])
+        self.save()
 
 
 class CIBuild(models.Model):

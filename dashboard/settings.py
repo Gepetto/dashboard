@@ -158,3 +158,4 @@ LOGGING = {
 RAINBOARD_DATA = Path('/srv/dashboard')
 RAINBOARD_GITS = RAINBOARD_DATA / 'repositories'
 RAINBOARD_RPKG = RAINBOARD_DATA / 'robotpkg'
+REGISTRY = 'eur0c.laas.fr:4567'

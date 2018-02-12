@@ -87,3 +87,9 @@ class BranchTable(StrippedTable):
     # TODO: this works, but we have to hide the pinned from the main dataset
     # def get_top_pinned_data(self):
         # return self.data.data.filter(name__in=models.MAIN_BRANCHES)
+
+
+class ImageTable(StrippedTable):
+    class Meta:
+        model = models.Image
+        fields = ('robotpkg', 'target', 'image', 'created')

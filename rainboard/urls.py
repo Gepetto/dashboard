@@ -14,4 +14,5 @@ urlpatterns = [
     path('project/<str:slug>/robotpkg', views.ProjectView.as_view(), name='project'),
     path('project/<str:slug>/repos', views.ProjectReposView.as_view(), name='project-repos'),
     path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='project-branches'),
+    path('project/<str:slug>/images', views.ProjectImagesView.as_view(), name='project-images'),
 ]

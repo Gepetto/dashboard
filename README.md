@@ -24,8 +24,3 @@ You can then go to http://localhost:8000
 ## TODO
 
 - fix urls (https://api.github.com/repos/stack-of-tasks/pinocchio)
-- retrieve dependencies
-    - classify system / rpkg
-    - get their version depending on the target os
-- dockerfile
-    - generic Vs. using dependencies

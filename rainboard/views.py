@@ -38,23 +38,36 @@ class ProjectView(DetailView):
     model = models.Project
 
 
-class ProjectReposView(ProjectView):
-    template_name = 'rainboard/project_detail_repos.html'
+class ProjectTableView(ProjectView):
+    order_by = None
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        repos = tables.RepoTable(self.object.repo_set.all())
-        RequestConfig(self.request).configure(repos)
-        ctx['repos'] = repos
+        object_list = self.get_object_list()
+        table = self.table_class(object_list, order_by=self.order_by)
+        RequestConfig(self.request).configure(table)
+        ctx.update(table=table, object_list=object_list)
         return ctx
 
 
-class ProjectBranchesView(ProjectView):
-    template_name = 'rainboard/project_detail_branches.html'
+class ProjectReposView(ProjectTableView):
+    table_class = tables.RepoTable
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        branches = tables.BranchTable(self.object.branch_set.all(), order_by='-updated')
-        RequestConfig(self.request).configure(branches)
-        ctx['branches'] = branches
-        return ctx
+    def get_object_list(self):
+        return self.object.repo_set.all()
+
+
+class ProjectBranchesView(ProjectTableView):
+    table_class = tables.BranchTable
+    order_by = '-updated'
+
+    def get_object_list(self):
+        return self.object.branch_set.all()
+
+
+class ProjectImagesView(ProjectTableView):
+    table_class = tables.ImageTable
+    order_by = 'target'
+
+    def get_object_list(self):
+        return models.Image.objects.filter(robotpkg__project=self.object)
