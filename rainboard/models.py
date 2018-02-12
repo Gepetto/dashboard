@@ -598,9 +598,11 @@ class Image(models.Model):
     def push(self):
         return ['docker', 'push', self.get_image_name()]
 
-    def update(self):
+    def update(self, pull=False):
         image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
         if not image:
+            if not pull:
+                return
             try:
                 logger.info(f' pulling {self}')
                 check_output(self.pull())
