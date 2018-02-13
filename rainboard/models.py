@@ -26,7 +26,7 @@ RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'M
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
 CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
-GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None}
+GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
 
 
 class Article(NamedModel):
