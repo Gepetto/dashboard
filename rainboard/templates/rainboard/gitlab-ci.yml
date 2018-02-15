@@ -22,12 +22,13 @@ cache:
     - export CCACHE_DIR=${PWD}/ccache
   script:
     - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
-    - echo "MASTER_REPOSITORY=git ${CI_PROJECT_DIR}" >> Makefile
+    - git pull
+    - echo "MASTER_REPOSITORY = git ${CI_PROJECT_DIR}" >> Makefile
+    - echo "REPOSITORY.{{ robotpkg }} = git ${CI_PROJECT_DIR}" >> /opt/openrobots/etc/robotpkg.conf
     - make checkout
     - make install
     - cd work.*/${PROJECT}*/
     - make test
-  retry: 2
   except:
     - gh-pages
 
