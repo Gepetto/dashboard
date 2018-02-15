@@ -71,3 +71,10 @@ class ProjectImagesView(ProjectTableView):
 
     def get_object_list(self):
         return models.Image.objects.filter(robotpkg__project=self.object)
+
+
+class ProjectContributorsView(ProjectTableView):
+    table_class = tables.ContributorTable
+
+    def get_object_list(self):
+        return self.object.contributors()

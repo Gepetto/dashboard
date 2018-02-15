@@ -33,10 +33,11 @@
 </div>
 
 <ul class="nav nav-tabs">
-  <li role="presentation" {% if 'robotpkg' in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project'          slug=project.slug %}">Robotpkg</a></h2></li>
-  <li role="presentation" {% if 'repos'    in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-repos'    slug=project.slug %}">Repos   </a></h2></li>
-  <li role="presentation" {% if 'branches' in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-branches' slug=project.slug %}">Branches</a></h2></li>
-  <li role="presentation" {% if 'images'   in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-images'   slug=project.slug %}">Images  </a></h2></li>
+  <li role="presentation" {% if 'robotpkg'       in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project'                slug=project.slug %}">Robotpkg    </a></h2></li>
+  <li role="presentation" {% if 'repos'          in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-repos'          slug=project.slug %}">Repos       </a></h2></li>
+  <li role="presentation" {% if 'branches'       in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-branches'       slug=project.slug %}">Branches    </a></h2></li>
+  <li role="presentation" {% if 'images'         in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-images'         slug=project.slug %}">Images      </a></h2></li>
+  <li role="presentation" {% if 'contributors'   in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-contributors'   slug=project.slug %}">Contributors</a></h2></li>
 </ul>
 
 {% if table %}

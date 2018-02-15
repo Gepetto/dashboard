@@ -93,3 +93,12 @@ class ImageTable(StrippedTable):
     class Meta:
         model = models.Image
         fields = ('robotpkg', 'target', 'image', 'created')
+
+
+class ContributorTable(StrippedTable):
+    names = tables.Column(accessor='names', orderable=False)
+    mails = tables.Column(accessor='mails', orderable=False)
+
+    class Meta:
+        model = models.Contributor
+        fields = ('names', 'mails')

@@ -11,6 +11,7 @@ logger = logging.getLogger('rainboard.utils')
 
 SOURCES = IntEnum('Sources', 'github gitlab redmine robotpkg travis')
 TARGETS = IntEnum('Targets', '14.04 16.04 17.10 18.04 dubnium')
+INVALID_MAILS = ('localhost', 'none')
 
 
 def slugify_with_dots(value):
@@ -58,3 +59,7 @@ def update_robotpkg(path):
     except git.exc.GitCommandError:
         logger.error('Network error, retrying…')
         git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()
+
+
+def invalid_mail(mail):
+    return any(invalid in mail for invalid in INVALID_MAILS)

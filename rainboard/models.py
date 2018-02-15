@@ -15,7 +15,7 @@ from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, TARGETS, api_next, slugify_with_dots
+from .utils import SOURCES, TARGETS, api_next, slugify_with_dots, invalid_mail
 
 logger = logging.getLogger('rainboard.models')
 
@@ -265,6 +265,17 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def gitlabciyml(self):
         return get_template('rainboard/gitlab-ci.yml').render({'project': self})
+
+    def contributors(self, update=False):
+        if self.main_branch() is None:
+            return []
+        if update:
+            for guy in self.git().git.shortlog('-nse').split('\n'):
+                name, mail = guy[7:-1].split(' <')
+                contributor = get_contributor(name, mail)
+                contributor.projects.add(self)
+                contributor.save()
+        return self.contributor_set.all()
 
 
 class Repo(TimeStampedModel):
@@ -643,10 +654,41 @@ class Tag(models.Model):
         ordering = ('name',)
         unique_together = ('name', 'project')
 
-# TODO: later
-# class Dockerfile(NamedModel, TimeStampedModel):
-    # project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    # target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
+
+class Contributor(models.Model):
+    projects = models.ManyToManyField(Project)
+
+    def __str__(self):
+        name = self.contributorname_set.first()
+        mail = self.contributormail_set.first()
+        return f'{name} <{mail}>'
+
+    def names(self):
+        return ', '.join(str(name) for name in self.contributorname_set.all())
+
+    def mails(self):
+        return ', '.join(str(mail) for mail in self.contributormail_set.filter(invalid=False))
+
+    def contributed(self):
+        return ', '.join(str(project) for project in self.projects.all())
+
+
+
+class ContributorName(models.Model):
+    contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class ContributorMail(models.Model):
+    contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE, blank=True, null=True)
+    mail = models.EmailField(unique=True)
+    invalid = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.mail
 
 
 def get_default_forge(project):
@@ -728,3 +770,46 @@ def update_travis(namespace, data):
     else:
         repo.travis_id = data['id']
         repo.save()
+
+
+def get_contributor(name, mail):
+    cname, name_created = ContributorName.objects.get_or_create(name=name)
+    cmail, mail_created = ContributorMail.objects.get_or_create(mail=mail, defaults={'invalid': invalid_mail(mail)})
+    if name_created or mail_created:
+        if name_created and mail_created:
+            contributor = Contributor.objects.create()
+            cname.contributor = contributor
+            cmail.contributor = contributor
+            cname.save()
+            cmail.save()
+        if mail_created:
+            contributor = cname.contributor
+            cmail.contributor = contributor
+            cmail.save()
+        if name_created:
+            contributor = cmail.contributor
+            cname.contributor = cmail.contributor
+            cname.save()
+    elif cname.contributor == cmail.contributor or invalid_mail(mail):
+        contributor = cname.contributor
+    elif cname.contributor is None and cmail.contributor is not None:
+        contributor = cmail.contributor
+        cname.contributor = contributor
+        cname.save()
+    elif cmail.contributor is None:
+        contributor = cname.contributor
+        cmail.contributor = contributor
+        cmail.save()
+    else:
+        contributor, fake = cname.contributor, cmail.contributor
+        logger.warning(f'merging {contributor} & {fake}')
+        if fake.id < contributor.id:
+            contributor, fake = fake, contributor
+        for n in fake.contributorname_set.all():
+            n.contributor = contributor
+            n.save()
+        for m in fake.contributormail_set.all():
+            m.contributor = contributor
+            m.save()
+        fake.delete()
+    return contributor
