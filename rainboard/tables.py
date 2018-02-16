@@ -101,7 +101,7 @@ class ContributorTable(StrippedTable):
 
     class Meta:
         model = models.Contributor
-        fields = ('names', 'mails')
+        fields = ('agreement_signed', 'names', 'mails')
 
 
 class ContributorProjectTable(ContributorTable):

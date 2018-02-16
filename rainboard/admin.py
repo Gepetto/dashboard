@@ -1,6 +1,19 @@
 from django.contrib.admin import site
 
-from .models import Article, License, Namespace, Project, Repo
+from . import models
 
-for model in [Article, License, Namespace, Project, Repo]:
+for model in [
+        models.Article,
+        models.License,
+        models.Namespace,
+        models.Project,
+        models.Repo,
+        models.Branch,
+        models.Robotpkg,
+        models.Image,
+        models.Tag,
+        models.Contributor,
+        models.ContributorName,
+        models.ContributorMail,
+]:
     site.register(model)
