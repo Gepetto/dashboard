@@ -772,6 +772,18 @@ def update_travis(namespace, data):
         repo.save()
 
 
+def merge_contributors(*contributors):
+    logger.warning(f'merging {contributors}')
+    ids = [contributor.id for contributor in contributors]
+    main = min(ids)
+    for model in (ContributorName, ContributorMail):
+        for instance in model.objects.filter(contributor_id__in=ids):
+            instance.contributor_id = main
+            instance.save()
+    Contributor.objects.filter(id__in=ids).exclude(id=main).delete()
+    return Contributor.objects.get(id=main)
+
+
 def get_contributor(name, mail):
     cname, name_created = ContributorName.objects.get_or_create(name=name)
     cmail, mail_created = ContributorMail.objects.get_or_create(mail=mail, defaults={'invalid': invalid_mail(mail)})
@@ -801,15 +813,5 @@ def get_contributor(name, mail):
         cmail.contributor = contributor
         cmail.save()
     else:
-        contributor, fake = cname.contributor, cmail.contributor
-        logger.warning(f'merging {contributor} & {fake}')
-        if fake.id < contributor.id:
-            contributor, fake = fake, contributor
-        for n in fake.contributorname_set.all():
-            n.contributor = contributor
-            n.save()
-        for m in fake.contributormail_set.all():
-            m.contributor = contributor
-            m.save()
-        fake.delete()
+        contributor = merge_contributors(cname.contributor, cmail.contributor)
     return contributor
