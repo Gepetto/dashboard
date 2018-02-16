@@ -4,8 +4,7 @@ from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
 
-from . import models, tables
-from .filters import ProjectFilter
+from . import models, tables, filters
 
 
 class ArticlesView(SingleTableView):
@@ -31,7 +30,7 @@ class NamespacesView(SingleTableView):
 class ProjectsView(SingleTableMixin, FilterView):
     model = models.Project
     table_class = tables.ProjectTable
-    filterset_class = ProjectFilter
+    filterset_class = filters.ProjectFilter
 
 
 class ProjectView(DetailView):
@@ -78,3 +77,9 @@ class ProjectContributorsView(ProjectTableView):
 
     def get_object_list(self):
         return self.object.contributors()
+
+
+class ContributorsView(SingleTableMixin, FilterView):
+    model = models.Contributor
+    table_class = tables.ContributorProjectTable
+    filterset_class = filters.ContributorFilter

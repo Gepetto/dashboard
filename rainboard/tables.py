@@ -102,3 +102,10 @@ class ContributorTable(StrippedTable):
     class Meta:
         model = models.Contributor
         fields = ('names', 'mails')
+
+
+class ContributorProjectTable(ContributorTable):
+    projects = tables.Column(accessor='contributed', orderable=False)
+
+    class Meta:
+        fields = ('names', 'mails', 'projects')
