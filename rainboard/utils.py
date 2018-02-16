@@ -11,7 +11,7 @@ logger = logging.getLogger('rainboard.utils')
 
 SOURCES = IntEnum('Sources', 'github gitlab redmine robotpkg travis')
 TARGETS = IntEnum('Targets', '14.04 16.04 17.10 18.04 dubnium')
-INVALID_MAILS = ('localhost', 'none', 'noreply')
+INVALID_MAILS = ('localhost', 'none', 'noreply', 'example')
 
 
 def slugify_with_dots(value):
