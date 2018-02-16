@@ -657,6 +657,7 @@ class Tag(models.Model):
 
 class Contributor(models.Model):
     projects = models.ManyToManyField(Project)
+    agreement_signed = models.BooleanField(default=False)
 
     def __str__(self):
         name = self.contributorname_set.first()
