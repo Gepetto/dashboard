@@ -79,7 +79,12 @@ class ProjectContributorsView(ProjectTableView):
         return self.object.contributors()
 
 
-class ContributorsView(SingleTableMixin, FilterView):
+class DistinctMixin(object):
+    def get_queryset(self):
+        return super().get_queryset().distinct()
+
+
+class ContributorsView(SingleTableMixin, DistinctMixin, FilterView):
     model = models.Contributor
     table_class = tables.ContributorProjectTable
     filterset_class = filters.ContributorFilter
