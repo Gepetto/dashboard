@@ -28,6 +28,7 @@ def groups(apps, schema_editor):
     Namespace.objects.create(name='Humanoid Path Planner', group=True)
     Namespace.objects.create(name='Gepetto', group=True)
     Namespace.objects.create(name='Pyrène Dev', group=True)
+    Namespace.objects.create(name='HRP2 Dev', group=True)
 
 
 class Migration(migrations.Migration):
