@@ -78,6 +78,10 @@ class ProjectContributorsView(ProjectTableView):
     def get_object_list(self):
         return self.object.contributors()
 
+class ProjectGitlabView(ProjectView):
+    template_name = 'rainboard/gitlab-ci.yml'
+    content_type = 'application/x-yaml'
+
 
 class DistinctMixin(object):
     def get_queryset(self):
