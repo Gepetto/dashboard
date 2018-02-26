@@ -538,7 +538,12 @@ class Robotpkg(NamedModel):
         path = '-wip/wip' if self.category == 'wip' else f'/{self.category}'
         return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
 
-    def update(self, pull=True):
+    def update_images(self, pull=False):
+        for target in TARGETS:
+            image, _ = Image.objects.get_or_create(robotpkg=self, target=target)
+            image.update(pull)
+
+    def update(self, pull=True, pull_image=False):
         path = settings.RAINBOARD_RPKG
         repo = git.Repo(str(path / 'wip' / '.git' if self.category == 'wip' else path / '.git'))
         if pull:
@@ -562,11 +567,7 @@ class Robotpkg(NamedModel):
         with (cwd / 'DESCR').open() as f:
             self.description = f.read().strip()
 
-        for target in TARGETS:
-            image, created = Image.objects.get_or_create(robotpkg=self, target=target)
-            if created:
-                image.update()
-
+        self.update_images(pull_image)
         self.save()
 
     def valid_images(self):
