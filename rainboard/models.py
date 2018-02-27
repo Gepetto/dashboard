@@ -410,14 +410,7 @@ class Repo(TimeStampedModel):
                 branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
                 branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
                 if created:
-                    try:
-                        branch.update()
-                    except git.exc.GitCommandError:
-                        # Some guys might delete some branches…
-                        # eg. https://travis-ci.org/stack-of-tasks/dynamic-graph/builds/246184885
-                        logger.error(f' DELETED BRANCH for {self.project}: {branch_name}')
-                        branch.delete()
-                        continue
+                    branch.update()
                 started = build['started_at'] if build['started_at'] is not None else build['finished_at']
                 CIBuild.objects.get_or_create(repo=self, build_id=build['id'], defaults={
                     'passed': TRAVIS_STATE[build['state']],
@@ -447,6 +440,7 @@ class Branch(TimeStampedModel):
     behind = models.PositiveSmallIntegerField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
     repo = models.ForeignKey(Repo, on_delete=models.CASCADE, null=True)
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -471,15 +465,20 @@ class Branch(TimeStampedModel):
         return git_repo.branches[self.name]
 
     def update(self, pull=True):
-        if pull:
-            self.repo.fetch()
-            if self.repo != self.project.main_repo():
-                self.project.main_repo().fetch()
-        main_branch = self.project.main_branch()
-        if main_branch is not None:
-            self.ahead = self.get_ahead(main_branch)
-            self.behind = self.get_behind(main_branch)
-        self.updated = self.git().commit.authored_datetime
+        if self.deleted:
+            return
+        try:
+            if pull:
+                self.repo.fetch()
+                if self.repo != self.project.main_repo():
+                    self.project.main_repo().fetch()
+            main_branch = self.project.main_branch()
+            if main_branch is not None:
+                self.ahead = self.get_ahead(main_branch)
+                self.behind = self.get_behind(main_branch)
+            self.updated = self.git().commit.authored_datetime
+        except (git.exc.GitCommandError, IndexError):
+            self.deleted = True
         self.save()
 
     def ci(self):
@@ -654,6 +653,9 @@ class Tag(models.Model):
     class Meta:
         ordering = ('name',)
         unique_together = ('name', 'project')
+
+    def __str__(self):
+        return f'{self.project} {self.name}'
 
 
 class Contributor(models.Model):
