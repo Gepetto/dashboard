@@ -28,7 +28,8 @@ cache:
     - make checkout
     - make install
     - cd work.*/${PROJECT}*/
-    - make test
+    {% if project.tests %}- make test{% endif %}
+    {% if project.docs %}- make doc{% endif %}
   except:
     - gh-pages
 

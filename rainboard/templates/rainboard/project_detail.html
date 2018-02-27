@@ -29,6 +29,8 @@
            <dt>Updated</dt> <dd>{{ project.updated }}</dd>
            <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
      <dt>Commits since</dt> <dd>{{ project.commits_since }}</dd>
+         <dt>Has tests</dt> <dd>{{ project.tests|yesno:"✔,✘" }}</dd>
+          <dt>Has docs</dt> <dd>{{ project.docs|yesno:"✔,✘" }}</dd>
   </dl>
 </div>
 

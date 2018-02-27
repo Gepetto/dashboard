@@ -160,6 +160,8 @@ class Project(Links, NamedModel, TimeStampedModel):
     description = models.TextField()
     version = models.CharField(max_length=20, blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
+    tests = models.BooleanField(default=True)
+    docs = models.BooleanField(default=True)
     # TODO: release github ↔ robotpkg
 
     def git_path(self):
