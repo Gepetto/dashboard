@@ -4,7 +4,8 @@ variables:
   GIT_DEPTH: "3"
   NAMESPACE: {{ project.main_namespace.slug }}
   PROJECT: {{ project }}
-  IMAGE: "${CI_REGISTRY}/${NAMESPACE}/${PROJECT}"
+  REGISTRY: {{ project.registry }}
+  IMAGE: "${REGISTRY}/${NAMESPACE}/${PROJECT}"
 
 cache:
   paths:

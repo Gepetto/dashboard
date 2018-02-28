@@ -279,6 +279,9 @@ class Project(Links, NamedModel, TimeStampedModel):
                 contributor.save()
         return self.contributor_set.all()
 
+    def registry(self):
+        return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
@@ -594,14 +597,15 @@ class Image(models.Model):
         return f'{self.robotpkg}-{self.get_target_display()}'
 
     def get_build_args(self):
-        ret = {'TARGET': self.get_target_display(), 'ROBOTPKG': self.robotpkg}
+        ret = {'TARGET': self.get_target_display(), 'ROBOTPKG': self.robotpkg,
+               'REGISTRY': self.robotpkg.project.registry}
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl'
         return ret
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{settings.REGISTRY}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
+        return f'{project.registry}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
 
     def build(self):
         args = self.get_build_args()

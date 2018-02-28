@@ -12,13 +12,9 @@ class Command(BaseCommand):
     help = 'Create all docker images'
 
     def handle(self, *args, **options):
-        logger.info('Creating all docker images…')
-
-        for robotpkg in Robotpkg.objects.all():
-            logger.info(f' {robotpkg}')
-            robotpkg.update_images()
-
         logger.info('Building all docker images…')
         for image in Image.objects.all():
             ret = call(image.build())
             logger.info(f' {image}: {ret}')
+            if ret == 0:
+                image.update()

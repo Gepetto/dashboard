@@ -1,5 +1,5 @@
-ARG REGISTRY=eur0c.laas.fr:4567
-ARG NAMESPACE=gsaurel/buildfarm
+ARG REGISTRY=eur0c.laas.fr:5000
+ARG NAMESPACE=buildfarm
 ARG IMAGE=robotpkg
 ARG TARGET=14.04
 
