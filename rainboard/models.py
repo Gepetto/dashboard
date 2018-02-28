@@ -598,14 +598,14 @@ class Image(models.Model):
 
     def get_build_args(self):
         ret = {'TARGET': self.get_target_display(), 'ROBOTPKG': self.robotpkg,
-               'REGISTRY': self.robotpkg.project.registry}
+               'REGISTRY': self.robotpkg.project.registry()}
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl'
         return ret
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
+        return f'{project.registry()}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
 
     def build(self):
         args = self.get_build_args()
