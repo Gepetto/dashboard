@@ -24,3 +24,11 @@ You can then go to http://localhost:8000
 ## TODO
 
 - fix urls (https://api.github.com/repos/stack-of-tasks/pinocchio)
+
+## Prod
+
+```
+docker-compose build
+docker-compose up -d
+docker-compose exec app ./manage.py collectstatic --noinput
+```

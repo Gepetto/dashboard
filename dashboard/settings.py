@@ -127,7 +127,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/srv/media'
+STATIC_ROOT = '/srv/static'
 SITE_ID = 1
 
 DJANGO_TABLES2_TEMPLATE = 'rainboard/tables.html'
