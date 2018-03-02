@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
 
 from django.conf import settings
 from django.db import models
@@ -15,7 +15,7 @@ from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, TARGETS, api_next, slugify_with_dots, invalid_mail
+from .utils import SOURCES, TARGETS, api_next, invalid_mail, slugify_with_dots
 
 logger = logging.getLogger('rainboard.models')
 
@@ -673,7 +673,6 @@ class Contributor(models.Model):
 
     def contributed(self):
         return ', '.join(str(project) for project in self.projects.all())
-
 
 
 class ContributorName(models.Model):

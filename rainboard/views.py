@@ -1,10 +1,10 @@
-from django.views.generic import CreateView, DetailView
+from django.views.generic import DetailView
 
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
 
-from . import models, tables, filters
+from . import filters, models, tables
 
 
 class ForgesView(SingleTableView):
@@ -67,6 +67,7 @@ class ProjectContributorsView(ProjectTableView):
 
     def get_object_list(self):
         return self.object.contributors()
+
 
 class ProjectGitlabView(ProjectView):
     template_name = 'rainboard/gitlab-ci.yml'

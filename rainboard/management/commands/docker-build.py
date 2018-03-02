@@ -3,7 +3,7 @@ from subprocess import call
 
 from django.core.management.base import BaseCommand
 
-from rainboard.models import Image, Robotpkg
+from rainboard.models import Image
 
 logger = logging.getLogger('rainboard.docker')
 
