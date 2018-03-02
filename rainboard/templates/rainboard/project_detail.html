@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load django_tables2 bootstrap3 %}
+{% load django_tables2 bootstrap4 %}
 
 {% block content %}
 
@@ -20,42 +20,41 @@
     {% endif %}
   </div>
 
-  <dl class="dl-horizontal">
-        <dt>Main forge</dt> <dd>{{ project.main_forge.get_link }}</dd>
-    <dt>Main namespace</dt> <dd>{{ project.main_namespace }}</dd>
-       <dt>Main branch</dt> <dd>{{ project.main_branch }}</dd>
-       <dt>Description</dt> <dd>{{ project.description }}</dd>
-          <dt>Homepage</dt> <dd>{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
-           <dt>Updated</dt> <dd>{{ project.updated }}</dd>
-           <dt>Version</dt> <dd>{{ project.version|default:"—" }}</dd>
-     <dt>Commits since</dt> <dd>{{ project.commits_since }}</dd>
-         <dt>Has tests</dt> <dd>{{ project.tests|yesno:"✔,✘" }}</dd>
-          <dt>Has docs</dt> <dd>{{ project.docs|yesno:"✔,✘" }}</dd>
+  <dl class="row" style="line-height: 1">
+        <dt class="col-3 text-right">Main forge</dt> <dd class="col-9">{{ project.main_forge.get_link }}</dd>
+    <dt class="col-3 text-right">Main namespace</dt> <dd class="col-9">{{ project.main_namespace }}</dd>
+       <dt class="col-3 text-right">Main branch</dt> <dd class="col-9">{{ project.main_branch }}</dd>
+       <dt class="col-3 text-right">Description</dt> <dd class="col-9">{{ project.description }}</dd>
+          <dt class="col-3 text-right">Homepage</dt> <dd class="col-9">{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
+           <dt class="col-3 text-right">Updated</dt> <dd class="col-9">{{ project.updated }}</dd>
+           <dt class="col-3 text-right">Version</dt> <dd class="col-9">{{ project.version|default:"—" }}</dd>
+     <dt class="col-3 text-right">Commits since</dt> <dd class="col-9">{{ project.commits_since }}</dd>
+         <dt class="col-3 text-right">Has tests</dt> <dd class="col-9">{{ project.tests|yesno:"✔,✘" }}</dd>
+          <dt class="col-3 text-right">Has docs</dt> <dd class="col-9">{{ project.docs|yesno:"✔,✘" }}</dd>
   </dl>
 </div>
 
 <ul class="nav nav-tabs">
-  <li role="presentation" {% if 'robotpkg'       in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project'                slug=project.slug %}">Robotpkg    </a></h2></li>
-  <li role="presentation" {% if 'repos'          in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-repos'          slug=project.slug %}">Repos       </a></h2></li>
-  <li role="presentation" {% if 'branches'       in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-branches'       slug=project.slug %}">Branches    </a></h2></li>
-  <li role="presentation" {% if 'images'         in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-images'         slug=project.slug %}">Images      </a></h2></li>
-  <li role="presentation" {% if 'contributors'   in request.path %}class="active"{% endif %}><a href="{% url 'rainboard:project-contributors'   slug=project.slug %}">Contributors</a></h2></li>
+  <li class="nav-item"><a class="nav-link {% if 'robotpkg'     in request.path %}active{% endif %}" href="{% url 'rainboard:project'              slug=project.slug %}">Robotpkg    </a></li>
+  <li class="nav-item"><a class="nav-link {% if 'repos'        in request.path %}active{% endif %}" href="{% url 'rainboard:project-repos'        slug=project.slug %}">Repos       </a></li>
+  <li class="nav-item"><a class="nav-link {% if 'branches'     in request.path %}active{% endif %}" href="{% url 'rainboard:project-branches'     slug=project.slug %}">Branches    </a></li>
+  <li class="nav-item"><a class="nav-link {% if 'images'       in request.path %}active{% endif %}" href="{% url 'rainboard:project-images'       slug=project.slug %}">Images      </a></li>
+  <li class="nav-item"><a class="nav-link {% if 'contributors' in request.path %}active{% endif %}" href="{% url 'rainboard:project-contributors' slug=project.slug %}">Contributors</a></li>
 </ul>
 
 {% if table %}
 
 {% render_table table %}
+
 {% if 'images' in request.path %}
-<pre>{% for image in object_list %}
+<pre><code class="bash">{% for image in object_list %}
 {{ image.pull|join:' ' }}
 {{ image.build|join:' ' }}
 {{ image.push|join:' ' }}
-{% endfor %}</pre>
+{% endfor %}</code></pre>
 {% endif %}
 
 {% else %}
-
-<h2>Robotpkg</h2>
 
 {% for rpkg in project.robotpkg_set.all %}
 
@@ -63,27 +62,27 @@
 
 {{ rpkg.description }}
 
-<dl class="dl-horizontal">
-               <dt>Base</dt> <dd>{{ rpkg.pkgbase }}</dd>
-            <dt>Version</dt> <dd>{{ rpkg.pkgversion }}</dd>
+<dl class="row" style="line-height: 1">
+               <dt class="col-3 text-right">Base</dt> <dd class="col-9">{{ rpkg.pkgbase }}</dd>
+            <dt class="col-3 text-right">Version</dt> <dd class="col-9">{{ rpkg.pkgversion }}</dd>
 {% if project.public and not request.user.is_staff %}
-       <dt>Master Sites</dt> <dd>{{ rpkg.master_sites }}</dd>
-  <dt>Master Repository</dt> <dd>{{ rpkg.master_repository }}</dd>
+       <dt class="col-3 text-right">Master Sites</dt> <dd class="col-9">{{ rpkg.master_sites }}</dd>
+  <dt class="col-3 text-right">Master Repository</dt> <dd class="col-9">{{ rpkg.master_repository }}</dd>
 {% endif %}
-         <dt>Maintainer</dt> <dd>{{ rpkg.maintainer }}</dd>
-            <dt>Comment</dt> <dd>{{ rpkg.comment }}</dd>
-            <dt>License</dt> <dd>{{ rpkg.license }}</dd>
-            <dt>Updated</dt> <dd>{{ rpkg.updated }}</dd>
-          <dt>Main page</dt> <dd>{% if rpkg.main_page %}<a href="{{ rpkg.main_page }}">{{ rpkg.main_page }}</a>{% else %}—{% endif %}</dd>
-         <dt>Build page</dt> <dd><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
+         <dt class="col-3 text-right">Maintainer</dt> <dd class="col-9">{{ rpkg.maintainer }}</dd>
+            <dt class="col-3 text-right">Comment</dt> <dd class="col-9">{{ rpkg.comment }}</dd>
+            <dt class="col-3 text-right">License</dt> <dd class="col-9">{{ rpkg.license }}</dd>
+            <dt class="col-3 text-right">Updated</dt> <dd class="col-9">{{ rpkg.updated }}</dd>
+          <dt class="col-3 text-right">Main page</dt> <dd class="col-9">{% if rpkg.main_page %}<a href="{{ rpkg.main_page }}">{{ rpkg.main_page }}</a>{% else %}—{% endif %}</dd>
+         <dt class="col-3 text-right">Build page</dt> <dd class="col-9"><a href="{{ rpkg.build_page }}">{{ rpkg.build_page }}</a></dd>
 </dl>
 
 {% endfor %}
 
 <h3>generated .gitlab-ci.yml</h3>
-<pre>
+<pre><code class="yaml">
 {{ project.gitlabciyml }}
-</pre>
+</code></pre>
 
 {% endif %}
 

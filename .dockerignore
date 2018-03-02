@@ -1,1 +1,10 @@
-*
+db.sqlite3
+.env
+LICENSE
+README.md
+requirements.in
+.git
+.python-version
+.venv
+*/__pycache__
+*.orig

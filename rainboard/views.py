@@ -7,16 +7,6 @@ from django_tables2.views import SingleTableMixin, SingleTableView
 from . import models, tables, filters
 
 
-class ArticlesView(SingleTableView):
-    model = models.Article
-    table_class = tables.ArticleTable
-
-
-class ArticleCreateView(CreateView):
-    model = models.Article
-    fields = ('name', 'authors', 'year', 'url', 'pdf')
-
-
 class ForgesView(SingleTableView):
     model = models.Forge
     table_class = tables.ForgeTable

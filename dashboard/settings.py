@@ -21,12 +21,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'mgun706*g8lq6voa#1n*)cfk7t4m%8s@4my^al#@8tzis+#v5e'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['hagurosan', 'hagurosan.laas.fr', 'localhost']
+ALLOWED_HOSTS = ['rainboard', 'rainboard.laas.fr', 'localhost']
 
 
 # Application definition
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_tables2',
     'django_filters',
-    'bootstrap3',
+    'bootstrap4',
     'ndh',
     'rainboard',
 ]

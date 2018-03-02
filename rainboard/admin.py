@@ -3,7 +3,6 @@ from django.contrib.admin import site
 from . import models
 
 for model in [
-        models.Article,
         models.License,
         models.Namespace,
         models.Project,

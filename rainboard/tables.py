@@ -10,12 +10,6 @@ class StrippedTable(tables.Table):
         attrs = {'class': 'table table-striped'}
 
 
-class ArticleTable(StrippedTable):
-    class Meta:
-        model = models.Article
-        fields = ('name', 'authors', 'year', 'url', 'pdf')
-
-
 class ForgeTable(StrippedTable):
     class Meta:
         model = models.Forge

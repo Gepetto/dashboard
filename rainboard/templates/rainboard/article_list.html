@@ -1,8 +1,0 @@
-{% extends 'base.html' %}
-{% load django_tables2 %}
-
-{% block content %}
-<h1>Articles</h1>
-{% render_table table %}
-<a class="btn btn-success" href="{% url 'rainboard:article-new' %}">+</a>
-{% endblock %}

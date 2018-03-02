@@ -7,8 +7,6 @@ app_name = 'rainboard'
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='rainboard:projects'), name='home'),
     path('forges', views.ForgesView.as_view(), name='forges'),
-    path('articles', views.ArticlesView.as_view(), name='articles'),
-    path('article/create', views.ArticleCreateView.as_view(), name='article-new'),
     path('namespaces', views.NamespacesView.as_view(), name='namespaces'),
     path('contributors', views.ContributorsView.as_view(), name='contributors'),
     path('projects', views.ProjectsView.as_view(), name='projects'),

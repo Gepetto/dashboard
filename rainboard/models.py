@@ -29,13 +29,6 @@ TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': Fals
 GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
 
 
-class Article(NamedModel):
-    authors = models.ManyToManyField(settings.AUTH_USER_MODEL)
-    year = models.PositiveSmallIntegerField()
-    url = models.URLField(max_length=200)
-    pdf = models.URLField(max_length=200)
-
-
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
 
@@ -156,7 +149,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     main_forge = models.ForeignKey(Forge, on_delete=models.SET_NULL, null=True, blank=True)
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
-    articles = models.ManyToManyField(Article)
     description = models.TextField()
     version = models.CharField(max_length=20, blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)

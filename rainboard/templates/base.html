@@ -1,10 +1,17 @@
 {% extends 'ndh.html' %}
+{% load static %}
+
+{% block style %}<link rel="stylesheet" href="{% static 'highlight/github.css' %}">{% endblock %}
 
 {% block pagetitle %}Gepetto Packages{% endblock %}
 {% block sitetitle %}Gepetto Packages{% endblock %}
 {% block navbarleft %}
-<li><a href="{% url 'rainboard:articles' %}">Articles</a></li>
-<li><a href="{% url 'rainboard:forges' %}">Forges</a></li>
-<li><a href="{% url 'rainboard:namespaces' %}">Namespaces</a></li>
-<li><a href="{% url 'rainboard:contributors' %}">Contributors</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:forges' %}">Forges</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:namespaces' %}">Namespaces</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:contributors' %}">Contributors</a></li>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'highlight/highlight.pack.js' %}"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 {% endblock %}
