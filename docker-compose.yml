@@ -23,4 +23,4 @@ services:
       - static:/srv/static
       - media:/srv/media
     ports:
-      - 6500:8000
+      - 80:8000
