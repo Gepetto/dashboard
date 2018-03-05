@@ -151,7 +151,7 @@ LOGGING = {
         '': {
             'handlers': ['console', 'file'],
             'propagate': True,
-            'level': 'INFO',
+            'level': 'WARNING',
         },
     },
 }
