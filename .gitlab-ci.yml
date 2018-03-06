@@ -1,0 +1,31 @@
+variables:
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_DEPTH: "3"
+  SECRET_KEY: "pipo"
+  DEPLOY_URL: "http://rainboard.laas.fr/deploy"
+
+build:
+  stage: build
+  image: python:alpine
+  before_script:
+    - pip install flake8
+  script:
+    - flake8
+
+test:
+  stage: test
+  image: docker
+  script:
+    - docker build -t ${CI_PROJECT_NAME} .
+    - docker run --rm -e SECRET_KEY ${CI_PROJECT_NAME} ./manage.py migrate
+    - docker run --rm -e SECRET_KEY ${CI_PROJECT_NAME} ./manage.py test
+    - docker tag ${CI_PROJECT_NAME} eur0c.laas.fr:5000/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}
+    - docker push eur0c.laas.fr:5000/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}
+
+deploy:
+  stage: deploy
+  image: appropriate/curl
+  only:
+    - master
+  script:
+    - curl ${DEPLOY_URL}
