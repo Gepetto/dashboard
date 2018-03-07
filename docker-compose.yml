@@ -6,7 +6,7 @@ volumes:
 
 services:
   app:
-    build: .
+    image: eur0c.laas.fr:5000/gepetto/dashboard:master
     restart: unless-stopped
     volumes:
       - ./db.sqlite3:/app/db.sqlite3
@@ -22,5 +22,15 @@ services:
     volumes:
       - static:/srv/static
       - media:/srv/media
-    ports:
-      - 80:8000
+    expose:
+      - 8000
+    labels:
+      - "traefik.backend=dashboard"
+      - "traefik.frontend.rule=Host:rainboard.laas.fr"
+    networks:
+      - web
+      - default
+
+networks:
+  web:
+    external: true
