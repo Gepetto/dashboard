@@ -1,0 +1,11 @@
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "rainboard.laas.fr"
+watch = true
+exposedbydefault = true
