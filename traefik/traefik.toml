@@ -6,6 +6,6 @@ defaultEntryPoints = ["http"]
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "rainboard.laas.fr"
+domain = "docker.localhost"
 watch = true
 exposedbydefault = true

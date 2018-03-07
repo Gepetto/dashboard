@@ -27,8 +27,18 @@ You can then go to http://localhost:8000
 
 ## Prod
 
+### Traefik
+
 ```
-docker-compose build
+docker network create web
+cd traefik
+docker-compose up -d
+```
+
+### Dashboard
+
+```
 docker-compose up -d
 docker-compose exec app ./manage.py collectstatic --noinput
+docker-compose exec app ./manage.py migrate
 ```

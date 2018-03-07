@@ -23,10 +23,7 @@ services:
     volumes:
       - static:/srv/static
       - media:/srv/media
-    expose:
-      - 8000
     labels:
-      - "traefik.backend=dashboard"
       - "traefik.frontend.rule=Host:rainboard.laas.fr"
     networks:
       - web
