@@ -5,6 +5,11 @@ volumes:
   media:
 
 services:
+  postgres:
+    image: postgres:alpine
+    restart: unless-stopped
+    env_file:
+      - .env
   app:
     image: eur0c.laas.fr:5000/gepetto/dashboard:master
     build: .
