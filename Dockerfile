@@ -1,16 +1,24 @@
-FROM python:alpine
+FROM python:alpine3.7
 
 EXPOSE 8000
 
 RUN mkdir /app
 WORKDIR /app
 
-RUN apk update && apk add --no-cache git
+ADD requirements.txt ./
 
-ADD requirements.txt manage.py ./
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -U https://github.com/jieter/django-tables2/archive/template-makeover.zip
+ENV PYTHONPATH=/usr/lib/python3.6/site-packages
+RUN apk update -q && apk add -q --no-cache \
+    git \
+    py3-psycopg2 \
+ && pip3 install --no-cache-dir -r requirements.txt \
+    gunicorn
 
 ADD . .
 
-CMD ./manage.py runserver 0.0.0.0:8000
+CMD while ! nc -z postgres 5432; do sleep 1; done \
+ && ./manage.py migrate \
+ && ./manage.py collectstatic --no-input \
+ && gunicorn \
+    --bind 0.0.0.0 \
+    dashboard.wsgi

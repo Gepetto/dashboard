@@ -1,44 +1,35 @@
 # Gepetto Softwares Dashboard
 
-## Dependencies
+## Reverse Proxy
 
-Get Python3.6, create a virtualenv, and install dependencies:
+Look at my Traefik easy setup for [dev](https://github.com/nim65s/traefik-dev) and
+[prod](https://github.com/nim65s/traefik-prod)
 
-`pip install -U -r requirements.txt`
+## Configuration example
+
+```
+echo POSTGRES_PASSWORD=$(openssl rand -base64 32) >> .env
+echo SECRET_KEY=$(openssl rand -base64 32) >> .env
+echo EMAIL_HOST_PASSWORD=xxx >> .env
+echo GITHUB_TOKEN=xxx >> .env
+echo GITLAB_TOKEN=xxx >> .env
+echo REDMINE_TOKEN=xxx >> .env
+echo OPENROB_TOKEN=xxx >> .env
+echo TRAVIS_TOKEN=xxx >> .env
+```
 
 ## Launch
 
-```
-export GITHUB_TOKEN=xxx
-export GITLAB_TOKEN=xxx
-export REDMINE_TOKEN=xxx
-export OPENROB_TOKEN=xxx
-export TRAVIS_TOKEN=xxx
-./manage.py migrate
-./manage.py populate
-./manage.py runserver
-```
+`docker-compose up -d`
 
-You can then go to http://localhost:8000
+## Populate
+
+`docker-compose exec app ./manage.py populate`
+
+## Create super user
+
+`docker-compose exec app ./manage.py createsuperuser`
 
 ## TODO
 
 - fix urls (https://api.github.com/repos/stack-of-tasks/pinocchio)
-
-## Prod
-
-### Traefik
-
-```
-docker network create web
-cd traefik
-docker-compose up -d
-```
-
-### Dashboard
-
-```
-docker-compose up -d
-docker-compose exec app ./manage.py collectstatic --noinput
-docker-compose exec app ./manage.py migrate
-```

@@ -1,39 +1,48 @@
 version: '3'
 
 volumes:
-  static:
-  media:
+  srv:
+  sql:
 
 services:
   postgres:
-    image: postgres:alpine
+    image: postgres:10-alpine
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - "sql:/var/lib/postgresql/data"
+  memcached:
+    image: memcached:alpine
+    restart: unless-stopped
   app:
     image: eur0c.laas.fr:5000/gepetto/dashboard:master
     build: .
     restart: unless-stopped
     volumes:
-      - ./db.sqlite3:/app/db.sqlite3
+      - "srv:/srv"
       - /srv/dashboard/repositories:/srv/dashboard/repositories
       - /srv/dashboard/robotpkg:/srv/dashboard/robotpkg
-      - static:/srv/static
-      - media:/srv/media
     env_file:
       - .env
+    networks:
+      - traefik
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule= Host:rainboard.${DOMAIN_NAME:-local}"
+      - "traefik.docker.network=traefik"
   nginx:
     image: nim65s/ndh:nginx
     restart: unless-stopped
     volumes:
-      - static:/srv/static
-      - media:/srv/media
-    labels:
-      - "traefik.frontend.rule=Host:rainboard.laas.fr"
+      - "srv:/srv"
     networks:
-      - web
-      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule= Host:rainboard.${DOMAIN_NAME:-local}; PathPrefix: /static, /media"
 
 networks:
-  web:
+  traefik:
     external: true
