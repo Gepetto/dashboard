@@ -6,16 +6,16 @@ variables:
   DB: "db.sqlite3"
   DEPLOY_URL: "http://rainboard.laas.fr/deploy"
 
-build:
-  stage: build
+test:
+  stage: test
   image: python:alpine
   before_script:
     - pip install flake8
   script:
     - flake8
 
-test:
-  stage: test
+build:
+  stage: build
   image: docker
   script:
     - docker build -t ${CI_PROJECT_NAME} .
