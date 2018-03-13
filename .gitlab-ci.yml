@@ -2,6 +2,8 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
   GIT_DEPTH: "3"
   SECRET_KEY: "pipo"
+  EMAIL_HOST_PASSWORD: "pipo"
+  DB: "db.sqlite3"
   DEPLOY_URL: "http://rainboard.laas.fr/deploy"
 
 build:
@@ -17,8 +19,8 @@ test:
   image: docker
   script:
     - docker build -t ${CI_PROJECT_NAME} .
-    - docker run --rm -e SECRET_KEY ${CI_PROJECT_NAME} ./manage.py migrate
-    - docker run --rm -e SECRET_KEY ${CI_PROJECT_NAME} ./manage.py test
+    - docker run --rm -e SECRET_KEY -e EMAIL_HOST_PASSWORD -e DB ${CI_PROJECT_NAME} ./manage.py migrate
+    - docker run --rm -e SECRET_KEY -e EMAIL_HOST_PASSWORD -e DB ${CI_PROJECT_NAME} ./manage.py test
     - docker tag ${CI_PROJECT_NAME} eur0c.laas.fr:5000/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}
     - docker push eur0c.laas.fr:5000/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}
 
