@@ -25,6 +25,9 @@ services:
       - /srv/dashboard/robotpkg:/srv/dashboard/robotpkg
     env_file:
       - .env
+    environment:
+      - DB=postgres
+      - MEMCACHED=True
     networks:
       - traefik
       - default

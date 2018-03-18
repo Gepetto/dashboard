@@ -73,11 +73,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = f'{PROJECT}.wsgi.application'
 
-DB = environ.get('DB', 'postgres')
+DB = environ.get('DB', 'db.sqlite3')
 DATABASES = {
     'default': {
         'ENGINE': f'django.db.backends.sqlite3',
-        'NAME': join(BASE_DIR, 'db.sqlite3'),
+        'NAME': join(BASE_DIR, DB),
     }
 }
 if DB == 'postgres':
@@ -117,12 +117,13 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 STATIC_ROOT = '/srv/static/'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'memcached:11211',
+if os.environ.get('MEMCACHED', 'False').lower() == 'true':
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'memcached:11211',
+        }
     }
-}
 
 LOGGING = {
     'version': 1,
