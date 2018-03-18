@@ -1,26 +1,25 @@
-from os import environ
-from os.path import abspath, dirname, join
+import os
 from pathlib import Path
 
 PROJECT = 'dashboard'
 PROJECT_VERBOSE = PROJECT.capitalize()
 SELF_MAIL = False
-DOMAIN_NAME = environ.get('DOMAIN_NAME', 'local')
-ALLOWED_HOSTS = [environ.get('ALLOWED_HOST', f'{PROJECT}.{DOMAIN_NAME}')]
+DOMAIN_NAME = os.environ.get('DOMAIN_NAME', 'local')
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST', f'{PROJECT}.{DOMAIN_NAME}')]
 ALLOWED_HOSTS += [f'www.{host}' for host in ALLOWED_HOSTS]
 
-BASE_DIR = dirname(dirname(abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-SECRET_KEY = environ['SECRET_KEY']
-DEBUG = environ.get('DEBUG', 'False').lower() == 'true'
+SECRET_KEY = os.environ['SECRET_KEY']
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 EMAIL_USE_SSL = True
-EMAIL_HOST = environ.get('EMAIL_HOST', f'smtp.{DOMAIN_NAME}')
-EMAIL_HOST_PASSWORD = environ['EMAIL_HOST_PASSWORD']
-EMAIL_USER = environ.get('EMAIL_USER', 'majo')
-EMAIL_PORT = environ.get('EMAIL_PORT', 465)
-EMAIL_FQDN = environ.get('EMAIL_FQDN', ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', f'smtp.{DOMAIN_NAME}')
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_USER = os.environ.get('EMAIL_USER', 'majo')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 465)
+EMAIL_FQDN = os.environ.get('EMAIL_FQDN', ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME)
 EMAIL_HOST_USER = f'{EMAIL_USER}@{EMAIL_FQDN}'
 SERVER_EMAIL = f'{EMAIL_USER}+{PROJECT}@{EMAIL_FQDN}'
 DEFAULT_FROM_EMAIL = f'{PROJECT_VERBOSE} <{EMAIL_USER}@{EMAIL_FQDN}>'
@@ -73,20 +72,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = f'{PROJECT}.wsgi.application'
 
-DB = environ.get('DB', 'db.sqlite3')
+DB = os.environ.get('DB', 'db.sqlite3')
 DATABASES = {
     'default': {
         'ENGINE': f'django.db.backends.sqlite3',
-        'NAME': join(BASE_DIR, DB),
+        'NAME': os.path.join(BASE_DIR, DB),
     }
 }
 if DB == 'postgres':
     DATABASES['default'].update(
         ENGINE='django.db.backends.postgresql',
-        NAME=environ.get('POSTGRES_DB', DB),
-        USER=environ.get('POSTGRES_USER', DB),
-        HOST=environ.get('POSTGRES_HOST', DB),
-        PASSWORD=environ['POSTGRES_PASSWORD'],
+        NAME=os.environ.get('POSTGRES_DB', DB),
+        USER=os.environ.get('POSTGRES_USER', DB),
+        HOST=os.environ.get('POSTGRES_HOST', DB),
+        PASSWORD=os.environ['POSTGRES_PASSWORD'],
     )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -104,13 +103,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = environ.get('LANGUAGE_CODE', 'fr-FR')
-TIME_ZONE = environ.get('TIME_ZONE', 'Europe/Paris')
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'fr-FR')
+TIME_ZONE = os.environ.get('TIME_ZONE', 'Europe/Paris')
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-SITE_ID = int(environ.get('SITE_ID', 1))
+SITE_ID = int(os.environ.get('SITE_ID', 1))
 
 MEDIA_ROOT = '/srv/media/'
 MEDIA_URL = '/media/'
