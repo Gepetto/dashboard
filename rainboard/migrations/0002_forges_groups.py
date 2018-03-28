@@ -11,7 +11,7 @@ from rainboard.utils import SOURCES
 
 def forges(apps, schema_editor):
     Forge = apps.get_model('rainboard', 'Forge')
-    Forge.objects.create(name='Gitlab', source=SOURCES.gitlab, url='https://eur0c.laas.fr', verify=False,
+    Forge.objects.create(name='Gitlab', source=SOURCES.gitlab, url='https://gepgitlab.laas.fr',
                          token=os.getenv('GITLAB_TOKEN'))
     Forge.objects.create(name='Github', source=SOURCES.github, url='https://github.com',
                          token=os.getenv('GITHUB_TOKEN'))
