@@ -438,6 +438,7 @@ class Branch(TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     repo = models.ForeignKey(Repo, on_delete=models.CASCADE, null=True)
     deleted = models.BooleanField(default=False)
+    keep_doc = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -33,3 +33,4 @@ echo TRAVIS_TOKEN=xxx >> .env
 ## TODO
 
 - fix urls (https://api.github.com/repos/stack-of-tasks/pinocchio)
+- ./bootstrap in robotpkg for `make show-var VARNAME=…`
