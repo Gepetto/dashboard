@@ -5,7 +5,7 @@ variables:
   PROJECT: {{ project }}
   REGISTRY: {{ project.registry }}
   IMAGE: "${REGISTRY}/${NAMESPACE}/${PROJECT}"
-  CCACHE_BASEDIR: "$${CI_PROJECT_DIR}"
+  CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
 
 cache:
@@ -33,12 +33,10 @@ cache:
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
   image: ${IMAGE}:{{ image.get_target_display }}
-{% if projectsdocs and image.get_target_display == '16.04'%}
-  artifacts:
+{% if project.docs and image.get_target_display == '16.04' %}  artifacts:
     expire_in: 1 day
     paths:
         - doc/doxygen-html/
 {% endif %}
 {% endfor %}
-
 {% endfor %}
