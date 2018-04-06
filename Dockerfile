@@ -1,4 +1,4 @@
-FROM python
+FROM python:jessie
 
 EXPOSE 8000
 
@@ -8,10 +8,15 @@ WORKDIR /app
 ADD requirements.txt ./
 
 RUN apt-get update -qq && apt-get install -qqy \
+    apt-transport-https \
     git \
     libpq-dev \
     netcat-openbsd \
- && pip3 install --no-cache-dir -r requirements.txt \
+ && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
+ && echo "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable" >> /etc/apt/sources.list \
+ && apt-get update -qq && apt-get install -qqy docker-ce
+
+RUN pip3 install --no-cache-dir -r requirements.txt \
     gunicorn \
     psycopg2 \
     python-memcached
