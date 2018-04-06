@@ -1,15 +1,16 @@
 variables:
-  GIT_SSL_NO_VERIFY: "true"
   GIT_SUBMODULE_STRATEGY: "recursive"
   GIT_DEPTH: "3"
   NAMESPACE: {{ project.main_namespace.slug }}
   PROJECT: {{ project }}
   REGISTRY: {{ project.registry }}
   IMAGE: "${REGISTRY}/${NAMESPACE}/${PROJECT}"
+  CCACHE_BASEDIR: "$${CI_PROJECT_DIR}"
+  CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
 
 cache:
   paths:
-    - build/ccache
+    - ccache
 
 {% for robotpkg in project.robotpkg_set.all %}
 .robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
@@ -17,19 +18,13 @@ cache:
     ROBOTPKG: {{ robotpkg }}
     CATEGORY: {{ robotpkg.category }}
   before_script:
-    - mkdir -p build/ccache
-    - cd build
-    - export CCACHE_BASEDIR=${PWD}
-    - export CCACHE_DIR=${PWD}/ccache
+    - mkdir -p ccache
   script:
     - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
     - git pull
-    - echo "MASTER_REPOSITORY = git ${CI_PROJECT_DIR}" >> Makefile
-    - echo "REPOSITORY.{{ robotpkg }} = git ${CI_PROJECT_DIR}" >> /opt/openrobots/etc/robotpkg.conf
-    - make checkout
-    - make install
-    - cd work.*/${PROJECT}*/
-    {% if project.tests %}- make test{% endif %}
+    - make install WRKSRC=${CI_PROJECT_DIR}
+    - cd ${CI_PROJECT_DIR}
+    {% if project.tests %}- make check{% endif %}
     {% if project.docs %}- make doc{% endif %}
   except:
     - gh-pages
@@ -38,6 +33,12 @@ cache:
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
   image: ${IMAGE}:{{ image.get_target_display }}
+{% if projectsdocs and image.get_target_display == '16.04'%}
+  artifacts:
+    expire_in: 1 day
+    paths:
+        - doc/doxygen-html/
+{% endif %}
 {% endfor %}
 
 {% endfor %}

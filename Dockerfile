@@ -1,4 +1,4 @@
-FROM python:alpine3.7
+FROM python
 
 EXPOSE 8000
 
@@ -7,12 +7,14 @@ WORKDIR /app
 
 ADD requirements.txt ./
 
-ENV PYTHONPATH=/usr/lib/python3.6/site-packages
-RUN apk update -q && apk add -q --no-cache \
+RUN apt-get update -qq && apt-get install -qqy \
     git \
-    py3-psycopg2 \
+    libpq-dev \
+    netcat-openbsd \
  && pip3 install --no-cache-dir -r requirements.txt \
-    gunicorn
+    gunicorn \
+    psycopg2 \
+    python-memcached
 
 ADD . .
 

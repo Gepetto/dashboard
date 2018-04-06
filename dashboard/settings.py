@@ -145,5 +145,5 @@ DJANGO_TABLES2_TEMPLATE = 'rainboard/tables.html'
 RAINBOARD_DATA = Path('/srv/dashboard')
 RAINBOARD_GITS = RAINBOARD_DATA / 'repositories'
 RAINBOARD_RPKG = RAINBOARD_DATA / 'robotpkg'
-PRIVATE_REGISTRY = 'eur0c.laas.fr:4567'
+PRIVATE_REGISTRY = 'gepgitlab.laas.fr:4567'
 PUBLIC_REGISTRY = 'eur0c.laas.fr:5000'
