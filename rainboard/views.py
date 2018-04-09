@@ -90,5 +90,5 @@ def json_doc(request):
     """
     Get the list of project / namespace / branch of which we want to keep the doc
     """
-    return JsonResponse({'ret': [(b.project.slug, b.repo.namespace.slug, b.name.split('/', maxsplit=2)[2]) for b in
-                                 models.Branch.objects.filter(keep_doc=True)]})
+    return JsonResponse({'ret': [(b.project.slug, b.repo.namespace.slug, b.name.split('/', maxsplit=2)[2])
+                                 for b in models.Branch.objects.filter(keep_doc=True)]})

@@ -1,4 +1,5 @@
 from django.utils.safestring import mark_safe
+from django.urls import reverse
 
 import django_tables2 as tables
 
@@ -62,7 +63,7 @@ class BranchTable(StrippedTable):
 
     class Meta:
         model = models.Branch
-        fields = ('forge', 'namespace', 'name', 'ahead', 'behind', 'updated')
+        fields = ('forge', 'namespace', 'name', 'ahead', 'behind', 'updated', 'keep_doc')
 
     def render_name(self, record, value):
         if record.repo is None:
@@ -77,6 +78,11 @@ class BranchTable(StrippedTable):
     def render_namespace(self, record, value):
         if value:
             return mark_safe(f'<a href="{record.repo.url}">{value}</a>')
+
+    def render_keep_doc(self, record, value):
+        url = reverse('admin:rainboard_branch_change', args=[record.id])
+        status = {True: '✓', False: '✗'}[value]
+        return mark_safe(f'<a href="{url}">{status}</a>')
 
     # TODO: this works, but we have to hide the pinned from the main dataset
     # def get_top_pinned_data(self):
