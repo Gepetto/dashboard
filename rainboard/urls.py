@@ -15,6 +15,6 @@ urlpatterns = [
     path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='project-branches'),
     path('project/<str:slug>/images', views.ProjectImagesView.as_view(), name='project-images'),
     path('project/<str:slug>/contributors', views.ProjectContributorsView.as_view(), name='project-contributors'),
-    path('project/<str:slug>/gitlab-ci.yml', views.ProjectGitlabView.as_view(), name='project-gitlab'),
+    path('project/<str:slug>/.gitlab-ci.yml', views.ProjectGitlabView.as_view(), name='project-gitlab'),
     path('doc', views.json_doc, name='doc'),
 ]
