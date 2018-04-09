@@ -80,6 +80,7 @@
 {% endfor %}
 
 <h3>generated .gitlab-ci.yml</h3>
+<a class="btn btn-outline-primary" href="{% url 'rainboard:project-gitlab' slug=project.slug %}">Télécharger</a>
 <pre><code class="yaml">
 {{ project.gitlabciyml }}
 </code></pre>
