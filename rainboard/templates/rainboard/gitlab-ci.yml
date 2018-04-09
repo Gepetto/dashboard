@@ -36,7 +36,7 @@ robotpkg-{{ image }}:
 {% if project.docs and image.get_target_display == '16.04' %}  artifacts:
     expire_in: 1 day
     paths:
-        - doc/doxygen-html/
+      - doc/doxygen-html/
 {% endif %}
 {% endfor %}
 {% endfor %}
