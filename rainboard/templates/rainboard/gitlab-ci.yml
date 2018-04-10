@@ -22,7 +22,8 @@ cache:
   script:
     - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
     - git pull
-    - make install WRKSRC=${CI_PROJECT_DIR}
+    - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
+    - make install
     - cd ${CI_PROJECT_DIR}
     {% if project.tests %}- make check{% endif %}
     {% if project.docs %}- make doc{% endif %}
