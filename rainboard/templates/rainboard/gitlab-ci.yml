@@ -24,9 +24,10 @@ cache:
     - git pull
     - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
     - make install
-    - cd ${CI_PROJECT_DIR}
+    - cd work.$(hostname)/$(make show-var VARNAME=DISTNAME)
     {% if project.tests %}- make check{% endif %}
-    {% if project.docs %}- make doc{% endif %}
+    {% if project.docs %}- make doc
+    - mv doc/doxygen-html ${CI_PROJECT_DIR}{% endif %}
   except:
     - gh-pages
 
@@ -37,7 +38,7 @@ robotpkg-{{ image }}:
 {% if project.docs and image.get_target_display == '16.04' %}  artifacts:
     expire_in: 1 day
     paths:
-      - doc/doxygen-html/
+      - doxygen-html/
 {% endif %}
 {% endfor %}
 {% endfor %}
