@@ -17,4 +17,5 @@ urlpatterns = [
     path('project/<str:slug>/contributors', views.ProjectContributorsView.as_view(), name='project-contributors'),
     path('project/<str:slug>/.gitlab-ci.yml', views.ProjectGitlabView.as_view(), name='project-gitlab'),
     path('doc', views.json_doc, name='doc'),
+    path('docker', views.docker, name='docker'),
 ]

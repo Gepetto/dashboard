@@ -1,4 +1,4 @@
-from django.http.response import JsonResponse
+from django.http.response import HttpResponse, JsonResponse
 from django.views.generic import DetailView
 
 from django_filters.views import FilterView
@@ -92,3 +92,11 @@ def json_doc(request):
     """
     return JsonResponse({'ret': [(b.project.slug, b.repo.namespace.slug, b.name.split('/', maxsplit=2)[2])
                                  for b in models.Branch.objects.filter(keep_doc=True)]})
+
+
+def docker(request):
+    method = request.GET.get('method', 'build')
+    if method not in ['push', 'pull', 'build']:
+        method = 'build'
+    return HttpResponse('\n'.join([' '.join(getattr(image, method)()) for image in models.Image.objects.all()]),
+                        content_type="text/plain")
