@@ -96,9 +96,9 @@ def json_doc(request):
 
 def docker(request):
     cmd = 'build'
-    if 'cmd' in request.GET and request.GET['cmd'] in ['push', 'pull', 'build']:
-        cmd = request.GET.pop('cmd')
     filters = request.GET.dict()
+    if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
+        cmd = filters.pop('cmd')
     if 'target' in filters:
         filters['target'] = int(utils.TARGETS.__getitem__(filters['target']))
     images = models.Image.objects.filter(**filters)
