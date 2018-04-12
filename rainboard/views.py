@@ -95,8 +95,8 @@ def json_doc(request):
 
 
 def docker(request):
-    method = request.GET.get('method', 'build')
-    if method not in ['push', 'pull', 'build']:
-        method = 'build'
-    return HttpResponse('\n'.join([' '.join(getattr(image, method)()) for image in models.Image.objects.all()]),
-                        content_type="text/plain")
+    cmd = 'build'
+    if 'cmd' in request.GET and request.GET['cmd'] in ['push', 'pull', 'build']:
+        cmd = request.GET.pop('cmd')
+    images = models.Image.objects.filter(**request.GET.dict())
+    return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
