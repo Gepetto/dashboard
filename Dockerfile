@@ -12,6 +12,7 @@ RUN apt-get update -qq && apt-get install -qqy \
     git \
     libpq-dev \
     netcat-openbsd \
+    ssmtp \
  && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
  && echo "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable" >> /etc/apt/sources.list \
  && apt-get update -qq && apt-get install -qqy docker-ce
