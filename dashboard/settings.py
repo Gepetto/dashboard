@@ -16,8 +16,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 EMAIL_USE_SSL = True
 EMAIL_HOST = os.environ.get('EMAIL_HOST', f'smtp.{DOMAIN_NAME}')
-EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-EMAIL_USER = os.environ.get('EMAIL_USER', 'majo')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USER = os.environ.get('EMAIL_USER', '')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 465)
 EMAIL_FQDN = os.environ.get('EMAIL_FQDN', ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME)
 EMAIL_HOST_USER = f'{EMAIL_USER}@{EMAIL_FQDN}'
