@@ -98,7 +98,8 @@ def docker(request):
     cmd = 'build'
     if 'cmd' in request.GET and request.GET['cmd'] in ['push', 'pull', 'build']:
         cmd = request.GET.pop('cmd')
-    if 'target' in request.GET:
-        request.GET['target'] = int(utils.TARGETS.__getitem__(request.GET['target']))
-    images = models.Image.objects.filter(**request.GET.dict())
+    filters = request.GET.dict()
+    if 'target' in filters:
+        filters['target'] = int(utils.TARGETS.__getitem__(filters['target']))
+    images = models.Image.objects.filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
