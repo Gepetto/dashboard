@@ -26,6 +26,9 @@ DEFAULT_FROM_EMAIL = f'{PROJECT_VERBOSE} <{EMAIL_USER}@{EMAIL_FQDN}>'
 EMAIL_BACKEND = 'django.core.mail.backends.%s' % ('filebased.EmailBackend' if DEBUG else 'smtp.EmailBackend')
 EMAIL_SUBJECT_PREFIX = f'[{PROJECT_VERBOSE}] '
 
+ADMINS = ((os.environ.get('ADMIN_NAME', f'{PROJECT_VERBOSE} webmaster'),
+           os.environ.get('ADMIN_MAIL', f'webmaster@{DOMAIN_NAME}')),)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
