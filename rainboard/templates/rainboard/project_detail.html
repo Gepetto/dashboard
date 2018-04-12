@@ -49,8 +49,6 @@
 {% if 'images' in request.path %}
 <pre><code class="bash">{% for image in object_list %}
 {{ image.pull|join:' ' }}
-{{ image.build|join:' ' }}
-{{ image.push|join:' ' }}
 {% endfor %}</code></pre>
 {% endif %}
 
