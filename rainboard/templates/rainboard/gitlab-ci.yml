@@ -17,6 +17,8 @@ cache:
   variables:
     ROBOTPKG: {{ robotpkg }}
     CATEGORY: {{ robotpkg.category }}
+  except:
+    - gh-pages
   before_script:
     - mkdir -p ccache
   script:
@@ -28,8 +30,6 @@ cache:
     {% if project.tests %}- make check{% endif %}
     {% if project.docs %}- make doc
     - mv doc/doxygen-html ${CI_PROJECT_DIR}{% endif %}
-  except:
-    - gh-pages
 
 {% for image in robotpkg.valid_images %}
 robotpkg-{{ image }}:
