@@ -3,10 +3,12 @@ import logging
 from django.core.management.base import BaseCommand
 
 from rainboard.models import Project, Robotpkg
+from rainboard.utils import SOURCES
 
 ALLOWED_MAINTAINERS = ['hpp@laas.fr', 'pinocchio@laas.fr']
 ATTRIBUTES = ['homepage', 'license', 'description']
 NUM_ATTRS = ['license']
+NOT_GITLAB = ['homepage', 'license']
 logger = logging.getLogger('rainboard.management.checks')
 
 
@@ -37,6 +39,8 @@ class Command(BaseCommand):
                     rattr = getattr(rpkg, 'comment' if attr_name == 'description' else attr_name)
                     logger.warning(f"project {project}'s rpkg {rpkg} {attr_name}: {attr} Vs. {rattr}")
                 for repo in project.repo_set.exclude(**{attr_name: attr}):
+                    if repo.forge.source == SOURCES.gitlab and attr in NOT_GITLAB:
+                        continue
                     rattr = getattr(repo, attr_name)
                     logger.warning(f"project {project}'s repo {repo.git_remote()} {attr_name}: {attr} Vs. {rattr}")
 

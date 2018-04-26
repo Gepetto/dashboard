@@ -154,7 +154,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
-    # TODO: release github ↔ robotpkg
 
     def git_path(self):
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
@@ -723,7 +722,8 @@ def update_gitlab(forge, data):
     repo.clone_url = data['http_url_to_repo']
     repo.open_issues = data['open_issues_count']
     repo.default_branch = data['default_branch']
-    # TODO license, open_pr, homepage
+    repo.description = data['description']
+    # TODO license (https://gitlab.com/gitlab-org/gitlab-ce/issues/28267), open_pr
     if 'forked_from_project' in data:
         repo.forked_from = data['forked_from_project']['id']
     elif created or project.main_namespace is None:
@@ -744,6 +744,7 @@ def update_github(forge, namespace, data):
     repo.repo_id = data['id']
     repo.default_branch = data['default_branch']
     repo.open_issues = data['open_issues']
+    repo.description = data['description']
 
     repo_data = repo.api_data()
     if repo_data and 'license' in repo_data and repo_data['license']:
