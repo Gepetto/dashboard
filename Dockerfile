@@ -19,7 +19,7 @@ RUN apt-get update -qq && apt-get install -qqy \
 
 RUN pip3 install --no-cache-dir -r requirements.txt \
     gunicorn \
-    psycopg2 \
+    psycopg2-binary \
     python-memcached
 
 ADD . .
