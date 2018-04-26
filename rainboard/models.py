@@ -149,7 +149,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     main_forge = models.ForeignKey(Forge, on_delete=models.SET_NULL, null=True, blank=True)
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     homepage = models.URLField(max_length=200, blank=True, null=True)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     version = models.CharField(max_length=20, blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
@@ -291,6 +291,7 @@ class Repo(TimeStampedModel):
     forked_from = models.PositiveIntegerField(blank=True, null=True)
     clone_url = models.URLField(max_length=200)
     travis_id = models.PositiveIntegerField(blank=True, null=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -524,7 +525,7 @@ class Robotpkg(NamedModel):
 
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     public = models.BooleanField(default=True)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     updated = models.DateTimeField(blank=True, null=True)
 
     def main_page(self):
