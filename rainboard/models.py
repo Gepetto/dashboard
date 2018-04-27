@@ -366,7 +366,11 @@ class Repo(TimeStampedModel):
             git_repo.fetch()
         except git.exc.GitCommandError:
             logger.warning(f'fetching {self.forge} / {self.namespace} / {self.project} - SECOND TRY')
-            git_repo.fetch()
+            try:
+                git_repo.fetch()
+            except git.exc.GitCommandError:
+                return False
+        return True
 
     def main_branch(self):
         return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
@@ -416,11 +420,16 @@ class Repo(TimeStampedModel):
                 })
 
     def update(self, pull=True):
+        ok = True
         self.project.update_tags()
         if pull:
-            self.fetch()
-        self.api_update()
-        self.get_builds()
+            ok = self.fetch()
+        if ok:
+            self.api_update()
+            self.get_builds()
+        else:
+            logger.error(f'fetching {self.forge} / {self.namespace} / {self.project} - NOT FOUND - DELETING')
+            logger.error(str(self.delete()))
 
 
 class Commit(NamedModel, TimeStampedModel):
