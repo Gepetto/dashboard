@@ -556,6 +556,9 @@ class Robotpkg(NamedModel):
             repo.remotes.origin.pull()
 
         cwd = path / self.category / self.name
+        if not cwd.is_dir():
+            logger.warning(f'deleted {self}: {self.delete()}')
+            return
         for field in RPKG_FIELDS:
             cmd = ['make', 'show-var', f'VARNAME={field}']
             self.__dict__[field.lower()] = check_output(cmd, cwd=cwd).decode().strip()
