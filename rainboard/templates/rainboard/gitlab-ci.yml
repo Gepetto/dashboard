@@ -35,7 +35,7 @@ cache:
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
   image: ${IMAGE}:{{ image.target }}
-{% if project.docs and image.target == '16.04' %}  artifacts:
+{% if project.docs and image.target.name == '16.04' %}  artifacts:
     expire_in: 1 day
     paths:
       - doxygen-html/
