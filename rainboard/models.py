@@ -15,7 +15,7 @@ from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, TARGETS, api_next, invalid_mail, slugify_with_dots
+from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots
 
 logger = logging.getLogger('rainboard.models')
 
@@ -504,19 +504,23 @@ class Branch(TimeStampedModel):
             return self.repo.namespace
 
 
-class Test(TimeStampedModel):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
-    target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
-    passed = models.BooleanField(default=False)
+class Target(NamedModel):
+    pass
+
+
+# class Test(TimeStampedModel):
+    # project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    # branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    # commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
+    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
+    # passed = models.BooleanField(default=False)
     # TODO: travis vs gitlab-ci ?
     # TODO: deploy binary, doc, coverage, lint
 
 
-class SystemDependency(NamedModel):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
+# class SystemDependency(NamedModel):
+    # project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
 
 
 class Robotpkg(NamedModel):
@@ -545,7 +549,7 @@ class Robotpkg(NamedModel):
         return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
 
     def update_images(self, pull=False):
-        for target in TARGETS:
+        for target in Target.objects.all():
             image, _ = Image.objects.get_or_create(robotpkg=self, target=target)
             image.update(pull)
 
@@ -583,15 +587,15 @@ class Robotpkg(NamedModel):
         return self.image_set.filter(created__isnull=False)
 
 
-class RobotpkgBuild(TimeStampedModel):
-    robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
-    target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
-    passed = models.BooleanField(default=False)
+# class RobotpkgBuild(TimeStampedModel):
+    # robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
+    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
+    # passed = models.BooleanField(default=False)
 
 
 class Image(models.Model):
     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
-    target = models.PositiveSmallIntegerField(choices=enum_to_choices(TARGETS))
+    target = models.ForeignKey(Target, on_delete=models.CASCADE)
     created = models.DateTimeField(blank=True, null=True)
     image = models.CharField(max_length=12, blank=True, null=True)
 
@@ -599,10 +603,10 @@ class Image(models.Model):
         unique_together = ('robotpkg', 'target')
 
     def __str__(self):
-        return f'{self.robotpkg}-{self.get_target_display()}'
+        return f'{self.robotpkg}-{self.target}'
 
     def get_build_args(self):
-        ret = {'TARGET': self.get_target_display(), 'ROBOTPKG': self.robotpkg,
+        ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg,
                'REGISTRY': self.robotpkg.project.registry()}
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl'
@@ -610,7 +614,7 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry()}/{project.main_namespace.slug}/{project}:{self.get_target_display()}'
+        return f'{project.registry()}/{project.main_namespace.slug}/{project}:{self.target}'
 
     def build(self):
         args = self.get_build_args()

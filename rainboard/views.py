@@ -5,7 +5,7 @@ from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
 
-from . import filters, models, tables, utils
+from . import filters, models, tables
 
 
 class ForgesView(SingleTableView):
@@ -99,7 +99,5 @@ def docker(request):
     filters = request.GET.dict()
     if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
         cmd = filters.pop('cmd')
-    if 'target' in filters:
-        filters['target'] = int(utils.TARGETS.__getitem__(filters['target']))
     images = models.Image.objects.filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
