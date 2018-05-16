@@ -598,18 +598,23 @@ class Image(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE)
     created = models.DateTimeField(blank=True, null=True)
     image = models.CharField(max_length=12, blank=True, null=True)
+    py3 = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('robotpkg', 'target')
+        unique_together = ('robotpkg', 'target', 'py3')
 
     def __str__(self):
+        if self.py3:
+            return f'{self.robotpkg}-{self.target}-py3'
         return f'{self.robotpkg}-{self.target}'
 
     def get_build_args(self):
         ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg,
                'REGISTRY': self.robotpkg.project.registry()}
         if not self.robotpkg.project.public:
-            ret['IMAGE'] = 'robotpkg-jrl'
+            ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
+        elif self.py3:
+            ret['IMAGE'] = 'robotpkg-py3'
         return ret
 
     def get_image_name(self):

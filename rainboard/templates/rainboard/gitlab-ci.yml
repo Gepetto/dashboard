@@ -34,8 +34,8 @@ cache:
 {% for image in robotpkg.valid_images %}
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
-  image: ${IMAGE}:{{ image.target }}
-{% if project.docs and image.target.name == '16.04' %}  artifacts:
+  image: ${IMAGE}{% if image.py3 %}-py3{% endif %}:{{ image.target }}
+{% if project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
     expire_in: 1 day
     paths:
       - doxygen-html/
