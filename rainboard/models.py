@@ -619,7 +619,8 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry()}/{project.main_namespace.slug}/{project}:{self.target}'
+        project_name = project.name.lower()
+        return f'{project.registry()}/{project.main_namespace.slug}/{project_name}:{self.target}'
 
     def build(self):
         args = self.get_build_args()
