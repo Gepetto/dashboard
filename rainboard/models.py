@@ -552,6 +552,10 @@ class Robotpkg(NamedModel):
         for target in Target.objects.all():
             image, _ = Image.objects.get_or_create(robotpkg=self, target=target)
             image.update(pull)
+        if self.name.startswith('py-'):
+            for target in Target.objects.all():
+                image, _ = Image.objects.get_or_create(robotpkg=self, target=target, py3=True)
+                image.update(pull)
 
     def update(self, pull=True, pull_image=False):
         path = settings.RAINBOARD_RPKG
