@@ -505,7 +505,7 @@ class Branch(TimeStampedModel):
 
 
 class Target(NamedModel):
-    pass
+    python3 = models.CharField(max_length=3, blank=True, null=True)
 
 
 # class Test(TimeStampedModel):
