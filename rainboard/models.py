@@ -608,9 +608,8 @@ class Image(models.Model):
         unique_together = ('robotpkg', 'target', 'py3')
 
     def __str__(self):
-        if self.py3:
-            return f'{self.robotpkg}-{self.target}-py3'
-        return f'{self.robotpkg}-{self.target}'
+        py = '-py3' if self.py3 else ''
+        return f'{self.robotpkg}{py}:{self.target}'
 
     def get_build_args(self):
         ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg,
@@ -623,8 +622,7 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        project_name = project.name.lower()
-        return f'{project.registry()}/{project.main_namespace.slug}/{project_name}:{self.target}'
+        return f'{project.registry()}/{project.main_namespace.slug}/{self}'
 
     def build(self):
         args = self.get_build_args()
