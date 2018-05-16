@@ -548,16 +548,14 @@ class Robotpkg(NamedModel):
         path = '-wip/wip' if self.category == 'wip' else f'/{self.category}'
         return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
 
-    def update_images(self, pull=False):
+    def update_images(self):
         for target in Target.objects.all():
-            image, _ = Image.objects.get_or_create(robotpkg=self, target=target)
-            image.update(pull)
+            Image.objects.get_or_create(robotpkg=self, target=target, py3=False)[0].update()
         if self.name.startswith('py-'):
             for target in Target.objects.all():
-                image, _ = Image.objects.get_or_create(robotpkg=self, target=target, py3=True)
-                image.update(pull)
+                image = Image.objects.get_or_create(robotpkg=self, target=target, py3=True)[0].update()
 
-    def update(self, pull=True, pull_image=False):
+    def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
         repo = git.Repo(str(path / 'wip' / '.git' if self.category == 'wip' else path / '.git'))
         if pull:
@@ -584,7 +582,7 @@ class Robotpkg(NamedModel):
         with (cwd / 'DESCR').open() as f:
             self.description = f.read().strip()
 
-        self.update_images(pull_image)
+        self.update_images()
         self.save()
 
     def valid_images(self):
@@ -624,6 +622,11 @@ class Image(models.Model):
         project = self.robotpkg.project
         return f'{project.registry()}/{project.main_namespace.slug}/{self}'
 
+    def get_image_url(self):
+        project = self.robotpkg.project
+        manifest = str(self).replace(':', '/manifests/')
+        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{manifest}'
+
     def build(self):
         args = self.get_build_args()
         build_args = sum((['--build-arg', f'{key}={value}'] for key, value in args.items()), list())
@@ -636,19 +639,11 @@ class Image(models.Model):
         return ['docker', 'push', self.get_image_name()]
 
     def update(self, pull=False):
-        image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
-        if not image:
-            if not pull:
-                return
-            try:
-                logger.info(f' pulling {self}')
-                check_output(self.pull())
-                image = check_output(['docker', 'images', '-q', self.get_image_name()]).decode().strip()
-            except CalledProcessError:
-                return
-        self.image = image
-        self.created = parse_datetime(json.loads(check_output(['docker', 'inspect', image]))[0]['Created'])
-        self.save()
+        r = requests.get(self.get_image_url())
+        if r.status_code == 200:
+            self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
+            self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
+            self.save()
 
 
 class CIBuild(models.Model):
