@@ -90,9 +90,15 @@ class BranchTable(StrippedTable):
 
 
 class ImageTable(StrippedTable):
+    name = tables.Column(accessor='get_image_name', orderable=False)
+
     class Meta:
         model = models.Image
-        fields = ('robotpkg', 'target', 'image', 'py3', 'created')
+        fields = ('name', 'robotpkg', 'target', 'image', 'py3', 'created')
+
+    def render_name(self, record, value):
+        if value:
+            return mark_safe(f'<a href="{record.get_image_url}">{value}</a>')
 
 
 class ContributorTable(StrippedTable):
