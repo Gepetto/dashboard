@@ -92,7 +92,7 @@ class BranchTable(StrippedTable):
 class ImageTable(StrippedTable):
     class Meta:
         model = models.Image
-        fields = ('robotpkg', 'target', 'image', 'created')
+        fields = ('robotpkg', 'target', 'image', 'py3', 'created')
 
 
 class ContributorTable(StrippedTable):
