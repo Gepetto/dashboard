@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from subprocess import CalledProcessError, check_output
+from subprocess import check_output
 
 from django.conf import settings
 from django.db import models
@@ -553,7 +553,7 @@ class Robotpkg(NamedModel):
             Image.objects.get_or_create(robotpkg=self, target=target, py3=False)[0].update()
         if self.name.startswith('py-'):
             for target in Target.objects.all():
-                image = Image.objects.get_or_create(robotpkg=self, target=target, py3=True)[0].update()
+                Image.objects.get_or_create(robotpkg=self, target=target, py3=True)[0].update()
 
     def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
