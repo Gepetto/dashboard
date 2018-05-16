@@ -98,7 +98,7 @@ class ImageTable(StrippedTable):
 
     def render_name(self, record, value):
         if value:
-            return mark_safe(f'<a href="{record.get_image_url}">{value}</a>')
+            return mark_safe(f'<a href="{record.get_image_url()}">{value}</a>')
 
 
 class ContributorTable(StrippedTable):
