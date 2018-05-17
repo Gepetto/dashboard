@@ -14,7 +14,7 @@ cache:
   before_script:
     - mkdir -p ccache
   script:
-    - cd {{ robotpkg.category }}/{{ robotpkg }}
+    - cd /root/robotpkg/{{ robotpkg.category }}/{{ robotpkg }}
     - git pull
     - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
     - make install
