@@ -1,10 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
   GIT_DEPTH: "3"
-  NAMESPACE: {{ project.main_namespace.slug }}
-  PROJECT: {{ project }}
-  REGISTRY: {{ project.registry }}
-  IMAGE: "${REGISTRY}/${NAMESPACE}/${PROJECT}"
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
 
@@ -14,15 +10,12 @@ cache:
 
 {% for robotpkg in project.robotpkg_set.all %}
 .robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
-  variables:
-    ROBOTPKG: {{ robotpkg }}
-    CATEGORY: {{ robotpkg.category }}
   except:
     - gh-pages
   before_script:
     - mkdir -p ccache
   script:
-    - cd /root/robotpkg/${CATEGORY}/${ROBOTPKG}
+    - cd {{ robotpkg.category }}/{{ robotpkg }}
     - git pull
     - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
     - make install
@@ -34,7 +27,7 @@ cache:
 {% for image in robotpkg.valid_images %}
 robotpkg-{{ image }}:
   <<: *robotpkg-{{ robotpkg }}
-  image: ${IMAGE}{% if image.py3 %}-py3{% endif %}:{{ image.target }}
+  image: {{ image.get_image_name }}
 {% if project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
     expire_in: 1 day
     paths:

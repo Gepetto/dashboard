@@ -620,7 +620,7 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry()}/{project.main_namespace.slug}/{self}'
+        return f'{project.registry()}/{project.main_namespace.slug}/{project}/{self}'
 
     def get_image_url(self):
         project = self.robotpkg.project
