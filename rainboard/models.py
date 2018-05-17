@@ -627,6 +627,9 @@ class Image(models.Model):
         manifest = str(self).replace(':', '/manifests/')
         return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{manifest}'
 
+    def get_job_name(self):
+        return f'robotpkg-{self}'.replace(':', '-')
+
     def build(self):
         args = self.get_build_args()
         build_args = sum((['--build-arg', f'{key}={value}'] for key, value in args.items()), list())
