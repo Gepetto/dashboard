@@ -8,8 +8,7 @@ cache:
   paths:
     - ccache
 
-{% for robotpkg in project.robotpkg_set.all %}
-.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
+{% for robotpkg in project.robotpkg_set.all %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   except:
     - gh-pages
   before_script:
@@ -24,8 +23,7 @@ cache:
     {% if project.docs %}- make doc
     - mv doc/doxygen-html ${CI_PROJECT_DIR}{% endif %}
 
-{% for image in robotpkg.valid_images %}
-{{ image.get_job_name }}:
+{% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
 {% if project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
@@ -33,5 +31,4 @@ cache:
     paths:
       - doxygen-html/
 {% endif %}
-{% endfor %}
-{% endfor %}
+{% endfor %}{% endfor %}
