@@ -625,7 +625,7 @@ class Image(models.Model):
     def get_image_url(self):
         project = self.robotpkg.project
         manifest = str(self).replace(':', '/manifests/')
-        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{manifest}'
+        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project}/{manifest}'
 
     def get_job_name(self):
         return f'robotpkg-{self}'.replace(':', '-')
