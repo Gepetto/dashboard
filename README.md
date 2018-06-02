@@ -2,8 +2,7 @@
 
 ## Reverse Proxy
 
-Look at my Traefik easy setup for [dev](https://github.com/nim65s/traefik-dev) and
-[prod](https://github.com/nim65s/traefik-prod)
+This website needs a reverse proxy, like [proxyta.net](https://framagit.org/nim65s/proxyta.net)
 
 ## Configuration example
 
