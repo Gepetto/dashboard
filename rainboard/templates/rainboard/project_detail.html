@@ -31,6 +31,7 @@
      <dt class="col-3 text-right">Commits since</dt> <dd class="col-9">{{ project.commits_since }}</dd>
          <dt class="col-3 text-right">Has tests</dt> <dd class="col-9">{{ project.tests|yesno:"✔,✘" }}</dd>
           <dt class="col-3 text-right">Has docs</dt> <dd class="col-9">{{ project.docs|yesno:"✔,✘" }}</dd>
+<dt class="col-3 text-right">Also build in Debug</dt> <dd class="col-9">{{ project.debug|yesno:"✔,✘" }}</dd>
   </dl>
 </div>
 
