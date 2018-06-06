@@ -11,9 +11,8 @@ cache:
 {% for robotpkg in project.robotpkg_set.all %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   except:
     - gh-pages
-  before_script:
-    - mkdir -p ccache
   script:
+    - mkdir -p ccache
     - cd /root/robotpkg/{{ robotpkg.category }}/{{ robotpkg }}
     - git pull
     - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
@@ -27,7 +26,9 @@ cache:
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
-{% if project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
+{% if image.debug %}  before_script:
+    - echo PKG_OPTIONS.{{ robotpkg }}=debug >> /opt/openrobots/etc/robotpkg.conf
+{% elif project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
     expire_in: 1 day
     paths:
       - doxygen-html/

@@ -154,6 +154,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
+    debug = models.BooleanField(default=False)
 
     def git_path(self):
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
@@ -549,11 +550,12 @@ class Robotpkg(NamedModel):
         return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
 
     def update_images(self):
+        py3s = [False, True] if self.name.startswith('py-') else [False]
+        debugs = [False, True] if self.project.debug else [False]
         for target in Target.objects.all():
-            Image.objects.get_or_create(robotpkg=self, target=target, py3=False)[0].update()
-        if self.name.startswith('py-'):
-            for target in Target.objects.all():
-                Image.objects.get_or_create(robotpkg=self, target=target, py3=True)[0].update()
+            for py3 in py3s:
+                for debug in debugs:
+                    Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()
 
     def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
@@ -601,9 +603,10 @@ class Image(models.Model):
     created = models.DateTimeField(blank=True, null=True)
     image = models.CharField(max_length=12, blank=True, null=True)
     py3 = models.BooleanField(default=False)
+    debug = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('robotpkg', 'target', 'py3')
+        unique_together = ('robotpkg', 'target', 'py3', 'debug')
 
     def __str__(self):
         py = '-py3' if self.py3 else ''
@@ -628,7 +631,8 @@ class Image(models.Model):
         return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project}/{manifest}'
 
     def get_job_name(self):
-        return f'robotpkg-{self}'.replace(':', '-')
+        mode = 'debug' if self.debug else 'release'
+        return f'robotpkg-{self}-{mode}'.replace(':', '-')
 
     def build(self):
         args = self.get_build_args()
