@@ -21,17 +21,17 @@
   </div>
 
   <dl class="row" style="line-height: 1">
-        <dt class="col-3 text-right">Main forge</dt> <dd class="col-9">{{ project.main_forge.get_link }}</dd>
-    <dt class="col-3 text-right">Main namespace</dt> <dd class="col-9">{{ project.main_namespace }}</dd>
-       <dt class="col-3 text-right">Main branch</dt> <dd class="col-9">{{ project.main_branch }}</dd>
-       <dt class="col-3 text-right">Description</dt> <dd class="col-9">{{ project.description }}</dd>
-          <dt class="col-3 text-right">Homepage</dt> <dd class="col-9">{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
-           <dt class="col-3 text-right">Updated</dt> <dd class="col-9">{{ project.updated }}</dd>
-           <dt class="col-3 text-right">Version</dt> <dd class="col-9">{{ project.version|default:"—" }}</dd>
-     <dt class="col-3 text-right">Commits since</dt> <dd class="col-9">{{ project.commits_since }}</dd>
-         <dt class="col-3 text-right">Has tests</dt> <dd class="col-9">{{ project.tests|yesno:"✔,✘" }}</dd>
-          <dt class="col-3 text-right">Has docs</dt> <dd class="col-9">{{ project.docs|yesno:"✔,✘" }}</dd>
-<dt class="col-3 text-right">Also build in Debug</dt> <dd class="col-9">{{ project.debug|yesno:"✔,✘" }}</dd>
+             <dt class="col-3 text-right">Main forge</dt> <dd class="col-9">{{ project.main_forge.get_link }}</dd>
+         <dt class="col-3 text-right">Main namespace</dt> <dd class="col-9">{{ project.main_namespace }}</dd>
+            <dt class="col-3 text-right">Main branch</dt> <dd class="col-9">{{ project.main_branch }}</dd>
+            <dt class="col-3 text-right">Description</dt> <dd class="col-9">{{ project.description }}</dd>
+               <dt class="col-3 text-right">Homepage</dt> <dd class="col-9">{% if project.homepage %}<a href="{{ project.homepage }}">{{ project.homepage }}</a>{% else %}—{% endif %}</dd>
+                <dt class="col-3 text-right">Updated</dt> <dd class="col-9">{{ project.updated }}</dd>
+                <dt class="col-3 text-right">Version</dt> <dd class="col-9">{{ project.version|default:"—" }}</dd>
+          <dt class="col-3 text-right">Commits since</dt> <dd class="col-9">{{ project.commits_since }}</dd>
+              <dt class="col-3 text-right">Has tests</dt> <dd class="col-9">{{ project.tests|yesno:"✔,✘" }}</dd>
+               <dt class="col-3 text-right">Has docs</dt> <dd class="col-9">{{ project.docs|yesno:"✔,✘" }}</dd>
+    <dt class="col-3 text-right">Also build in Debug</dt> <dd class="col-9">{{ project.debug|yesno:"✔,✘" }}</dd>
   </dl>
 </div>
 
