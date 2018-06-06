@@ -94,7 +94,7 @@ class ImageTable(StrippedTable):
 
     class Meta:
         model = models.Image
-        fields = ('name', 'robotpkg', 'target', 'image', 'py3', 'created')
+        fields = ('name', 'robotpkg', 'target', 'image', 'py3', 'debug', 'created')
 
     def render_name(self, record, value):
         if value:
