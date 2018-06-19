@@ -534,7 +534,7 @@ class Robotpkg(NamedModel):
     master_repository = models.CharField(max_length=200, default='')
     maintainer = models.CharField(max_length=200, default='')
     comment = models.TextField()
-    homepage = models.URLField(max_length=200, default='')
+    homepage = models.URLField(max_length=200, blank=True, null=True)
 
     license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
     public = models.BooleanField(default=True)
