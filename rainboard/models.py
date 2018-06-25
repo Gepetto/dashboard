@@ -5,6 +5,7 @@ from subprocess import check_output
 
 from django.conf import settings
 from django.db import models
+from django.db.models.functions import Length
 from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
@@ -273,6 +274,10 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def registry(self):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
+
+    def doc_coverage_image(self):
+        images = Image.objects.filter(robotpkg__project=self, py3=False, target__name='16.04')
+        return images.order_by(Length('robotpkg__name').desc()).first()
 
 
 class Repo(TimeStampedModel):

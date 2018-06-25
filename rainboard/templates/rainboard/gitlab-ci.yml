@@ -19,19 +19,29 @@ cache:
     - make install
     - cd work.$(hostname)/$(make show-var VARNAME=DISTNAME)
 {% if project.tests %}    - make check
-{% endif %}{% if project.docs %}    - make doc
-    - mv doc/doxygen-html ${CI_PROJECT_DIR}
 {% endif %}
-
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
 {% if image.debug %}  before_script:
     - echo PKG_OPTIONS.{{ robotpkg }}=debug >> /opt/openrobots/etc/robotpkg.conf
-{% elif project.docs and image.target.name == '16.04' and not image.py3 %}  artifacts:
+{% endif %}
+{% endfor %}{% endfor %}{% if project.tests or project.docs %}doc-coverage:
+{% with image=project.doc_coverage_image %}  <<: *robotpkg-{{ image.robotpkg }}
+  image: {{ image.get_image_name }}
+  before_script:
+    - echo -e 'CXXFLAGS+= --coverage\nLDFLAGS+= --coverage\nPKG_DEFAULT_OPTIONS= debug' >> /opt/openrobots/etc/robotpkg.conf
+  after_script:
+    - cd /root/robotpkg/{{ image.robotpkg.category }}/{{ image.robotpkg }}{% endwith %}
+    - cd work.$(hostname)/$(make show-var VARNAME=DISTNAME)
+{% if project.docs %}    - make doc
+    - mv doc/doxygen-html ${CI_PROJECT_DIR}
+{% endif %}{% if project.tests%}    - mkdir -p ${CI_PROJECT_DIR}/coverage/
+    - gcovr -r .
+    - gcovr -r . --html --html-details -o ${CI_PROJECT_DIR}/coverage/index.html
+{% endif %}  artifacts:
     expire_in: 1 day
     paths:
       - doxygen-html/
+      - coverage/
 {% endif %}
-{% endfor %}
-{% endfor %}
