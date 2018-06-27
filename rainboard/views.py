@@ -24,6 +24,10 @@ class ProjectsView(SingleTableMixin, FilterView):
     filterset_class = filters.ProjectFilter
 
 
+class GepettoProjectsView(ProjectsView):
+    queryset = models.Project.objects.filter(from_gepetto=True)
+
+
 class ProjectView(DetailView):
     model = models.Project
 
