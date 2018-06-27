@@ -156,6 +156,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
     debug = models.BooleanField(default=False)
+    from_gepetto = models.BooleanField(default=True)
 
     def git_path(self):
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
