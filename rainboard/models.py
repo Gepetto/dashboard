@@ -705,7 +705,7 @@ class Contributor(models.Model):
         return ', '.join(str(mail) for mail in self.contributormail_set.filter(invalid=False))
 
     def contributed(self):
-        return ', '.join(str(project) for project in self.projects.all())
+        return ', '.join(str(project) for project in self.projects.filter(from_gepetto=True))
 
 
 class ContributorName(models.Model):
