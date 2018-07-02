@@ -511,8 +511,15 @@ class Branch(TimeStampedModel):
             return self.repo.namespace
 
 
+class ActiveQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(active=True)
+
+
 class Target(NamedModel):
-    pass
+    active = models.BooleanField(default=True)
+
+    objects = ActiveQuerySet.as_manager()
 
 
 # class Test(TimeStampedModel):
@@ -558,7 +565,7 @@ class Robotpkg(NamedModel):
     def update_images(self):
         py3s = [False, True] if self.name.startswith('py-') else [False]
         debugs = [False, True] if self.project.debug else [False]
-        for target in Target.objects.all():
+        for target in Target.objects.active():
             for py3 in py3s:
                 for debug in debugs:
                     Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()

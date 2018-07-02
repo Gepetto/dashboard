@@ -11,6 +11,7 @@ for model in [
         models.Robotpkg,
         models.Image,
         models.Tag,
+        models.Target,
         models.Contributor,
         models.ContributorName,
         models.ContributorMail,

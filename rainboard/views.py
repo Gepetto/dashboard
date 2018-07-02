@@ -64,7 +64,7 @@ class ProjectImagesView(ProjectTableView):
     order_by = 'target'
 
     def get_object_list(self):
-        return models.Image.objects.filter(robotpkg__project=self.object)
+        return models.Image.objects.filter(robotpkg__project=self.object, target__active=True)
 
 
 class ProjectContributorsView(ProjectTableView):
