@@ -512,7 +512,7 @@ class Branch(TimeStampedModel):
 
 
 class Target(NamedModel):
-    python3 = models.CharField(max_length=3, blank=True, null=True)
+    pass
 
 
 # class Test(TimeStampedModel):
