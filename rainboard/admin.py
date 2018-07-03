@@ -1,4 +1,4 @@
-from django.contrib.admin import site
+from django.contrib.admin import ModelAdmin, site
 
 from . import models
 
@@ -12,8 +12,11 @@ for model in [
         models.Image,
         models.Tag,
         models.Target,
-        models.Contributor,
         models.ContributorName,
         models.ContributorMail,
 ]:
     site.register(model)
+
+class ContributorAdmin(ModelAdmin):
+    def queryset(self, request):
+        return super().queryset(request).gepettist()

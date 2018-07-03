@@ -85,7 +85,7 @@ class DistinctMixin(object):
 
 
 class ContributorsView(SingleTableMixin, DistinctMixin, FilterView):
-    queryset = models.Contributor.objects.filter(projects__from_gepetto=True)
+    queryset = models.Contributor.objects.gepettist()
     table_class = tables.ContributorProjectTable
     filterset_class = filters.ContributorFilter
 

@@ -696,9 +696,16 @@ class Tag(models.Model):
         return f'{self.project} {self.name}'
 
 
+class GepettistQuerySet(models.QuerySet):
+    def gepettist(self):
+        return self.filter(projects__from_gepetto=True)
+
+
 class Contributor(models.Model):
     projects = models.ManyToManyField(Project)
     agreement_signed = models.BooleanField(default=False)
+
+    objects = GepettistQuerySet.as_manager()
 
     def __str__(self):
         name = self.contributorname_set.first()
