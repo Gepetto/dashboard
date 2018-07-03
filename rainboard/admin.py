@@ -20,3 +20,5 @@ for model in [
 class ContributorAdmin(ModelAdmin):
     def queryset(self, request):
         return super().queryset(request).gepettist()
+
+site.register(models.Contributor, ContributorAdmin)
