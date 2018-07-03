@@ -5,7 +5,7 @@ from . import models
 
 class ContributorAdmin(ModelAdmin):
     def get_queryset(self, request):
-        return super().get_queryset(request).gepettist()
+        return super().get_queryset(request).gepettist().distinct()
 
 
 site.register(models.Contributor, ContributorAdmin)
