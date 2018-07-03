@@ -2,6 +2,13 @@ from django.contrib.admin import ModelAdmin, site
 
 from . import models
 
+
+class ContributorAdmin(ModelAdmin):
+    def queryset(self, request):
+        return super().queryset(request).gepettist()
+
+
+site.register(models.Contributor, ContributorAdmin)
 for model in [
         models.License,
         models.Namespace,
@@ -16,9 +23,3 @@ for model in [
         models.ContributorMail,
 ]:
     site.register(model)
-
-class ContributorAdmin(ModelAdmin):
-    def queryset(self, request):
-        return super().queryset(request).gepettist()
-
-site.register(models.Contributor, ContributorAdmin)
