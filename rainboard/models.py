@@ -601,7 +601,7 @@ class Robotpkg(NamedModel):
         self.save()
 
     def valid_images(self):
-        return self.image_set.filter(created__isnull=False)
+        return self.image_set.filter(created__isnull=False, target__active=True)
 
 
 # class RobotpkgBuild(TimeStampedModel):
