@@ -4,8 +4,8 @@ from . import models
 
 
 class ContributorAdmin(ModelAdmin):
-    def queryset(self, request):
-        return super().queryset(request).gepettist()
+    def get_queryset(self, request):
+        return super().get_queryset(request).gepettist()
 
 
 site.register(models.Contributor, ContributorAdmin)
