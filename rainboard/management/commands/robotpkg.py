@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         for project in Project.objects.all():
             for slug in [project.slug, project.slug.replace('_', '-')]:
-                for pkg in path.glob(f'*/{slug}'):
+                for pkg in path.glob(f'*/*{slug}'):
                     obj, created = Robotpkg.objects.get_or_create(name=pkg.name, category=pkg.parent.name,
                                                                   project=project)
                     if created:
