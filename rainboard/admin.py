@@ -21,5 +21,6 @@ for model in [
         models.Target,
         models.ContributorName,
         models.ContributorMail,
+        models.Dependency,
 ]:
     site.register(model)
