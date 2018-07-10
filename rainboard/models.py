@@ -23,7 +23,7 @@ logger = logging.getLogger('rainboard.models')
 MAIN_BRANCHES = ['master', 'devel']
 RPKG_URL = 'http://robotpkg.openrobots.org'
 RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'MIT', 'gnu-gpl-v3': 'GPL-3.0',
-                 '2-clause-bsd': 'BSD-2-Clause', 'eclipse': 'EPL-1.0'}
+                 '2-clause-bsd': 'BSD-2-Clause', 'eclipse': 'EPL-1.0', 'modified-bsd': 'BSD-3-Clause'}
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
 CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
