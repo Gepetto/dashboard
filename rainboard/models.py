@@ -739,6 +739,20 @@ class ContributorMail(models.Model):
         return self.mail
 
 
+class Dependency(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='dependencies')
+    library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='rdeps')
+    robotpkg = models.BooleanField(default=False)
+    cmake = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'dependencies'
+        unique_together = ('project', 'library')
+
+    def __str__(self):
+        return '{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}'
+
+
 def get_default_forge(project):
     for forge in Forge.objects.order_by('source'):
         if project.repo_set.filter(forge=forge).exists():
