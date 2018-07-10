@@ -199,6 +199,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
             if bcreated:
                 instance.update(pull=pull)
+        self.cmake()
 
     def main_branch(self):
         heads = self.git().heads
@@ -219,6 +220,13 @@ class Project(Links, NamedModel, TimeStampedModel):
             if search:
                 self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
                 self.save()
+        for dependency in re.findall(r'ADD_[^ ]+_DEPENDENCY\s*\(["\']([^ ]+).*["\']\)', content, re.I):
+            project = Project.objects.filter(slug=dependency)
+            if project.exists():
+                dependency, created = Dependency.objects.get_or_create(project=self, library=dependency)
+                if dependency.cmake:
+                    dependency.cmake = True
+                    dependency.save()
 
     def repos(self):
         return self.repo_set.count()
