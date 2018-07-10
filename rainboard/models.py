@@ -750,7 +750,7 @@ class ContributorMail(models.Model):
 class Dependency(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='dependencies')
     library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='rdeps')
-    robotpkg = models.BooleanField(default=False)
+    robotpkg = models.BooleanField(default=False)  # TODO NYI
     cmake = models.BooleanField(default=False)
 
     class Meta:
