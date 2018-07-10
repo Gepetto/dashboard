@@ -199,7 +199,6 @@ class Project(Links, NamedModel, TimeStampedModel):
                 instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
             if bcreated:
                 instance.update(pull=pull)
-        self.cmake()
 
     def main_branch(self):
         heads = self.git().heads
@@ -252,6 +251,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 self.updated = robotpkg.updated
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
+        self.cmake()
         self.save()
 
     def commits_since(self):
