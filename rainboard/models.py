@@ -299,6 +299,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     def print_rdeps(self):
         return ', '.join(str(d.project) for d in self.rdeps.all())
 
+
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
     slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
