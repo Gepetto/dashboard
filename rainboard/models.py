@@ -294,10 +294,10 @@ class Project(Links, NamedModel, TimeStampedModel):
         return images.order_by(Length('robotpkg__name').desc()).first()
 
     def print_deps(self):
-        return ', '.join(str(d.library) for d in self.dependencies.all())
+        return mark_safe(', '.join(d.get_link() for d in self.dependencies.all()))
 
     def print_rdeps(self):
-        return ', '.join(str(d.project) for d in self.rdeps.all())
+        return mark_safe(', '.join(d.get_link() for d in self.rdeps.all()))
 
 
 class Repo(TimeStampedModel):
