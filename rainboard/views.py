@@ -115,7 +115,7 @@ def graph_svg(request):
         for project in models.Project.objects.filter(from_gepetto=True):
             print(f'{{I{project.pk} [label="{project}"];}}', file=f)
         for dep in models.Dependency.objects.filter(project__from_gepetto=True, library__from_gepetto=True):
-            print(f'I{dep.project.pk} -> I{dep.library.pk};', file=f)
+            print(f'I{dep.library.pk} -> I{dep.project.pk};', file=f)
         print('}', file=f)
     svg = run(['dot', '/tmp/graph', '-Tsvg'], stdout=PIPE).stdout.decode()
     return HttpResponse(svg, content_type='image/svg+xml')
