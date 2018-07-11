@@ -219,10 +219,11 @@ class Project(Links, NamedModel, TimeStampedModel):
             search = re.search(f'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
             if search:
                 try:
+                    old = self.__dict__[value]
                     self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
                     self.save()
                 except DataError:
-                    pass
+                    self.__dict__[value] = old
         for dependency in re.findall(r'ADD_[^ ]+_DEPENDENCY\s*\(["\']([^ ]+).*["\']\)', content, re.I):
             project = Project.objects.filter(slug=dependency)
             if project.exists():
