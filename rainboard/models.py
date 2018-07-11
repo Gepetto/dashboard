@@ -6,6 +6,7 @@ from subprocess import check_output
 from django.conf import settings
 from django.db import models
 from django.db.models.functions import Length
+from django.db.utils import DataError
 from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
@@ -217,8 +218,11 @@ class Project(Links, NamedModel, TimeStampedModel):
         for key, value in CMAKE_FIELDS.items():
             search = re.search(f'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
             if search:
-                self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
-                self.save()
+                try:
+                    self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
+                    self.save()
+                except DataError:
+                    pass
         for dependency in re.findall(r'ADD_[^ ]+_DEPENDENCY\s*\(["\']([^ ]+).*["\']\)', content, re.I):
             project = Project.objects.filter(slug=dependency)
             if project.exists():
