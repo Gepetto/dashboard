@@ -271,6 +271,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
         self.cmake()
+        self.ros()
         self.save()
 
     def commits_since(self):
