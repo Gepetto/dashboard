@@ -294,10 +294,10 @@ class Project(Links, NamedModel, TimeStampedModel):
         return images.order_by(Length('robotpkg__name').desc()).first()
 
     def print_deps(self):
-        return ', '.join(str(d.library) for d in p.dependencies.all())
+        return ', '.join(str(d.library) for d in self.dependencies.all())
 
     def print_rdeps(self):
-        return  ', '.join(str(d.project) for d in p.rdeps.all())
+        return ', '.join(str(d.project) for d in self.rdeps.all())
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
