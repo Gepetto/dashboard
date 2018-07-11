@@ -111,8 +111,8 @@ def docker(request):
 
 def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
-        print('digraph {', file=f)
-        for project in models.Project.objects.all():
+        print('digraph { rankdir=RL;', file=f)
+        for project in models.Project.objects.filter(from_gepetto=True):
             print(f'{{I{project.pk} [label="{project}"];}}', file=f)
         for dep in models.Dependency.objects.all():
             print(f'I{dep.project.pk} -> I{dep.library.pk};', file=f)
