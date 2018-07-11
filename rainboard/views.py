@@ -109,7 +109,6 @@ def docker(request):
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
 
 
-
 def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
         print('digraph {', file=f)
