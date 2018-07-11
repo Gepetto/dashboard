@@ -232,6 +232,20 @@ class Project(Links, NamedModel, TimeStampedModel):
                     dependency.cmake = True
                     dependency.save()
 
+    def ros(self):
+        filename = self.git_path() / 'package.xml'
+        if not filename.exists():
+            return
+        with filename.open() as f:
+            content = f.read()
+        for dependency in re.findall(r'<run_depend>(\w+).*</run_depend>', content, re.I):
+            project = Project.objects.filter(models.Q(slug=dependency) | models.Q(slug=dependency.replace('_', '-')))
+            if project.exists():
+                dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
+                if not dependency.ros:
+                    dependency.ros = True
+                    dependency.save()
+
     def repos(self):
         return self.repo_set.count()
 
@@ -294,10 +308,10 @@ class Project(Links, NamedModel, TimeStampedModel):
         return images.order_by(Length('robotpkg__name').desc()).first()
 
     def print_deps(self):
-        return mark_safe(', '.join(d.get_link() for d in self.dependencies.all()))
+        return mark_safe(', '.join(d.library.get_link() for d in self.dependencies.all()))
 
     def print_rdeps(self):
-        return mark_safe(', '.join(d.get_link() for d in self.rdeps.all()))
+        return mark_safe(', '.join(d.project.get_link() for d in self.rdeps.all()))
 
 
 class Repo(TimeStampedModel):
@@ -763,6 +777,7 @@ class Dependency(models.Model):
     library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='rdeps')
     robotpkg = models.BooleanField(default=False)  # TODO NYI
     cmake = models.BooleanField(default=False)
+    ros = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'dependencies'
