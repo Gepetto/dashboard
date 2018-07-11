@@ -222,8 +222,8 @@ class Project(Links, NamedModel, TimeStampedModel):
         for dependency in re.findall(r'ADD_[^ ]+_DEPENDENCY\s*\(["\']([^ ]+).*["\']\)', content, re.I):
             project = Project.objects.filter(slug=dependency)
             if project.exists():
-                dependency, created = Dependency.objects.get_or_create(project=self, library=dependency)
-                if dependency.cmake:
+                dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
+                if not dependency.cmake:
                     dependency.cmake = True
                     dependency.save()
 
