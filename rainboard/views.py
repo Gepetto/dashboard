@@ -1,3 +1,5 @@
+from subprocess import PIPE, run
+
 from django.http.response import HttpResponse, JsonResponse
 from django.views.generic import DetailView
 
@@ -108,13 +110,13 @@ def docker(request):
 
 
 
-def graph(request):
+def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
         print('digraph {', file=f)
-        for project in Project.objects.all():
+        for project in models.Project.objects.all():
             print(f'{{I{project.pk} [label="{project}"];}}', file=f)
-        for dep in Dependency.objects.all():
+        for dep in models.Dependency.objects.all():
             print(f'I{dep.project.pk} -> I{dep.library.pk};', file=f)
         print('}', file=f)
-    svg = run(['dot', '/tmp/graph', '-Tsvg'], capture_output=True).stdout.decode()
+    svg = run(['dot', '/tmp/graph', '-Tsvg'], stdout=PIPE).stdout.decode()
     return HttpResponse(svg, content_type='image/svg+xml')
