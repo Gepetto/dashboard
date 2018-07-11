@@ -225,7 +225,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 except DataError:
                     self.__dict__[value] = old
         for dependency in re.findall(r'ADD_[^ ]+_DEPENDENCY\s*\(["\']([^ "\']+).*["\']\)', content, re.I):
-            project = Project.objects.filter(slug=dependency)
+            project = Project.objects.filter(models.Q(slug=dependency) | models.Q(slug=dependency.replace('_', '-')))
             if project.exists():
                 dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
                 if not dependency.cmake:
