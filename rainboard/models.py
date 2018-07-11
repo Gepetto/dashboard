@@ -758,7 +758,7 @@ class Dependency(models.Model):
         unique_together = ('project', 'library')
 
     def __str__(self):
-        return '{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}'
+        return f'{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}'
 
 
 def get_default_forge(project):

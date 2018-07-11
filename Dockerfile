@@ -10,6 +10,7 @@ ADD requirements.txt ./
 RUN apt-get update -qq && apt-get install -qqy \
     apt-transport-https \
     git \
+    graphviz \
     libpq-dev \
     netcat-openbsd \
     ssmtp \

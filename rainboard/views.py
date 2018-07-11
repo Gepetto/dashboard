@@ -105,3 +105,16 @@ def docker(request):
         cmd = filters.pop('cmd')
     images = models.Image.objects.filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
+
+
+
+def graph(request):
+    with open('/tmp/graph', 'w') as f:
+        print('digraph {', file=f)
+        for project in Project.objects.all():
+            print(f'{{I{project.pk} [label="{project}"];}}', file=f)
+        for dep in Dependency.objects.all():
+            print(f'I{dep.project.pk} -> I{dep.library.pk};', file=f)
+        print('}', file=f)
+    svg = run(['dot', '/tmp/graph', '-Tsvg'], capture_output=True).stdout.decode()
+    return HttpResponse(svg, content_type='image/svg+xml')
