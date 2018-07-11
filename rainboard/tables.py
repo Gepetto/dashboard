@@ -32,7 +32,7 @@ class ProjectTable(StrippedTable):
 
     class Meta:
         model = models.Project
-        fields = ('main_namespace', 'name', 'public', 'license', 'homepage', 'updated', 'version')
+        fields = ('main_namespace', 'name', 'public', 'from_gepetto', 'license', 'homepage', 'updated', 'version')
 
     def render_name(self, record):
         return record.get_link()
