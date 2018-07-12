@@ -6,7 +6,7 @@
 <div class="clearfix">
   <h1>{{ project }}</h1>
 
-  <div class="pull-right">
+  <div class="float-right">
     {% if project.license %}
     {% bootstrap_label project.license label_class='label label-primary' %}
     {% else %}
@@ -18,6 +18,19 @@
     {% else %}
     {% bootstrap_label 'private' label_class='label label-danger' %}
     {% endif %}
+
+    <a href="https://travis-ci.org/{{ project.main_namespace.slug }}/{{ project.slug }}">
+        <img src="https://travis-ci.org/{{project.main_namespace.slug }}/{{ project.slug }}.svg?branch=master"
+             alt="Building Status" />
+    </a>
+    <a href="https://gepgitlab.laas.fr/{{ project.main_namespace.slug }}/{{ project.slug }}">
+        <img src="https://gepgitlab.laas.fr/{{ project.main_namespace.slug }}/{{ project.slug }}/badges/master/pipeline.svg"
+             alt="Pipeline Status" />
+    </a>
+    <a href="http://projects.laas.fr/gepetto/doc/{{ project.main_namespace.slug }}/{{ project.slug }}/master/coverage">
+        <img src="https://gepgitlab.laas.fr/{{ project.main_namespace.slug }}/{{ project.slug }}/badges/master/coverage.svg?job=doc-coverage"
+             alt="Coverage Report" />
+    </a>
   </div>
 
   <dl class="row" style="line-height: 1">
