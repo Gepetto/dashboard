@@ -6,7 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-ndh = "*"
+ndh = ">=3.6"
+django = "<2.1"
 django-filter = "*"
 "django-tables2" = "*"
 requests = "*"
@@ -14,3 +15,6 @@ GitPython = "*"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
