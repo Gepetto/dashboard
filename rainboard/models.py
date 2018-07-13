@@ -314,6 +314,9 @@ class Project(Links, NamedModel, TimeStampedModel):
     def print_rdeps(self):
         return mark_safe(', '.join(d.project.get_link() for d in self.rdeps.all()))
 
+    def ordered_robotpkg(self):
+        return self.robotpkg_set.order_by('name')
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
