@@ -8,7 +8,7 @@ cache:
   paths:
     - ccache
 
-{% for robotpkg in project.robotpkg_set.all %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
+{% for robotpkg in project.robotpkg_set.name_ordered %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   except:
     - gh-pages
   script:
