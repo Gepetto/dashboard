@@ -235,7 +235,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     def ros(self):
         try:
             filename = self.git_path() / 'package.xml'
-        except:
+        except TypeError:
             return
         if not filename.exists():
             return
