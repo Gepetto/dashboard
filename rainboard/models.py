@@ -233,7 +233,10 @@ class Project(Links, NamedModel, TimeStampedModel):
                     dependency.save()
 
     def ros(self):
-        filename = self.git_path() / 'package.xml'
+        try:
+            filename = self.git_path() / 'package.xml'
+        except:
+            return
         if not filename.exists():
             return
         with filename.open() as f:
