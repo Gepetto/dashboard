@@ -489,7 +489,7 @@ class Branch(TimeStampedModel):
     ahead = models.PositiveSmallIntegerField(blank=True, null=True)
     behind = models.PositiveSmallIntegerField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
-    repo = models.ForeignKey(Repo, on_delete=models.CASCADE, null=True)
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
     deleted = models.BooleanField(default=False)
     keep_doc = models.BooleanField(default=False)
 
@@ -497,7 +497,7 @@ class Branch(TimeStampedModel):
         return self.name
 
     class Meta:
-        unique_together = ('project', 'name')
+        unique_together = ('project', 'name', 'repo')
 
     def get_ahead(self, branch='master'):
         commits = self.project.git().git.rev_list(f'{branch}..{self}')
