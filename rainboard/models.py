@@ -185,7 +185,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         for branch in branches:
             logger.info(f'update branch {branch}')
             if branch in MAIN_BRANCHES:
-                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self)
+                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=self.main_repo())
             else:
                 if branch.startswith('remotes/'):
                     branch = branch[8:]
