@@ -338,7 +338,7 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def badge_coverage(self):
         return self.badge(f'{DOC_URL}/{self.main_namespace.slug}/{self.slug}/master/coverage',
-                           f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
+                          f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
 
     def badges(self):
         return self.badge_travis() + self.badge_gitlab() + self.badge_coverage()
