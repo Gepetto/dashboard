@@ -23,6 +23,7 @@ logger = logging.getLogger('rainboard.models')
 
 MAIN_BRANCHES = ['master', 'devel']
 RPKG_URL = 'http://robotpkg.openrobots.org'
+DOC_URL = 'http://projects.laas.fr/gepetto/doc'
 RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'MIT', 'gnu-gpl-v3': 'GPL-3.0',
                  '2-clause-bsd': 'BSD-2-Clause', 'eclipse': 'EPL-1.0', 'modified-bsd': 'BSD-3-Clause'}
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
@@ -319,6 +320,28 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def ordered_robotpkg(self):
         return self.robotpkg_set.order_by('name')
+
+    def url_travis(self):
+        return f'https://travis-ci.org/{self.main_namespace.slug}/{self.slug}'
+
+    def url_gitlab(self):
+        return f'https://gepgitlab.laas.fr/{self.main_namespace.slug}/{self.slug}'
+
+    def badge(self, link, img, alt):
+        return mark_safe(f'<a href="{link}"><img src="{img}" alt="{alt}" /></a> ')
+
+    def badge_travis(self):
+        return self.badge(self.url_travis(), f'{self.url_travis()}.svg?branch=master', 'Building Status')
+
+    def badge_gitlab(self):
+        return self.badge(self.url_gitlab(), f'{self.url_gitlab()}/badges/master/pipeline.svg', 'Pipeline Status')
+
+    def badge_coverage(self):
+        return self.badge(f'{DOC_URL}/{self.main_namespace.slug}/{self.slug}/master/coverage',
+                           f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
+
+    def badges(self):
+        return self.badge_travis() + self.badge_gitlab() + self.badge_coverage()
 
 
 class Repo(TimeStampedModel):
