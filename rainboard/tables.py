@@ -29,6 +29,7 @@ class ProjectTable(StrippedTable):
     issues = tables.Column(accessor='open_issues', orderable=False)
     pr = tables.Column(accessor='open_pr', orderable=False)
     rpkgs = tables.Column(accessor='rpkgs', orderable=False)
+    badges = tables.Column(accessor='badges', orderable=False)
 
     class Meta:
         model = models.Project
