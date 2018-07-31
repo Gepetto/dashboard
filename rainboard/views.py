@@ -131,26 +131,31 @@ class AuthenticatedOrReadOnlyModelViewSet(viewsets.ModelViewSet):
 class NamespaceViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Namespace.objects.all()
     serializer_class = serializers.NamespaceSerializer
+    filterset_fields = ('name', 'slug')
 
 
 class LicenseViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.License.objects.all()
     serializer_class = serializers.LicenseSerializer
+    filterset_fields = ('name', 'spdx_id')
 
 
 class ForgeViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Forge.objects.all()
     serializer_class = serializers.ForgeSerializer
+    filterset_fields = ('name', 'slug')
 
 
 class ProjectViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Project.objects.all()
     serializer_class = serializers.ProjectSerializer
+    filterset_class = filters.ProjectFilter
 
 
 class RepoViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Repo.objects.all()
     serializer_class = serializers.RepoSerializer
+    filterset_fields = ('name', 'slug')
 
 
 class BranchViewSet(AuthenticatedOrReadOnlyModelViewSet):
@@ -159,13 +164,15 @@ class BranchViewSet(AuthenticatedOrReadOnlyModelViewSet):
 
 
 class TargetViewSet(AuthenticatedOrReadOnlyModelViewSet):
-    queryset = models.Target.objects.all()
+    queryset = models.Target.objects.active()
     serializer_class = serializers.TargetSerializer
+    filterset_fields = ('name', 'slug')
 
 
 class RobotpkgViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Robotpkg.objects.all()
     serializer_class = serializers.RobotpkgSerializer
+    filterset_fields = ('name', 'slug')
 
 
 class ImageViewSet(AuthenticatedOrReadOnlyModelViewSet):
@@ -176,6 +183,7 @@ class ImageViewSet(AuthenticatedOrReadOnlyModelViewSet):
 class ContributorViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Contributor.objects.all()
     serializer_class = serializers.ContributorSerializer
+    filterset_class = filters.ContributorFilter
 
 
 class ContributorNameViewSet(AuthenticatedOrReadOnlyModelViewSet):

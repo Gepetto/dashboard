@@ -148,6 +148,12 @@ LOGGING = {
     },
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
+
 DJANGO_TABLES2_TEMPLATE = 'rainboard/tables.html'
 RAINBOARD_DATA = Path('/srv/dashboard')
 RAINBOARD_GITS = RAINBOARD_DATA / 'repositories'
