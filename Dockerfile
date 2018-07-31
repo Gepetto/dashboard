@@ -1,4 +1,4 @@
-FROM python:jessie
+FROM python:stretch
 
 EXPOSE 8000
 
