@@ -14,11 +14,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-EMAIL_USE_SSL = True
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True').lower() == 'true'
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
+if EMAIL_USE_SSL and EMAIL_USE_TLS:
+    raise ValueError('you must not set both EMAIL_USE_{TLS,SSL}')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', f'smtp.{DOMAIN_NAME}')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USER = os.environ.get('EMAIL_USER', '')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 465)
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465 if EMAIL_USE_SSL else 587 if EMAIL_USE_TLS else 25))
 EMAIL_FQDN = os.environ.get('EMAIL_FQDN', ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME)
 EMAIL_HOST_USER = f'{EMAIL_USER}@{EMAIL_FQDN}'
 SERVER_EMAIL = f'{EMAIL_USER}+{PROJECT}@{EMAIL_FQDN}'
