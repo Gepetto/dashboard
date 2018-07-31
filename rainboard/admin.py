@@ -11,6 +11,7 @@ class ContributorAdmin(ModelAdmin):
 site.register(models.Contributor, ContributorAdmin)
 for model in [
         models.License,
+        models.Forge,
         models.Namespace,
         models.Project,
         models.Repo,
