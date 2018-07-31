@@ -85,5 +85,3 @@ class DependencySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Dependency
         fields = ('id', 'project', 'library', 'robotpkg', 'cmake', 'ros')
-
-
