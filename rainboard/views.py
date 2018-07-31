@@ -6,8 +6,9 @@ from django.views.generic import DetailView
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
+from rest_framework import permissions, viewsets
 
-from . import filters, models, tables
+from . import filters, models, serializers, tables
 
 
 class ForgesView(SingleTableView):
@@ -119,3 +120,81 @@ def graph_svg(request):
         print('}', file=f)
     svg = run(['dot', '/tmp/graph', '-Tsvg'], stdout=PIPE).stdout.decode()
     return HttpResponse(svg, content_type='image/svg+xml')
+
+
+class NamespaceViewSet(viewsets.ModelViewSet):
+    queryset = models.Namespace.objects.all()
+    serializer_class = serializers.NamespaceSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class LicenseViewSet(viewsets.ModelViewSet):
+    queryset = models.License.objects.all()
+    serializer_class = serializers.LicenseSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ForgeViewSet(viewsets.ModelViewSet):
+    queryset = models.Forge.objects.all()
+    serializer_class = serializers.ForgeSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = models.Project.objects.all()
+    serializer_class = serializers.ProjectSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class RepoViewSet(viewsets.ModelViewSet):
+    queryset = models.Repo.objects.all()
+    serializer_class = serializers.RepoSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class BranchViewSet(viewsets.ModelViewSet):
+    queryset = models.Branch.objects.all()
+    serializer_class = serializers.BranchSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class TargetViewSet(viewsets.ModelViewSet):
+    queryset = models.Target.objects.all()
+    serializer_class = serializers.TargetSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class RobotpkgViewSet(viewsets.ModelViewSet):
+    queryset = models.Robotpkg.objects.all()
+    serializer_class = serializers.RobotpkgSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ImageViewSet(viewsets.ModelViewSet):
+    queryset = models.Image.objects.all()
+    serializer_class = serializers.ImageSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ContributorViewSet(viewsets.ModelViewSet):
+    queryset = models.Contributor.objects.all()
+    serializer_class = serializers.ContributorSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ContributorNameViewSet(viewsets.ModelViewSet):
+    queryset = models.ContributorName.objects.all()
+    serializer_class = serializers.ContributorNameSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ContributorMailViewSet(viewsets.ModelViewSet):
+    queryset = models.ContributorMail.objects.all()
+    serializer_class = serializers.ContributorMailSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class DependencyViewSet(viewsets.ModelViewSet):
+    queryset = models.Dependency.objects.all()
+    serializer_class = serializers.DependencySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)

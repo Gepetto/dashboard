@@ -1,7 +1,24 @@
-from django.urls import path
+from django.urls import path, include
 from django.views.generic import RedirectView, TemplateView
 
+from rest_framework import routers
+
 from . import views
+
+router = routers.DefaultRouter()
+router.register(r'namespace', views.NamespaceViewSet)
+router.register(r'license', views.LicenseViewSet)
+router.register(r'forge', views.ForgeViewSet)
+router.register(r'project', views.ProjectViewSet)
+router.register(r'repo', views.RepoViewSet)
+router.register(r'branch', views.BranchViewSet)
+router.register(r'target', views.TargetViewSet)
+router.register(r'robotpkg', views.RobotpkgViewSet)
+router.register(r'image', views.ImageViewSet)
+router.register(r'contributor', views.ContributorViewSet)
+router.register(r'contributorName', views.ContributorNameViewSet)
+router.register(r'contributorMail', views.ContributorMailViewSet)
+router.register(r'dependency', views.DependencyViewSet)
 
 app_name = 'rainboard'
 urlpatterns = [
@@ -21,4 +38,6 @@ urlpatterns = [
     path('docker', views.docker, name='docker'),
     path('graph.svg', views.graph_svg, name='graph_svg'),
     path('graph', TemplateView.as_view(template_name='rainboard/graph.html'), name='graph'),
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
