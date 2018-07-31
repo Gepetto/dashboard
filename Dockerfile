@@ -1,4 +1,4 @@
-FROM python:stretch
+FROM python:slim-stretch
 
 EXPOSE 8000
 
@@ -7,7 +7,9 @@ WORKDIR /app
 
 RUN apt-get update -qq && apt-get install -qqy \
     apt-transport-https \
+    curl \
     git \
+    gnupg2 \
     graphviz \
     libpq-dev \
     netcat-openbsd \
