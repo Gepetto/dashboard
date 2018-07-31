@@ -25,6 +25,7 @@ class ProjectsView(SingleTableMixin, FilterView):
     model = models.Project
     table_class = tables.ProjectTable
     filterset_class = filters.ProjectFilter
+    strict = False
 
 
 class GepettoProjectsView(ProjectsView):
@@ -91,6 +92,7 @@ class ContributorsView(SingleTableMixin, DistinctMixin, FilterView):
     queryset = models.Contributor.objects.gepettist()
     table_class = tables.ContributorProjectTable
     filterset_class = filters.ContributorFilter
+    strict = False
 
 
 def json_doc(request):
