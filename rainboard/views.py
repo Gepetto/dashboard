@@ -108,7 +108,7 @@ def docker(request):
     filters = request.GET.dict()
     if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
         cmd = filters.pop('cmd')
-    images = models.Image.objects.filter(**filters)
+    images = models.Image.objects.filter(target__active=True).filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
 
 
