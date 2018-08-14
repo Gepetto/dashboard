@@ -161,7 +161,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     from_gepetto = models.BooleanField(default=True)
 
     def git_path(self):
-        return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug
+        return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug.strip()  # workaround SafeText TypeError
 
     def git(self):
         path = self.git_path()
