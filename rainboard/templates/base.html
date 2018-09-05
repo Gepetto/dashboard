@@ -1,16 +1,16 @@
 {% extends 'ndh.html' %}
-{% load static %}
+{% load ndh static %}
 
 {% block style %}<link rel="stylesheet" href="{% static 'highlight/github.css' %}">{% endblock %}
 
 {% block pagetitle %}Gepetto Packages{% endblock %}
 {% block sitetitle %}Gepetto Packages{% endblock %}
 {% block navbarleft %}
-<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:forges' %}">Forges</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:namespaces' %}">Namespaces</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:graph' %}">Graph</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:contributors' %}">Contributors</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'rainboard:gepetto' %}">Gepetto</a></li>
+{% navbar_item 'rainboard:forges' 'Forges' %}
+{% navbar_item 'rainboard:namespaces' 'Namespaces' %}
+{% navbar_item 'rainboard:graph' 'Graph' %}
+{% navbar_item 'rainboard:contributors' 'Contributors' %}
+{% navbar_item 'rainboard:gepetto' 'Gepetto' %}
 {% endblock %}
 
 {% block scripts %}

@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-ndh = ">=3.6"
+ndh = ">=3.9.0"
 django = "<2.1"
 django-filter = "*"
 "django-tables2" = "*"
