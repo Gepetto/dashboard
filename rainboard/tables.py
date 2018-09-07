@@ -69,7 +69,8 @@ class BranchTable(StrippedTable):
     def render_name(self, record, value):
         if record.repo is None:
             return value
-        name = record.name.split('/', maxsplit=2)[2]
+        if '/' in name:
+            name = record.name.split('/', maxsplit=2)[2]
         return mark_safe(f'<a href="{record.repo.url}/tree/{name}">{name}</a>')
 
     def render_forge(self, value):
