@@ -1,6 +1,8 @@
+# Please don't edit this file, and use the version generated at
+# http://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
+
 variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
-  GIT_DEPTH: "3"
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
 
