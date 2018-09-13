@@ -15,8 +15,12 @@ cache:
     - gh-pages
   script:
     - mkdir -p ccache
-    - cd /root/robotpkg/{{ robotpkg.category }}/{{ robotpkg }}
+    - cd /root/robotpkg/{{ robotpkg.category }}
     - git pull
+{% if robotpkg.without_py %}    - cd {{ robotpkg.without_py }}
+    - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
+    - cd ..
+{% endif %}    - cd {{ robotpkg }}
     - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
     - make install
     - cd work.$(hostname)/$(make show-var VARNAME=DISTNAME)

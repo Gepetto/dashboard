@@ -666,6 +666,10 @@ class Robotpkg(NamedModel):
     def valid_images(self):
         return self.image_set.filter(created__isnull=False, target__active=True).order_by('target__name')
 
+    def without_py(self):
+        if 'py-' in self.name:
+            return Robotpkg.objects.filter(name=self.name.replace('py-', '')).first()
+
 
 # class RobotpkgBuild(TimeStampedModel):
     # robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
