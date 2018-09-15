@@ -61,10 +61,10 @@
         },
         "django-tables2": {
             "hashes": [
-                "sha256:24d3b49f251008cabef8257b7fa03f872562456fe9979e0678b78a2c0366108f"
+                "sha256:e601af8a63d053c0b12c1b9f883f14f081b9cbc313cbaa3633a96b6e136e05e5"
             ],
             "index": "pypi",
-            "version": "==2.0.0b5"
+            "version": "==2.0.1"
         },
         "djangorestframework": {
             "hashes": [
@@ -131,6 +131,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
+            "markers": "python_version != '3.2.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.3.*' and python_version < '4' and python_version >= '2.6'",
             "version": "==1.23"
         }
     },
