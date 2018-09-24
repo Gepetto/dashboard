@@ -2,21 +2,21 @@ import os
 from pathlib import Path
 
 PROJECT = 'dashboard'
-PROJECT_VERBOSE = PROJECT.capitalize()
+PROJECT_VERBOSE = PROJECT.replace('_', ' ').title()
+PROJECT_SLUG = PROJECT.replace('_', '-')
 SELF_MAIL = False
 DOMAIN_NAME = os.environ.get('DOMAIN_NAME', 'local')
-ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST', f'{PROJECT}.{DOMAIN_NAME}')]
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST', f'{PROJECT_SLUG}.{DOMAIN_NAME}')]
 ALLOWED_HOSTS += [f'www.{host}' for host in ALLOWED_HOSTS]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True').lower() == 'true'
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
-if EMAIL_USE_SSL and EMAIL_USE_TLS:
+if EMAIL_USE_SSL and EMAIL_USE_TLS:  # pragma: no cover
     raise ValueError('you must not set both EMAIL_USE_{TLS,SSL}')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', f'smtp.{DOMAIN_NAME}')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
@@ -30,7 +30,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.%s' % ('filebased.EmailBackend' if DE
 EMAIL_SUBJECT_PREFIX = f'[{PROJECT_VERBOSE}] '
 
 ADMINS = ((os.environ.get('ADMIN_NAME', f'{PROJECT_VERBOSE} webmaster'),
-           os.environ.get('ADMIN_MAIL', f'webmaster@{DOMAIN_NAME}')),)
+           os.environ.get('ADMIN_MAIL', f'webmaster@{DOMAIN_NAME}')), )
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -86,7 +86,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, DB),
     }
 }
-if DB == 'postgres':
+if DB == 'postgres':  # pragma: no cover
     DATABASES['default'].update(
         ENGINE='django.db.backends.postgresql',
         NAME=os.environ.get('POSTGRES_DB', DB),
@@ -123,7 +123,7 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 STATIC_ROOT = '/srv/static/'
 
-if os.environ.get('MEMCACHED', 'False').lower() == 'true':
+if os.environ.get('MEMCACHED', 'False').lower() == 'true':  # pragma: no cover
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
