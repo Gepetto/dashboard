@@ -24,8 +24,15 @@ logger = logging.getLogger('rainboard.models')
 MAIN_BRANCHES = ['master', 'devel']
 RPKG_URL = 'http://robotpkg.openrobots.org'
 DOC_URL = 'http://projects.laas.fr/gepetto/doc'
-RPKG_LICENSES = {'gnu-lgpl-v3': 'LGPL-3.0', 'gnu-lgpl-v2': 'LGPL-2.0', 'mit': 'MIT', 'gnu-gpl-v3': 'GPL-3.0',
-                 '2-clause-bsd': 'BSD-2-Clause', 'eclipse': 'EPL-1.0', 'modified-bsd': 'BSD-3-Clause'}
+RPKG_LICENSES = {
+    'gnu-lgpl-v3': 'LGPL-3.0',
+    'gnu-lgpl-v2': 'LGPL-2.0',
+    'mit': 'MIT',
+    'gnu-gpl-v3': 'GPL-3.0',
+    '2-clause-bsd': 'BSD-2-Clause',
+    'eclipse': 'EPL-1.0',
+    'modified-bsd': 'BSD-3-Clause'
+}
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
 CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
@@ -80,12 +87,20 @@ class Forge(Links, NamedModel):
 
     def headers(self):
         return {
-            SOURCES.github: {'Authorization': f'token {self.token}', 'Accept':
-                             'application/vnd.github.drax-preview+json'},
-            SOURCES.gitlab: {'Private-Token': self.token},
-            SOURCES.redmine: {'X-Redmine-API-Key': self.token},
-            SOURCES.travis: {'Authorization': f'token {self.token}',
-                             'TRAVIS-API-Version': '3'},
+            SOURCES.github: {
+                'Authorization': f'token {self.token}',
+                'Accept': 'application/vnd.github.drax-preview+json'
+            },
+            SOURCES.gitlab: {
+                'Private-Token': self.token
+            },
+            SOURCES.redmine: {
+                'X-Redmine-API-Key': self.token
+            },
+            SOURCES.travis: {
+                'Authorization': f'token {self.token}',
+                'TRAVIS-API-Version': '3'
+            },
         }[self.source]
 
     def api_url(self):
@@ -99,13 +114,15 @@ class Forge(Links, NamedModel):
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
             for data in self.api_list(f'/orgs/{namespace.slug}/members'):
-                Namespace.objects.get_or_create(slug=data['login'],
-                                                defaults={'name': data['login'], 'group': False})
+                Namespace.objects.get_or_create(slug=data['login'], defaults={'name': data['login'], 'group': False})
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
-            Namespace.objects.get_or_create(slug=data['path'],
-                                            defaults={'name': data['name'], 'group': data['kind'] == 'group'})
+            Namespace.objects.get_or_create(
+                slug=data['path'], defaults={
+                    'name': data['name'],
+                    'group': data['kind'] == 'group'
+                })
         for data in self.api_list('/users'):
             Namespace.objects.get_or_create(slug=data['username'], defaults={'name': data['name']})
 
@@ -172,9 +189,15 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def main_repo(self):
         forge = self.main_forge if self.main_forge else get_default_forge(self)
-        repo, created = Repo.objects.get_or_create(forge=forge, namespace=self.main_namespace, project=self,
-                                                   defaults={'name': self.name, 'default_branch': 'master',
-                                                             'repo_id': 0})
+        repo, created = Repo.objects.get_or_create(
+            forge=forge,
+            namespace=self.main_namespace,
+            project=self,
+            defaults={
+                'name': self.name,
+                'default_branch': 'master',
+                'repo_id': 0
+            })
         if created:
             repo.api_update()
         return repo
@@ -193,9 +216,15 @@ class Project(Links, NamedModel, TimeStampedModel):
                 forge, namespace, name = branch.split('/', maxsplit=2)
                 namespace, _ = Namespace.objects.get_or_create(slug=namespace)
                 forge = Forge.objects.get(slug=forge)
-                repo, created = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=self,
-                                                           defaults={'name': self.name, 'default_branch': 'master',
-                                                                     'repo_id': 0})
+                repo, created = Repo.objects.get_or_create(
+                    forge=forge,
+                    namespace=namespace,
+                    project=self,
+                    defaults={
+                        'name': self.name,
+                        'default_branch': 'master',
+                        'repo_id': 0
+                    })
                 if created:
                     repo.api_update()
                 instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
@@ -375,12 +404,12 @@ class Repo(TimeStampedModel):
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
         try:
-            return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
-                                headers=self.forge.headers())
+            return requests.get(
+                self.api_url() + url, {'page': page}, verify=self.forge.verify, headers=self.forge.headers())
         except requests.exceptions.ConnectionError:
             logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
-            return requests.get(self.api_url() + url, {'page': page}, verify=self.forge.verify,
-                                headers=self.forge.headers())
+            return requests.get(
+                self.api_url() + url, {'page': page}, verify=self.forge.verify, headers=self.forge.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
@@ -466,11 +495,14 @@ class Repo(TimeStampedModel):
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
                 branch.update()
-            CIBuild.objects.get_or_create(repo=self, build_id=pid, defaults={
-                'passed': GITLAB_STATUS[pipeline['status']],
-                'started': parse_datetime(data['created_at']),
-                'branch': branch,
-            })
+            CIBuild.objects.get_or_create(
+                repo=self,
+                build_id=pid,
+                defaults={
+                    'passed': GITLAB_STATUS[pipeline['status']],
+                    'started': parse_datetime(data['created_at']),
+                    'branch': branch,
+                })
 
     def get_builds_github(self):
         if self.travis_id is not None:
@@ -483,11 +515,14 @@ class Repo(TimeStampedModel):
                 if created:
                     branch.update()
                 started = build['started_at'] if build['started_at'] is not None else build['finished_at']
-                CIBuild.objects.get_or_create(repo=self, build_id=build['id'], defaults={
-                    'passed': TRAVIS_STATE[build['state']],
-                    'started': parse_datetime(started),
-                    'branch': branch,
-                })
+                CIBuild.objects.get_or_create(
+                    repo=self,
+                    build_id=build['id'],
+                    defaults={
+                        'passed': TRAVIS_STATE[build['state']],
+                        'started': parse_datetime(started),
+                        'branch': branch,
+                    })
 
     def update(self, pull=True):
         ok = True
@@ -586,18 +621,17 @@ class Target(NamedModel):
 
 
 # class Test(TimeStampedModel):
-    # project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    # branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    # commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
-    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
-    # passed = models.BooleanField(default=False)
-    # TODO: travis vs gitlab-ci ?
-    # TODO: deploy binary, doc, coverage, lint
-
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+#     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+#     commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
+#     target = models.ForeignKey(Target, on_delete=models.CASCADE)
+#     passed = models.BooleanField(default=False)
+#     TODO: travis vs gitlab-ci ?
+#     TODO: deploy binary, doc, coverage, lint
 
 # class SystemDependency(NamedModel):
-    # project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+#     target = models.ForeignKey(Target, on_delete=models.CASCADE)
 
 
 class Robotpkg(NamedModel):
@@ -672,9 +706,9 @@ class Robotpkg(NamedModel):
 
 
 # class RobotpkgBuild(TimeStampedModel):
-    # robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
-    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
-    # passed = models.BooleanField(default=False)
+#     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
+#     target = models.ForeignKey(Target, on_delete=models.CASCADE)
+#     passed = models.BooleanField(default=False)
 
 
 class Image(models.Model):
@@ -693,8 +727,7 @@ class Image(models.Model):
         return f'{self.robotpkg}{py}:{self.target}'
 
     def get_build_args(self):
-        ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg,
-               'REGISTRY': self.robotpkg.project.registry()}
+        ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg, 'REGISTRY': self.robotpkg.project.registry()}
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
         elif self.py3:
@@ -741,7 +774,7 @@ class CIBuild(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('started',)
+        ordering = ('started', )
 
     def url(self):
         if self.repo.forge.source == SOURCES.github:
@@ -756,7 +789,7 @@ class Tag(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('name', )
         unique_together = ('name', 'project')
 
     def __str__(self):
@@ -835,14 +868,24 @@ def get_default_forge(project):
 def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
     public = data['visibility'] not in ['private', 'internal']
-    project, created = Project.objects.get_or_create(name=data['name'],
-                                                     defaults={'main_forge': forge, 'public': public})
-    namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
-                                                   defaults={'name': data['namespace']['name']})
-    repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
-                                         defaults={'repo_id': data['id'], 'name': data['name'], 'url': data['web_url'],
-                                                   'default_branch': data['default_branch'],
-                                                   'clone_url': data['http_url_to_repo']})
+    project, created = Project.objects.get_or_create(
+        name=data['name'], defaults={
+            'main_forge': forge,
+            'public': public
+        })
+    namespace, _ = Namespace.objects.get_or_create(
+        slug=data['namespace']['path'], defaults={'name': data['namespace']['name']})
+    repo, _ = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={
+            'repo_id': data['id'],
+            'name': data['name'],
+            'url': data['web_url'],
+            'default_branch': data['default_branch'],
+            'clone_url': data['http_url_to_repo']
+        })
     repo.name = data['name']
     repo.slug = data['path']
     repo.url = data['web_url']
@@ -862,11 +905,21 @@ def update_gitlab(forge, data):
 
 def update_github(forge, namespace, data):
     logger.info(f'update {data["name"]} from {forge}')
-    project, _ = Project.objects.get_or_create(name=data['name'], defaults={
-        'homepage': data['homepage'], 'main_namespace': namespace, 'main_forge': forge})
-    repo, _ = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
-                                         defaults={'repo_id': data['id'], 'name': data['name'],
-                                                   'clone_url': data['clone_url']})
+    project, _ = Project.objects.get_or_create(
+        name=data['name'], defaults={
+            'homepage': data['homepage'],
+            'main_namespace': namespace,
+            'main_forge': forge
+        })
+    repo, _ = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={
+            'repo_id': data['id'],
+            'name': data['name'],
+            'clone_url': data['clone_url']
+        })
     repo.homepage = data['homepage']
     repo.url = data['html_url']
     repo.repo_id = data['id']
@@ -895,8 +948,15 @@ def update_travis(namespace, data):
     if project is None:
         return
     forge = Forge.objects.get(source=SOURCES.github)
-    repo, created = Repo.objects.get_or_create(forge=forge, namespace=namespace, project=project,
-                                               defaults={'name': data['name'], 'repo_id': 0, 'travis_id': data['id']})
+    repo, created = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={
+            'name': data['name'],
+            'repo_id': 0,
+            'travis_id': data['id']
+        })
     if created:
         repo.api_update()
     else:
