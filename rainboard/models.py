@@ -932,7 +932,7 @@ def update_github(forge, namespace, data):
         if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
             try:
                 license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
-            except models.DoesNotExist:
+            except License.DoesNotExist:
                 raise ValueError('No License with spdx_id=' + repo_data['license']['spdx_id'])
             repo.license = license
             if not project.license:
