@@ -943,7 +943,8 @@ def update_github(forge, namespace, data):
                     project.license = license
         if 'source' in repo_data:
             repo.forked_from = repo_data['source']['id']
-    repo.open_issues = repo_data['open_issues_count']
+    if repo_data:
+        repo.open_issues = repo_data['open_issues_count']
     repo.clone_url = data['clone_url']
     repo.open_pr = len(list(repo.api_list('/pulls')))
     repo.save()
