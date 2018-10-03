@@ -11,8 +11,9 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import requests
+
+import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -249,11 +250,13 @@ class Project(Links, NamedModel, TimeStampedModel):
             search = re.search(f'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
             if search:
                 try:
-                    old = self.__dict__[value]
-                    self.__dict__[value] = search.groups()[0].strip(''' \r\n\t'"''')
-                    self.save()
+                    old = getattr(self, value)
+                    new = search.groups()[0].strip(''' \r\n\t'"''')
+                    if old != new:
+                        setattr(self, value, new)
+                        self.save()
                 except DataError:
-                    self.__dict__[value] = old
+                    setattr(self, value, old)
         for dependency in re.findall(r'ADD_[A-Z]+_DEPENDENCY\s*\(["\']?([^ "\')]+).*["\']?\)', content, re.I):
             project = Project.objects.filter(models.Q(slug=dependency) | models.Q(slug=dependency.replace('_', '-')))
             if project.exists():
