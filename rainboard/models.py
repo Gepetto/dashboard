@@ -11,9 +11,8 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -251,7 +250,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             if search:
                 try:
                     old = getattr(self, value)
-                    new = search.groups()[0].strip(''' \r\n\t'"''')
+                    new = search.groups()[0].strip(''' \r\n\t'"''').replace('_', '-')
                     if old != new:
                         setattr(self, value, new)
                         self.save()
