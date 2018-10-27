@@ -246,7 +246,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         with filename.open() as f:
             content = f.read()
         for key, value in CMAKE_FIELDS.items():
-            search = re.search(f'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
+            search = re.search(fr'set\s*\(\s*project_{key}\s+([^)]+)*\)', content, re.I)
             if search:
                 try:
                     old = getattr(self, value)
