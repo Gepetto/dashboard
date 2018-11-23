@@ -1010,3 +1010,15 @@ def get_contributor(name, mail):
     else:
         contributor = merge_contributors(cname.contributor, cmail.contributor)
     return contributor
+
+
+def unvalid_projects():
+    return Project.objects.filter(Q(name__contains='_') | Q(name__contains='-') | Q(slug__endswith='-2'))
+
+
+def fix_unvalid_projects():
+    for prj in unvalid_projects():
+        if prj.slug.endswith('-2'):
+            prj.slug = prj.slug[:-2]
+        prj.name = valid_name(prj.name)
+        prj.save()
