@@ -16,9 +16,9 @@ import requests
 import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
-from ndh.utils import enum_to_choices, query_sum, valid_name
+from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots
+from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_name
 
 logger = logging.getLogger('rainboard.models')
 
