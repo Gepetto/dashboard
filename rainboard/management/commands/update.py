@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
         log(f'\nUpdating all branches\n')
         for branch in Branch.objects.all():
-            log(f' {branch}')
+            log(f' {branch.project} - {branch}')
             branch.update(pull=False)
 
         log(f'\nPulling Robotpkg\n')

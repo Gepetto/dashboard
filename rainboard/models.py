@@ -582,10 +582,12 @@ class Branch(TimeStampedModel):
                 self.repo.fetch()
                 if self.repo != self.project.main_repo():
                     self.project.main_repo().fetch()
-            main_branch = self.project.main_branch()
-            if main_branch is not None:
+            try:
+                main_branch = self.project.main_branch()
                 self.ahead = self.get_ahead(main_branch)
                 self.behind = self.get_behind(main_branch)
+            except Branch.DoesNotExists:
+                pass
             self.updated = self.git().commit.authored_datetime
         except (git.exc.GitCommandError, IndexError):
             self.deleted = True
