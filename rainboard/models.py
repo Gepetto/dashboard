@@ -11,8 +11,9 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import requests
+
+import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -208,36 +209,31 @@ class Project(Links, NamedModel, TimeStampedModel):
             branches = [b for b in branches if b.endswith('master') or b.endswith('devel')]
         for branch in branches:
             logger.info(f'update branch {branch}')
-            if branch in MAIN_BRANCHES:
-                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=self.main_repo())
-            else:
-                if branch.startswith('remotes/'):
-                    branch = branch[8:]
-                forge, namespace, name = branch.split('/', maxsplit=2)
-                namespace, _ = Namespace.objects.get_or_create(slug=namespace)
-                forge = Forge.objects.get(slug=forge)
-                repo, created = Repo.objects.get_or_create(
-                    forge=forge,
-                    namespace=namespace,
-                    project=self,
-                    defaults={
-                        'name': self.name,
-                        'default_branch': 'master',
-                        'repo_id': 0
-                    })
-                if created:
-                    repo.api_update()
-                instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
+            if branch.startswith('remotes/'):
+                branch = branch[8:]
+            forge, namespace, name = branch.split('/', maxsplit=2)
+            namespace, _ = Namespace.objects.get_or_create(slug=namespace)
+            forge = Forge.objects.get(slug=forge)
+            repo, created = Repo.objects.get_or_create(
+                forge=forge,
+                namespace=namespace,
+                project=self,
+                defaults={
+                    'name': self.name,
+                    'default_branch': 'master',
+                    'repo_id': 0
+                })
+            if created:
+                repo.api_update()
+            instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
             if bcreated:
                 instance.update(pull=pull)
 
+    def checkout(self):
+        self.main_branch().git().checkout()
+
     def main_branch(self):
-        heads = self.git().heads
-        if heads:
-            for branch in MAIN_BRANCHES:
-                if branch in heads:
-                    return branch
-            return heads[0]
+        return self.main_repo().main_branch()
 
     def cmake(self):
         filename = self.git_path() / 'CMakeLists.txt'
@@ -305,6 +301,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 self.updated = robotpkg.updated
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
+        self.checkout()
         self.cmake()
         self.ros()
         self.save()
@@ -326,8 +323,6 @@ class Project(Links, NamedModel, TimeStampedModel):
         return get_template('rainboard/gitlab-ci.yml').render({'project': self})
 
     def contributors(self, update=False):
-        if self.main_branch() is None:
-            return []
         if update:
             for guy in self.git().git.shortlog('-nse').split('\n'):
                 name, mail = guy[7:-1].split(' <')
@@ -397,10 +392,11 @@ class Repo(TimeStampedModel):
         return self.name
 
     def api_url(self):
+        api_url = self.forge.api_url()
         return {
-            SOURCES.github: f'{self.forge.api_url()}/repos/{self.namespace.slug}/{self.slug}',
-            SOURCES.redmine: f'{self.forge.api_url()}/projects/{self.repo_id}.json',
-            SOURCES.gitlab: f'{self.forge.api_url()}/projects/{self.repo_id}',
+            SOURCES.github: f'{api_url}/repos/{self.namespace.slug}/{self.slug}',
+            SOURCES.redmine: f'{api_url}/projects/{self.repo_id}.json',
+            SOURCES.gitlab: f'{api_url}/projects/{self.repo_id}',
         }[self.forge.source]
 
     def api_req(self, url='', name=None, page=1):
@@ -603,12 +599,10 @@ class Branch(TimeStampedModel):
         return mark_safe(f'<a href="{build.url()}">{status}</a>')
 
     def forge(self):
-        if self.repo:
-            return self.repo.forge
+        return self.repo.forge
 
     def namespace(self):
-        if self.repo:
-            return self.repo.namespace
+        return self.repo.namespace
 
 
 class ActiveQuerySet(models.QuerySet):
