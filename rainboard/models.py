@@ -12,9 +12,8 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -289,6 +288,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             Tag.objects.get_or_create(name=str(tag), project=self)
 
     def update(self):
+        self.update_branches()
         self.update_tags()
         tag = self.tag_set.filter(name__startswith='v').last()  # TODO: implement SQL ordering for semver
         if tag is not None:
@@ -1023,3 +1023,10 @@ def fix_unvalid_projects():
             prj.slug = prj.slug[:-2]
         prj.name = valid_name(prj.name)
         prj.save()
+
+
+def to_release_in_robotpkg():
+    for robotpkg in Robotpkg.objects.all():
+        if robotpkg.pkgversion.split('r')[0] != robotpkg.project.version:
+            if 'alpha' not in str(robotpkg.project.version):
+                print(robotpkg, robotpkg.pkgversion, robotpkg.project.version)
