@@ -12,8 +12,9 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import requests
+
+import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -115,7 +116,8 @@ class Forge(Links, NamedModel):
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
             for data in self.api_list(f'/orgs/{namespace.slug}/members'):
-                Namespace.objects.get_or_create(slug=data['login'], defaults={'name': data['login'], 'group': False})
+                Namespace.objects.get_or_create(slug=data['login'].lower(),
+                                                defaults={'name': data['login'], 'group': False})
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
