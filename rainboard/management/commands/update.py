@@ -15,9 +15,9 @@ class Command(BaseCommand):
             if int(options['verbosity']) > 1:
                 self.stdout.write(message)
 
-        logger.info(f'updating forges')
+        log(f'updating forges')
         for forge in Forge.objects.order_by('source'):
-            logger.info(f' updating {forge}')
+            log(f' updating {forge}')
             forge.get_projects()
 
         log(f'\nUpdating all repos\n')
