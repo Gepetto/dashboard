@@ -3,8 +3,8 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 
-from rainboard.models import Branch, Project, Repo, Robotpkg
-from rainboard.utils import update_robotpkg, SOURCES
+from rainboard.models import Branch, Forge, Project, Repo, Robotpkg
+from rainboard.utils import SOURCES, update_robotpkg
 
 
 class Command(BaseCommand):
@@ -14,6 +14,11 @@ class Command(BaseCommand):
         def log(message):
             if int(options['verbosity']) > 1:
                 self.stdout.write(message)
+
+        logger.info(f'updating forges')
+        for forge in Forge.objects.order_by('source'):
+            logger.info(f' updating {forge}')
+            forge.get_projects()
 
         log(f'\nUpdating all repos\n')
         for repo in Repo.objects.all():

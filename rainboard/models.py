@@ -865,6 +865,8 @@ def get_default_forge(project):
 
 
 def update_gitlab(forge, data):
+    if 'default_branch' not in data:
+        return
     logger.info(f'update {data["name"]} from {forge}')
     public = data['visibility'] not in ['private', 'internal']
     project, created = Project.objects.get_or_create(
