@@ -31,11 +31,7 @@ class Command(BaseCommand):
         log(f'\nUpdating all projects\n')
         for project in Project.objects.all():
             log(f' {project}')
-            try:
-                project.update()
-            except Branch.DoesNotExist:
-                project.update_branches()
-                project.update()
+            project.update()
 
         log(f'\nUpdating Robotpkg\n')
         for robotpkg in Robotpkg.objects.all():
