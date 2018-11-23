@@ -16,7 +16,7 @@ import requests
 import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
-from ndh.utils import enum_to_choices, query_sum
+from ndh.utils import enum_to_choices, query_sum, valid_name
 
 from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots
 
@@ -143,7 +143,7 @@ class Forge(Links, NamedModel):
                 update_github(self, org, data)
         for user in Namespace.objects.filter(group=False):
             for data in self.api_list(f'/users/{user.slug}/repos'):
-                if Project.objects.filter(name=data['name']).exists():
+                if Project.objects.filter(name=valid_name(data['name'])).exists():
                     update_github(self, user, data)
 
     def get_projects_gitlab(self):
@@ -253,7 +253,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 except DataError:
                     setattr(self, value, old)
         for dependency in re.findall(r'ADD_[A-Z]+_DEPENDENCY\s*\(["\']?([^ "\')]+).*["\']?\)', content, re.I):
-            project = Project.objects.filter(models.Q(slug=dependency) | models.Q(slug=dependency.replace('_', '-')))
+            project = Project.objects.filter(name=valid_name(dependency))
             if project.exists():
                 dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
                 if not dependency.cmake:
@@ -270,7 +270,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         with filename.open() as f:
             content = f.read()
         for dependency in re.findall(r'<run_depend>(\w+).*</run_depend>', content, re.I):
-            project = Project.objects.filter(models.Q(slug=dependency) | models.Q(slug=dependency.replace('_', '-')))
+            project = Project.objects.filter(name=valid_name(dependency))
             if project.exists():
                 dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
                 if not dependency.ros:
@@ -867,7 +867,7 @@ def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
     public = data['visibility'] not in ['private', 'internal']
     project, created = Project.objects.get_or_create(
-        name=data['name'].replace('-', ' ').replace('_', ' '), defaults={
+        name=valid_name(data['name']), defaults={
             'main_forge': forge,
             'public': public
         })
@@ -904,7 +904,7 @@ def update_gitlab(forge, data):
 def update_github(forge, namespace, data):
     logger.info(f'update {data["name"]} from {forge}')
     project, _ = Project.objects.get_or_create(
-        name=data['name'].replace('_', ' ').replace('-', ' '), defaults={
+        name=valid_name(data['name']), defaults={
             'homepage': data['homepage'],
             'main_namespace': namespace,
             'main_forge': forge
@@ -947,7 +947,7 @@ def update_github(forge, namespace, data):
 
 
 def update_travis(namespace, data):
-    project = Project.objects.filter(name=data['name'].replace('_', ' ').replace('-', ' ')).first()
+    project = Project.objects.filter(name=valid_name(data['name'])).first()
     if project is None:
         return
     forge = Forge.objects.get(source=SOURCES.github)

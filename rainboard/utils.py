@@ -63,3 +63,7 @@ def update_robotpkg(path):
 
 def invalid_mail(mail):
     return any(invalid in mail for invalid in INVALID_MAILS)
+
+
+def valid_name(name):
+    return name.replace('_', ' ').replace('-', ' ').lower()
