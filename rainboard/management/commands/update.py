@@ -28,15 +28,19 @@ class Command(BaseCommand):
         log(f'\nPulling Robotpkg\n')
         update_robotpkg(settings.RAINBOARD_RPKG)
 
+        log(f'\nUpdating all projects\n')
+        for project in Project.objects.all():
+            log(f' {project}')
+            try:
+                project.update()
+            except Branch.DoesNotExist:
+                project.update_branches()
+                project.update()
+
         log(f'\nUpdating Robotpkg\n')
         for robotpkg in Robotpkg.objects.all():
             log(f' {robotpkg}')
             robotpkg.update(pull=False)
-
-        log(f'\nUpdating all projects\n')
-        for project in Project.objects.all():
-            log(f' {project}')
-            project.update()
 
         Branch.objects.filter(
                 Q(name__endswith='master') | Q(name__endswith='devel'),

@@ -867,7 +867,7 @@ def update_gitlab(forge, data):
     logger.info(f'update {data["name"]} from {forge}')
     public = data['visibility'] not in ['private', 'internal']
     project, created = Project.objects.get_or_create(
-        name=data['name'], defaults={
+        name=data['name'].replace('-', ' ').replace('_', ' '), defaults={
             'main_forge': forge,
             'public': public
         })
@@ -904,7 +904,7 @@ def update_gitlab(forge, data):
 def update_github(forge, namespace, data):
     logger.info(f'update {data["name"]} from {forge}')
     project, _ = Project.objects.get_or_create(
-        name=data['name'], defaults={
+        name=data['name'].replace('_', ' ').replace('-', ' '), defaults={
             'homepage': data['homepage'],
             'main_namespace': namespace,
             'main_forge': forge
@@ -947,7 +947,7 @@ def update_github(forge, namespace, data):
 
 
 def update_travis(namespace, data):
-    project = Project.objects.filter(name=data['name']).first()
+    project = Project.objects.filter(name=data['name'].replace('_', ' ').replace('-', ' ')).first()
     if project is None:
         return
     forge = Forge.objects.get(source=SOURCES.github)
