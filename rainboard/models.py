@@ -586,7 +586,7 @@ class Branch(TimeStampedModel):
                 main_branch = self.project.main_branch()
                 self.ahead = self.get_ahead(main_branch)
                 self.behind = self.get_behind(main_branch)
-            except Branch.DoesNotExists:
+            except Branch.DoesNotExist:
                 pass
             self.updated = self.git().commit.authored_datetime
         except (git.exc.GitCommandError, IndexError):
