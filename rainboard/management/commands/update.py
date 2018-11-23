@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 
 from rainboard.models import Branch, Project, Repo, Robotpkg
-from rainboard.utils import update_robotpkg
+from rainboard.utils import update_robotpkg, SOURCES
 
 
 class Command(BaseCommand):
