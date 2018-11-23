@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django.db.models import F, Q
 
 from rainboard.models import Branch, Project, Repo, Robotpkg
 from rainboard.utils import update_robotpkg
@@ -36,5 +37,10 @@ class Command(BaseCommand):
         for project in Project.objects.all():
             logger.info(f' {project}')
             project.update()
+
+        Branch.objects.filter(
+                Q(name__endswith='master') | Q(name__endswith='devel'),
+                repo__namespace=F('project__main_namespace'), repo__forge__source=SOURCES.gitlab
+                ).update(keep_doc=True)
 
         call_command('delete_perso')
