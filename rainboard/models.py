@@ -5,6 +5,7 @@ from subprocess import check_output
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.db.models.functions import Length
 from django.db.utils import DataError
 from django.template.loader import get_template
