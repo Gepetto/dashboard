@@ -12,8 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         def log(message):
-            if int(options['verbosity']) > 1:
-                self.stdout.write(message)
+            self.stdout.write(message)
 
         log(f'updating forges')
         for forge in Forge.objects.order_by('source'):
