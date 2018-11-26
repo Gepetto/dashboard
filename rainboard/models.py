@@ -898,7 +898,7 @@ def update_gitlab(forge, data):
     repo.default_branch = data['default_branch']
     repo.description = data['description']
     # TODO license (https://gitlab.com/gitlab-org/gitlab-ce/issues/28267), open_pr
-    if 'forked_from_project' in data and 'id' in data['forked_from_project']:
+    if 'forked_from_project' in data and data['forked_from_project'] is not None:
         repo.forked_from = data['forked_from_project']['id']
     elif created or project.main_namespace is None:
         project.main_namespace = namespace
