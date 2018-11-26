@@ -154,7 +154,8 @@ class Forge(Links, NamedModel):
 
         for orphan in Project.objects.filter(main_namespace=None):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
-            update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))
+            if repo:
+                update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
         pass  # TODO
