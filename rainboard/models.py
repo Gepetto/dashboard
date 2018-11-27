@@ -450,6 +450,8 @@ class Repo(TimeStampedModel):
     def get_clone_url(self):
         if self.forge.source == SOURCES.gitlab:
             return self.clone_url.replace('://', f'://gitlab-ci-token:{self.forge.token}@')
+        if self.forge.source == SOURCES.github:
+            return self.clone_url.replace('://', f'://{settings.GITHUB_USER}:{self.forge.token}@')
         return self.clone_url
 
     def git_remote(self):
