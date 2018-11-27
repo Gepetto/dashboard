@@ -36,7 +36,7 @@ RPKG_LICENSES = {
     'modified-bsd': 'BSD-3-Clause'
 }
 RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
-CMAKE_FIELDS = {'NAME': 'name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
+CMAKE_FIELDS = {'NAME': 'cmake_name', 'DESCRIPTION': 'description', 'URL': 'homepage', 'VERSION': 'version'}
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
 GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
 
@@ -180,6 +180,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     docs = models.BooleanField(default=True)
     debug = models.BooleanField(default=False)
     from_gepetto = models.BooleanField(default=True)
+    cmake_name = models.CharField(max_length=200, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
