@@ -742,12 +742,12 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry()}/{project.main_namespace.slug}/{project}/{self}'.lower()
+        return f'{project.registry()}/{project.main_namespace.slug}/{project.slug}/{self}'.lower()
 
     def get_image_url(self):
         project = self.robotpkg.project
         manifest = str(self).replace(':', '/manifests/')
-        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project}/{manifest}'
+        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project.slug}/{manifest}'
 
     def get_job_name(self):
         mode = 'debug' if self.debug else 'release'
