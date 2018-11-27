@@ -872,6 +872,8 @@ def get_default_forge(project):
 
 
 def update_gitlab(forge, data):
+    if data['archived']:
+        return
     if 'default_branch' not in data or data['default_branch'] is None:
         return
     logger.info(f'update {data["name"]} from {forge}')
@@ -912,6 +914,8 @@ def update_gitlab(forge, data):
 
 
 def update_github(forge, namespace, data):
+    if data['archived']:
+        return
     logger.info(f'update {data["name"]} from {forge}')
     project, _ = Project.objects.get_or_create(
         name=valid_name(data['name']), defaults={
