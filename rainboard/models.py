@@ -219,6 +219,9 @@ class Project(Links, NamedModel, TimeStampedModel):
             logger.info(f'update branch {branch}')
             if branch.startswith('remotes/'):
                 branch = branch[8:]
+            if branch.count('/') < 2:
+                logger.error(f'wrong branch "{branch}" in {self.git_path()}')
+                continue
             forge, namespace, name = branch.split('/', maxsplit=2)
             namespace, _ = Namespace.objects.get_or_create(slug=namespace)
             forge = Forge.objects.get(slug=forge)
