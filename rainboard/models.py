@@ -299,6 +299,8 @@ class Project(Links, NamedModel, TimeStampedModel):
             Tag.objects.get_or_create(name=str(tag), project=self)
 
     def update(self):
+        if self.main_namespace is None:
+            return
         self.update_branches()
         self.update_tags()
         tag = self.tag_set.filter(name__startswith='v').last()  # TODO: implement SQL ordering for semver
