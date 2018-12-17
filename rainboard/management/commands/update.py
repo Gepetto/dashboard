@@ -42,9 +42,11 @@ class Command(BaseCommand):
             log(f' {robotpkg}')
             robotpkg.update(pull=False)
 
+        log(f'\nUpdating keep doc\n')
         Branch.objects.filter(
                 Q(name__endswith='master') | Q(name__endswith='devel'),
                 repo__namespace=F('project__main_namespace'), repo__forge__source=SOURCES.gitlab
                 ).update(keep_doc=True)
 
+        log(f'\nDelet perso\n')
         call_command('delete_perso')
