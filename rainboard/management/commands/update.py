@@ -35,7 +35,7 @@ class Command(BaseCommand):
         log(f'\nUpdating all projects\n')
         for project in Project.objects.all():
             log(f' {project}')
-            project.update()
+            project.update(only_main_branches=False)
 
         log(f'\nUpdating Robotpkg\n')
         for robotpkg in Robotpkg.objects.all():

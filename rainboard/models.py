@@ -298,10 +298,10 @@ class Project(Links, NamedModel, TimeStampedModel):
         for tag in self.git().tags:
             Tag.objects.get_or_create(name=str(tag), project=self)
 
-    def update(self):
+    def update(self, only_main_branches=True):
         if self.main_namespace is None:
             return
-        self.update_branches()
+        self.update_branches(main=only_main_branches)
         self.update_tags()
         tag = self.tag_set.filter(name__startswith='v').last()  # TODO: implement SQL ordering for semver
         if tag is not None:
@@ -653,7 +653,7 @@ class Robotpkg(NamedModel):
     category = models.CharField(max_length=50)
 
     pkgbase = models.CharField(max_length=50, default='')
-    pkgversion = models.CharField(max_length=20, default='')
+    pkgversion = models.CharField(max_length=50, default='')
     master_sites = models.CharField(max_length=200, default='')
     master_repository = models.CharField(max_length=200, default='')
     maintainer = models.CharField(max_length=200, default='')
