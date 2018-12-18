@@ -116,8 +116,11 @@ class Forge(Links, NamedModel):
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
             for data in self.api_list(f'/orgs/{namespace.slug}/members'):
-                Namespace.objects.get_or_create(slug=data['login'].lower(),
-                                                defaults={'name': data['login'], 'group': False})
+                Namespace.objects.get_or_create(
+                    slug=data['login'].lower(), defaults={
+                        'name': data['login'],
+                        'group': False
+                    })
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
@@ -308,10 +311,12 @@ class Project(Links, NamedModel, TimeStampedModel):
             self.version = tag.name[1:]
         robotpkg = self.robotpkg_set.order_by('-updated').first()
         branch = self.branch_set.order_by('-updated').first()
-        if (branch is not None and branch.updated is not None) or robotpkg is not None:
-            if robotpkg is None:
+        branch_updated = branch is not None and branch.updated is not None
+        robotpkg_updated = robotpkg is not None and robotpkg.updated is not None
+        if branch_updated or robotpkg_updated:
+            if robotpkg_updated:
                 self.updated = branch.updated
-            elif branch is None or branch.updated is None:
+            elif branch_updated:
                 self.updated = robotpkg.updated
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
@@ -926,7 +931,8 @@ def update_github(forge, namespace, data):
         return
     logger.info(f'update {data["name"]} from {forge}')
     project, _ = Project.objects.get_or_create(
-        name=valid_name(data['name']), defaults={
+        name=valid_name(data['name']),
+        defaults={
             'homepage': data['homepage'],
             'main_namespace': namespace,
             'main_forge': forge
