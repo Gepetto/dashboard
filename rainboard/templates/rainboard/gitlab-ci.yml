@@ -18,10 +18,10 @@ cache:
     - cd /root/robotpkg/{{ robotpkg.category }}
     - git pull
 {% if robotpkg.without_py %}    - cd {{ robotpkg.without_py }}
-    - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
+    - make checkout MASTER_REPOSITORY="git ${CI_PROJECT_DIR}/.git"
     - cd ..
 {% endif %}    - cd {{ robotpkg }}
-    - make checkout MASTER_REPOSITORY="dir ${CI_PROJECT_DIR}"
+    - make checkout MASTER_REPOSITORY="git ${CI_PROJECT_DIR}/.git"
     - make install
     - cd $(make show-var VARNAME=WRKSRC)
 {% if project.tests %}    - make test
