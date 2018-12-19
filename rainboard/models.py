@@ -778,7 +778,19 @@ class Image(models.Model):
         return ['docker', 'push', self.get_image_name()]
 
     def update(self, pull=False):
-        r = requests.get(self.get_image_url())
+        headers = {}
+        if not self.robotpkg.project.public:
+            image_name = self.get_image_name().split('/', maxsplit=1)[1].split(':')[0]
+            token = requests.get(
+                f'{self.robotpkg.project.main_forge.url}/jwt/auth', {
+                    'client_id': 'docker',
+                    'offline_token': True,
+                    'service': 'container_registry',
+                    'scope': f'repository:{image_name}:push,pull'
+                },
+                auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
+            headers['Authorization'] = f'Bearer {token}'
+        r = requests.get(self.get_image_url(), headers=headers)
         if r.status_code == 200:
             self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
             self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
