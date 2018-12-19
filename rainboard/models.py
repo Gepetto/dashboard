@@ -314,9 +314,9 @@ class Project(Links, NamedModel, TimeStampedModel):
         branch_updated = branch is not None and branch.updated is not None
         robotpkg_updated = robotpkg is not None and robotpkg.updated is not None
         if branch_updated or robotpkg_updated:
-            if robotpkg_updated:
+            if not robotpkg_updated:
                 self.updated = branch.updated
-            elif branch_updated:
+            elif not branch_updated:
                 self.updated = robotpkg.updated
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
