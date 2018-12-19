@@ -386,7 +386,8 @@ class Project(Links, NamedModel, TimeStampedModel):
                           f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
 
     def badges(self):
-        return self.badge_travis() + self.badge_gitlab() + self.badge_coverage()
+        travis = self.badge_travis() if self.public else ''
+        return travis + self.badge_gitlab() + self.badge_coverage()
 
 
 class Repo(TimeStampedModel):
