@@ -12,9 +12,8 @@ from django.template.loader import get_template
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -546,6 +545,8 @@ class Repo(TimeStampedModel):
 
     def update(self, pull=True):
         ok = True
+        if self.project.main_namespace is None:
+            return
         self.project.update_tags()
         if pull:
             ok = self.fetch()
