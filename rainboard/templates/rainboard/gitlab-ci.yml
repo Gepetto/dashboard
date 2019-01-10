@@ -5,6 +5,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
+  CTEST_PARALLEL_LEVEL: 4
 
 cache:
   paths:
