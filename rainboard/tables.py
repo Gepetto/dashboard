@@ -1,5 +1,5 @@
-from django.utils.safestring import mark_safe
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 import django_tables2 as tables
 
@@ -33,7 +33,8 @@ class ProjectTable(StrippedTable):
 
     class Meta:
         model = models.Project
-        fields = ('main_namespace', 'name', 'public', 'from_gepetto', 'archived', 'license', 'homepage', 'updated', 'version')
+        fields = ('main_namespace', 'name', 'public', 'from_gepetto', 'archived', 'license', 'homepage', 'updated',
+                  'version')
 
     def render_name(self, record):
         return record.get_link()
@@ -87,7 +88,7 @@ class BranchTable(StrippedTable):
 
     # TODO: this works, but we have to hide the pinned from the main dataset
     # def get_top_pinned_data(self):
-        # return self.data.data.filter(name__in=models.MAIN_BRANCHES)
+    # return self.data.data.filter(name__in=models.MAIN_BRANCHES)
 
 
 class ImageTable(StrippedTable):
