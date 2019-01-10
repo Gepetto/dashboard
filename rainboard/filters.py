@@ -8,7 +8,7 @@ class ProjectFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = models.Project
-        fields = ('name', 'from_gepetto')
+        fields = ('name', 'from_gepetto', 'archived')
 
 
 class ContributorFilter(django_filters.rest_framework.FilterSet):

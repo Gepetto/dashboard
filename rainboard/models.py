@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 
 import git
 import requests
+
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -183,6 +184,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     debug = models.BooleanField(default=False)
     from_gepetto = models.BooleanField(default=True)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
+    archived = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -406,6 +408,7 @@ class Repo(TimeStampedModel):
     clone_url = models.URLField(max_length=200)
     travis_id = models.PositiveIntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -450,7 +453,14 @@ class Repo(TimeStampedModel):
     def api_update(self):
         data = self.api_data()
         if data:
-            return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
+            if data['archived']:
+                if self.project.main_repo() == self:
+                    self.project.archived = True
+                    self.project.save()
+                self.archived = True
+                self.save()
+            else:
+                return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
 
     def api_update_gitlab(self, data):
         update_gitlab(self.forge, data)
@@ -831,7 +841,7 @@ class Tag(models.Model):
 
 class GepettistQuerySet(models.QuerySet):
     def gepettist(self):
-        return self.filter(projects__from_gepetto=True)
+        return self.filter(projects__from_gepetto=True, projects__archived=False)
 
 
 class Contributor(models.Model):
@@ -852,7 +862,7 @@ class Contributor(models.Model):
         return ', '.join(str(mail) for mail in self.contributormail_set.filter(invalid=False))
 
     def contributed(self):
-        return ', '.join(str(project) for project in self.projects.filter(from_gepetto=True))
+        return ', '.join(str(project) for project in self.projects.filter(from_gepetto=True, archived=False))
 
 
 class ContributorName(models.Model):

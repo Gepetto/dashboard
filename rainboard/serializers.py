@@ -25,7 +25,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ('id', 'name', 'slug', 'public', 'main_namespace', 'main_forge', 'license', 'homepage', 'description',
-                  'version', 'updated', 'tests', 'docs', 'debug', 'from_gepetto', 'created', 'updated')
+                  'version', 'updated', 'tests', 'docs', 'debug', 'from_gepetto', 'archived', 'created', 'updated')
 
 
 class RepoSerializer(serializers.ModelSerializer):
