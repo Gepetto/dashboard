@@ -21,9 +21,10 @@ class Command(BaseCommand):
 
         for project in Project.objects.all():
             for slug in [project.slug, project.slug.replace('_', '-')]:
-                for pkg in itertools.chain(path.glob(f'*/{slug}'), path.glob(f'*/py-{slug}')):
-                    obj, created = Robotpkg.objects.get_or_create(name=pkg.name, category=pkg.parent.name,
-                                                                  project=project)
+                for pkg in itertools.chain(
+                        path.glob(f'*/{slug}{project.suffix}'), path.glob(f'*/py-{slug}{project.suffix}')):
+                    obj, created = Robotpkg.objects.get_or_create(
+                        name=pkg.name, category=pkg.parent.name, project=project)
                     if created:
                         logger.info(f'{project} found in {pkg}')
                         obj.update(pull=False)
