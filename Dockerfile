@@ -30,7 +30,7 @@ RUN pipenv install --system --deploy
 
 ADD . .
 
-CMD rm /opt/openrobots/etc/robotpkg.conf \
+CMD rm -f /opt/openrobots/etc/robotpkg.conf \
  && /srv/dashboard/robotpkg/bootstrap/bootstrap \
  && while ! nc -z postgres 5432; do sleep 1; done \
  && ./manage.py migrate \
