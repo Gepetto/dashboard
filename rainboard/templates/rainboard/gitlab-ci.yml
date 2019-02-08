@@ -29,7 +29,8 @@ cache:
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
-{% if image.debug %}  before_script:
+{% if image.allow_failure %}  allow_failure: true
+{% endif %}{% if image.debug %}  before_script:
     - echo PKG_OPTIONS.{{ robotpkg }}=debug >> /opt/openrobots/etc/robotpkg.conf
 {% endif %}
 {% endfor %}{% endfor %}{% if project.tests or project.docs %}doc-coverage:

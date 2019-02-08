@@ -756,6 +756,7 @@ class Image(models.Model):
     image = models.CharField(max_length=12, blank=True, null=True)
     py3 = models.BooleanField(default=False)
     debug = models.BooleanField(default=False)
+    allow_failure = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('robotpkg', 'target', 'py3', 'debug')
