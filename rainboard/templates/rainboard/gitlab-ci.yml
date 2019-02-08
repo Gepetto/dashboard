@@ -1,4 +1,3 @@
-# Please don't edit this file, and use the version generated at
 # http://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
 
 variables:
