@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.db.models.functions import Length
 from django.db.utils import DataError
 from django.template.loader import get_template
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
@@ -818,6 +819,9 @@ class Image(models.Model):
         if r.status_code == 200:
             self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
             self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
+            self.save()
+        if not self.allow_failure and (timezone.now() - self.created).days > 7:
+            self.allow_failure = True
             self.save()
 
 
