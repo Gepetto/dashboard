@@ -192,7 +192,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     from_gepetto = models.BooleanField(default=True)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
-    suffix = models.CharField(max_length=50, default='')
+    suffix = models.CharField(max_length=50, default='', blank=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
