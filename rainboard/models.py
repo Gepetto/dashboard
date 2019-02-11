@@ -309,11 +309,15 @@ class Project(Links, NamedModel, TimeStampedModel):
         for tag in self.git().tags:
             Tag.objects.get_or_create(name=str(tag), project=self)
 
+    def update_repo(self):
+        self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[self.main_branch()].commit
+
     def update(self, only_main_branches=True):
         if self.main_namespace is None:
             return
         self.update_branches(main=only_main_branches)
         self.update_tags()
+        self.update_repo()
         tag = self.tag_set.filter(name__startswith='v').last()  # TODO: implement SQL ordering for semver
         if tag is not None:
             self.version = tag.name[1:]
