@@ -96,11 +96,16 @@ class ImageTable(StrippedTable):
 
     class Meta:
         model = models.Image
-        fields = ('name', 'robotpkg', 'target', 'image', 'py3', 'debug', 'created')
+        fields = ('name', 'robotpkg', 'target', 'image', 'py3', 'debug', 'allow_failure', 'created')
 
     def render_name(self, record, value):
         if value:
             return mark_safe(f'<a href="{record.get_image_url()}">{value}</a>')
+
+    def render_allow_failure(self, record, value):
+        url = reverse('admin:rainboard_image_change', args=[record.id])
+        status = {True: '✓', False: '✗'}[value]
+        return mark_safe(f'<a href="{url}">{status}</a>')
 
 
 class ContributorTable(StrippedTable):
