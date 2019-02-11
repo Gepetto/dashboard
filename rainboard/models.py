@@ -247,8 +247,9 @@ class Project(Links, NamedModel, TimeStampedModel):
                 })
             if created:
                 repo.api_update()
-            instance, _ = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
-            instance.update(pull=pull)
+            instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
+            if bcreated:
+                instance.update(pull=pull)
 
     def checkout(self):
         self.main_branch().git().checkout()
