@@ -820,7 +820,7 @@ class Image(models.Model):
             self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
             self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
             self.save()
-        if not self.allow_failure and (timezone.now() - self.created).days > 7:
+        if not self.allow_failure and self.created and (timezone.now() - self.created).days > 7:
             self.allow_failure = True
             self.save()
 
