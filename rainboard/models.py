@@ -188,7 +188,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
-    debug = models.BooleanField(default=False)
     from_gepetto = models.BooleanField(default=True)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
@@ -704,7 +703,7 @@ class Robotpkg(NamedModel):
 
     def update_images(self):
         py3s = [False, True] if self.name.startswith('py-') else [False]
-        debugs = [False, True] if self.project.debug else [False]
+        debugs = [False, True]
         for target in Target.objects.active():
             for py3 in py3s:
                 for debug in debugs:
