@@ -32,8 +32,8 @@ class Command(BaseCommand):
         log(f'\nPulling Robotpkg\n')
         update_robotpkg(settings.RAINBOARD_RPKG)
 
-        log(f'\nUpdating all projects\n')
-        for project in Project.objects.all():
+        log(f'\nUpdating gepetto projects\n')
+        for project in Project.objects.filter(from_gepetto=True, archived=False):
             log(f' {project}')
             project.update(only_main_branches=False)
 
