@@ -41,6 +41,7 @@ cache:
     - echo -e 'CXXFLAGS+= --coverage\nLDFLAGS+= --coverage\nPKG_DEFAULT_OPTIONS= debug' >> /opt/openrobots/etc/robotpkg.conf
   after_script:
     - cd /root/robotpkg/{{ image.robotpkg.category }}/{{ image.robotpkg }}{% endwith %}
+    - /ci_deps.sh
     - cd $(make show-var VARNAME=WRKSRC)
 {% if project.docs %}    - make doc
     - mv doc/doxygen-html ${CI_PROJECT_DIR}
