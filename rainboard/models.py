@@ -310,7 +310,8 @@ class Project(Links, NamedModel, TimeStampedModel):
             Tag.objects.get_or_create(name=str(tag), project=self)
 
     def update_repo(self):
-        self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[self.main_branch()].commit
+        branch = str(self.main_branch()).split('/', maxsplit=2)[2]
+        self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[branch].commit
 
     def update(self, only_main_branches=True):
         if self.main_namespace is None:
