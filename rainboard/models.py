@@ -13,9 +13,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -771,7 +770,12 @@ class Image(models.Model):
         return f'{self.robotpkg}{py}:{self.target}'
 
     def get_build_args(self):
-        ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg, 'REGISTRY': self.robotpkg.project.registry()}
+        ret = {
+            'TARGET': self.target,
+            'ROBOTPKG': self.robotpkg,
+            'REGISTRY': self.robotpkg.project.registry(),
+            'CATEGORY': self.robotpkg.category,
+        }
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
         elif self.py3:
