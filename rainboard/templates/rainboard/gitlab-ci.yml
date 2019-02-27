@@ -25,7 +25,7 @@ cache:
     - /ci_deps.sh
     - make install
     - cd $(make show-var VARNAME=WRKSRC)
-{% if project.tests %}    - make test
+{% if project.tests %}    - make test || ctest -VV
 {% endif %}
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
