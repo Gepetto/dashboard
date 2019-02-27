@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import include, path
 from django.views.generic import RedirectView, TemplateView
 
 from rest_framework import routers
@@ -40,4 +40,5 @@ urlpatterns = [
     path('graph', TemplateView.as_view(template_name='rainboard/graph.html'), name='graph'),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('<str:slug>', RedirectView.as_view(pattern_name='project'), name='project_redirect'),
 ]
