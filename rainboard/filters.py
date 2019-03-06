@@ -1,10 +1,14 @@
 import django_filters
 
-from . import models
+from . import models, utils
+
+
+def filter_valid_name(queryset, name, value):
+    return queryset.filter(**{name: utils.valid_name(value)})
 
 
 class ProjectFilter(django_filters.rest_framework.FilterSet):
-    name = django_filters.CharFilter(lookup_expr='icontains')
+    name = django_filters.CharFilter(lookup_expr='icontains', method=filter_valid_name)
 
     class Meta:
         model = models.Project
