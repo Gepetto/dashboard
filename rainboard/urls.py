@@ -40,5 +40,5 @@ urlpatterns = [
     path('graph', TemplateView.as_view(template_name='rainboard/graph.html'), name='graph'),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('<str:slug>', RedirectView.as_view(pattern_name='project'), name='project_redirect'),
+    path('<str:slug>', RedirectView.as_view(pattern_name='rainboard:project'), name='project_redirect'),
 ]
