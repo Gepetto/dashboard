@@ -4,6 +4,7 @@ import re
 from subprocess import check_output
 
 from django.conf import settings
+from django.core.mail import mail_admins
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Length
@@ -313,6 +314,10 @@ class Project(Links, NamedModel, TimeStampedModel):
         branch = str(self.main_branch()).split('/', maxsplit=2)[2]
         self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[branch].commit
 
+    def ci_jobs(self):
+        if self.main_forge.source == SOURCES.gitlab:
+            self.main_repo().get_jobs_gitlab()
+
     def update(self, only_main_branches=True):
         if self.main_namespace is None:
             return
@@ -333,6 +338,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 self.updated = robotpkg.updated
             else:
                 self.updated = max(branch.updated, robotpkg.updated)
+        self.ci_jobs()
         self.checkout()
         self.cmake()
         self.ros()
@@ -536,7 +542,7 @@ class Repo(TimeStampedModel):
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
                 branch.update()
-            CIBuild.objects.get_or_create(
+            ci_build, created = CIBuild.objects.get_or_create(
                 repo=self,
                 build_id=pid,
                 defaults={
@@ -544,6 +550,37 @@ class Repo(TimeStampedModel):
                     'started': parse_datetime(data['created_at']),
                     'branch': branch,
                 })
+            if not created and ci_build.passed != GITLAB_STATUS[pipeline['status']]:
+                ci_build.passed = GITLAB_STATUS[pipeline['status']]
+                ci_build.save()
+
+    def get_jobs_gitlab(self):
+        for data in self.api_list('/jobs'):
+            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
+            branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+            if created:
+                branch.update()
+            ci_job, created = CIJob.objects.get_or_create(
+                repo=self,
+                job_id=data['id'],
+                defaults={
+                    'passed': GITLAB_STATUS[data['status']],
+                    'started': parse_datetime(data['created_at']),
+                    'branch': branch,
+                })
+            if not created and ci_job.passed != GITLAB_STATUS[data['status']]:
+                ci_job.passed = GITLAB_STATUS[data['status']]
+                ci_job.save()
+            if self == self.project.main_repo() and data['name'].startswith('robotpkg-'):
+                py3 = '-py3' in data['name']
+                debug = '-debug' in data['name']
+                target = next(target for target in Target.objects.all() if target.name in data['name']).name
+                robotpkg = data['name'][9:-(2 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
+                image = Image.objects.get(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
+                if image.allow_failure and GITLAB_STATUS[data['status']]:
+                    mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
+                    image.allow_failure = False
+                    image.save()
 
     def get_builds_github(self):
         if self.travis_id is not None:
@@ -840,6 +877,17 @@ class CIBuild(models.Model):
             return f'https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}/builds/{self.build_id}'
         if self.repo.forge.source == SOURCES.gitlab:
             return f'{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}/pipelines/{self.build_id}'
+
+
+class CIJob(models.Model):
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
+    passed = models.NullBooleanField()
+    job_id = models.PositiveIntegerField()
+    started = models.DateTimeField()
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ('-started', )
 
 
 class Tag(models.Model):
