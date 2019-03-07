@@ -1,5 +1,6 @@
 from subprocess import PIPE, run
 
+from django.http import Http404
 from django.http.response import HttpResponse, JsonResponse
 from django.views.generic import DetailView
 
@@ -9,6 +10,10 @@ from django_tables2.views import SingleTableMixin, SingleTableView
 from rest_framework import permissions, viewsets
 
 from . import filters, models, serializers, tables
+
+
+def nope(request):
+    raise Http404('not found')
 
 
 class ForgesView(SingleTableView):
