@@ -14,9 +14,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import requests
 
+import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -556,7 +556,7 @@ class Repo(TimeStampedModel):
 
     def get_jobs_gitlab(self):
         for data in self.api_list('/jobs'):
-            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
+            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{data["ref"]}'
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
                 branch.update()
