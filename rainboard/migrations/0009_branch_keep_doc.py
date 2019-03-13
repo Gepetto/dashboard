@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 from django.db.models import F, Q
-
 from rainboard.utils import SOURCES
 
 

@@ -3,7 +3,6 @@ from subprocess import PIPE, run
 from django.http import Http404
 from django.http.response import HttpResponse, JsonResponse
 from django.views.generic import DetailView
-
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView

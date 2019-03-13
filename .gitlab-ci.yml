@@ -5,16 +5,14 @@ variables:
   REGISTRY: "eur0c.laas.fr:5000"
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
 
-test:
-  stage: test
+format:
   image: python:alpine
   before_script:
     - pip install flake8
   script:
-    - flake8
+    - flake8 .
 
 build:
-  stage: build
   image: docker
   script:
     - docker build -t ${DOCKER_TAG} .

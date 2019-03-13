@@ -2,10 +2,9 @@
 
 import os
 
-from django.db import migrations
-
 import requests
 
+from django.db import migrations
 from rainboard.utils import SOURCES
 
 

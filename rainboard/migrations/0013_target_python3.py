@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 
-
 DIST_PYTHON3 = {
     '3.4': ['14.04', 'dubnium', 'jessie'],
     '3.5': ['16.04'],

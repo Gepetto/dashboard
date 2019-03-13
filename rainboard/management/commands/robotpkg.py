@@ -3,7 +3,6 @@ import logging
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-
 from rainboard.models import Project, Robotpkg
 from rainboard.utils import update_robotpkg
 

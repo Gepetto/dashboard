@@ -1,10 +1,9 @@
 import logging
 
-from django.core.management import call_command
-from django.core.management.base import BaseCommand
-
 import requests
 
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
 from rainboard.models import Forge, License, Repo
 
 LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'

@@ -3,9 +3,8 @@ import re
 import unicodedata
 from enum import IntEnum
 
-from django.utils.safestring import mark_safe
-
 import git
+from django.utils.safestring import mark_safe
 
 logger = logging.getLogger('rainboard.utils')
 

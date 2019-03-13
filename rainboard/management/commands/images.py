@@ -1,5 +1,5 @@
-from rainboard.models import Robotpkg
 from django.core.management.base import BaseCommand
+from rainboard.models import Robotpkg
 
 
 class Command(BaseCommand):
