@@ -3,6 +3,10 @@ import logging
 import re
 from subprocess import check_output
 
+import requests
+
+import git
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.db import models
@@ -13,15 +17,10 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
-
-import requests
-
-import git
-from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
-from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_name
+from .utils import (SOURCES, api_next, invalid_mail, slugify_with_dots, valid_name)
 
 logger = logging.getLogger('rainboard.models')
 
@@ -576,7 +575,10 @@ class Repo(TimeStampedModel):
                 debug = '-debug' in data['name']
                 target = next(target for target in Target.objects.all() if target.name in data['name']).name
                 robotpkg = data['name'][9:-(2 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
-                image = Image.objects.get(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
+                images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
+                if not images.exists():
+                    continue
+                image = images.first()
                 if image.allow_failure and GITLAB_STATUS[data['status']]:
                     mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
                     image.allow_failure = False
