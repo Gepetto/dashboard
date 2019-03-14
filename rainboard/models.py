@@ -1,12 +1,11 @@
 import json
 import logging
 import re
+import time
 from subprocess import check_output
 
-import requests
-
 import git
-from autoslug import AutoSlugField
+import requests
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.db import models
@@ -17,6 +16,8 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
+
+from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -581,6 +582,7 @@ class Repo(TimeStampedModel):
                 image = images.first()
                 if image.allow_failure and GITLAB_STATUS[data['status']]:
                     mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
+                    time.sleep(1)
                     image.allow_failure = False
                     image.save()
 
