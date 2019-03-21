@@ -49,10 +49,11 @@ cache:
     paths:
       - doxygen-html/
       - coverage/
-{% endif %}format:
+{% endif %}
+format:
 {% if project.allow_format_failure %}  allow_failure: true
 {% endif %}  image: eur0c.laas.fr:5000/gepetto/buildfarm/format
   script:
-    - isort -c
-    - flake8 .
     - check-clang-format.sh
+    - flake8 .
+    - yapf -dr
