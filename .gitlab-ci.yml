@@ -6,7 +6,7 @@ variables:
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
 
 format:
-  image: eur0c.laas.fr:5000/gepetto/buildfarm/format
+  image: eur0c.laas.fr:5000/gepetto/buildfarm/format:18.04
   script:
     - flake8 .
     - yapf -dr .
