@@ -1,9 +1,9 @@
 import logging
 
 import requests
-
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+
 from rainboard.models import Forge, License, Repo
 
 LICENSES = 'https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json'
@@ -16,8 +16,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info(f'updating licenses')
         for data in requests.get(LICENSES).json()['licenses']:
-            License.objects.get_or_create(spdx_id=data['licenseId'],
-                                          defaults={'name': data['name'], 'url': data['detailsUrl']})
+            License.objects.get_or_create(
+                spdx_id=data['licenseId'], defaults={
+                    'name': data['name'],
+                    'url': data['detailsUrl']
+                })
 
         logger.info(f'updating forges')
         for forge in Forge.objects.order_by('source'):

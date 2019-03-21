@@ -149,9 +149,7 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
 }
 
 DJANGO_TABLES2_TEMPLATE = 'rainboard/tables.html'

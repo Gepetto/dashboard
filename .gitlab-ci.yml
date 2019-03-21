@@ -8,8 +8,8 @@ variables:
 format:
   image: eur0c.laas.fr:5000/gepetto/buildfarm/format
   script:
-    - isort -c
     - flake8 .
+    - yapf -dr .
 
 build:
   image: docker

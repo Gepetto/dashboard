@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
+
 from rainboard.models import Branch, Forge, Project, Repo, Robotpkg
 from rainboard.utils import SOURCES, update_robotpkg
 
@@ -43,9 +44,9 @@ class Command(BaseCommand):
 
         log(f'\nUpdating keep doc\n')
         Branch.objects.filter(
-                Q(name__endswith='master') | Q(name__endswith='devel'),
-                repo__namespace=F('project__main_namespace'), repo__forge__source=SOURCES.gitlab
-                ).update(keep_doc=True)
+            Q(name__endswith='master') | Q(name__endswith='devel'),
+            repo__namespace=F('project__main_namespace'),
+            repo__forge__source=SOURCES.gitlab).update(keep_doc=True)
 
         log(f'\nDelet perso\n')
         call_command('delete_perso')
