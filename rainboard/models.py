@@ -193,6 +193,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
     suffix = models.CharField(max_length=50, default='', blank=True)
+    allow_format_failure = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
