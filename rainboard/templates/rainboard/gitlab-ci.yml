@@ -56,4 +56,4 @@ format:
   script:
     - check-clang-format.sh
     - flake8 .
-    - yapf -dr
+    - yapf -dr .
