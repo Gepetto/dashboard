@@ -4,8 +4,10 @@ import re
 import time
 from subprocess import check_output
 
-import git
 import requests
+
+import git
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.db import models
@@ -16,8 +18,6 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
-
-from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
