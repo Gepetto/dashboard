@@ -52,7 +52,7 @@ cache:
 {% endif %}
 format:
 {% if project.allow_format_failure %}  allow_failure: true
-{% endif %}  image: eur0c.laas.fr:5000/gepetto/buildfarm/format
+{% endif %}  image: gepetto/linters
   script:
     - check-clang-format.sh
     - flake8 .
