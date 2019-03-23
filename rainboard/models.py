@@ -4,9 +4,8 @@ import re
 import time
 from subprocess import check_output
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.mail import mail_admins
@@ -957,6 +956,7 @@ class Dependency(models.Model):
     robotpkg = models.BooleanField(default=False)  # TODO NYI
     cmake = models.BooleanField(default=False)
     ros = models.BooleanField(default=False)
+    mandatory = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = 'dependencies'
