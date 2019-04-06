@@ -8,7 +8,7 @@ yapf = "*"
 
 [packages]
 ndh = ">=3.9.0"
-django = "<2.2"
+django = "<2.3"
 django-filter = "*"
 "django-tables2" = "*"
 requests = "*"
