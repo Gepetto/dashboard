@@ -4,9 +4,6 @@ import re
 import time
 from subprocess import check_output
 
-import git
-import requests
-from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.db import models
@@ -17,6 +14,11 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
+
+import requests
+
+import git
+from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -123,19 +125,19 @@ class Forge(Links, NamedModel):
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
             for data in self.api_list(f'/orgs/{namespace.slug}/members'):
-                Namespace.objects.get_or_create(
-                    slug=data['login'].lower(), defaults={
-                        'name': data['login'],
-                        'group': False
-                    })
+                Namespace.objects.get_or_create(slug=data['login'].lower(),
+                                                defaults={
+                                                    'name': data['login'],
+                                                    'group': False
+                                                })
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
-            Namespace.objects.get_or_create(
-                slug=data['path'], defaults={
-                    'name': data['name'],
-                    'group': data['kind'] == 'group'
-                })
+            Namespace.objects.get_or_create(slug=data['path'],
+                                            defaults={
+                                                'name': data['name'],
+                                                'group': data['kind'] == 'group'
+                                            })
         for data in self.api_list('/users'):
             Namespace.objects.get_or_create(slug=data['username'], defaults={'name': data['name']})
 
@@ -210,15 +212,14 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def main_repo(self):
         forge = self.main_forge if self.main_forge else get_default_forge(self)
-        repo, created = Repo.objects.get_or_create(
-            forge=forge,
-            namespace=self.main_namespace,
-            project=self,
-            defaults={
-                'name': self.name,
-                'default_branch': 'master',
-                'repo_id': 0
-            })
+        repo, created = Repo.objects.get_or_create(forge=forge,
+                                                   namespace=self.main_namespace,
+                                                   project=self,
+                                                   defaults={
+                                                       'name': self.name,
+                                                       'default_branch': 'master',
+                                                       'repo_id': 0
+                                                   })
         if created:
             repo.api_update()
         return repo
@@ -237,15 +238,14 @@ class Project(Links, NamedModel, TimeStampedModel):
             forge, namespace, name = branch.split('/', maxsplit=2)
             namespace, _ = Namespace.objects.get_or_create(slug=namespace)
             forge = Forge.objects.get(slug=forge)
-            repo, created = Repo.objects.get_or_create(
-                forge=forge,
-                namespace=namespace,
-                project=self,
-                defaults={
-                    'name': self.name,
-                    'default_branch': 'master',
-                    'repo_id': 0
-                })
+            repo, created = Repo.objects.get_or_create(forge=forge,
+                                                       namespace=namespace,
+                                                       project=self,
+                                                       defaults={
+                                                           'name': self.name,
+                                                           'default_branch': 'master',
+                                                           'repo_id': 0
+                                                       })
             if created:
                 repo.api_update()
             instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
@@ -442,12 +442,14 @@ class Repo(TimeStampedModel):
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
         try:
-            return requests.get(
-                self.api_url() + url, {'page': page}, verify=self.forge.verify, headers=self.forge.headers())
+            return requests.get(self.api_url() + url, {'page': page},
+                                verify=self.forge.verify,
+                                headers=self.forge.headers())
         except requests.exceptions.ConnectionError:
             logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
-            return requests.get(
-                self.api_url() + url, {'page': page}, verify=self.forge.verify, headers=self.forge.headers())
+            return requests.get(self.api_url() + url, {'page': page},
+                                verify=self.forge.verify,
+                                headers=self.forge.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
@@ -542,14 +544,13 @@ class Repo(TimeStampedModel):
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
                 branch.update()
-            ci_build, created = CIBuild.objects.get_or_create(
-                repo=self,
-                build_id=pid,
-                defaults={
-                    'passed': GITLAB_STATUS[pipeline['status']],
-                    'started': parse_datetime(data['created_at']),
-                    'branch': branch,
-                })
+            ci_build, created = CIBuild.objects.get_or_create(repo=self,
+                                                              build_id=pid,
+                                                              defaults={
+                                                                  'passed': GITLAB_STATUS[pipeline['status']],
+                                                                  'started': parse_datetime(data['created_at']),
+                                                                  'branch': branch,
+                                                              })
             if not created and ci_build.passed != GITLAB_STATUS[pipeline['status']]:
                 ci_build.passed = GITLAB_STATUS[pipeline['status']]
                 ci_build.save()
@@ -560,14 +561,13 @@ class Repo(TimeStampedModel):
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
                 branch.update()
-            ci_job, created = CIJob.objects.get_or_create(
-                repo=self,
-                job_id=data['id'],
-                defaults={
-                    'passed': GITLAB_STATUS[data['status']],
-                    'started': parse_datetime(data['created_at']),
-                    'branch': branch,
-                })
+            ci_job, created = CIJob.objects.get_or_create(repo=self,
+                                                          job_id=data['id'],
+                                                          defaults={
+                                                              'passed': GITLAB_STATUS[data['status']],
+                                                              'started': parse_datetime(data['created_at']),
+                                                              'branch': branch,
+                                                          })
             if not created and ci_job.passed != GITLAB_STATUS[data['status']]:
                 ci_job.passed = GITLAB_STATUS[data['status']]
                 ci_job.save()
@@ -597,14 +597,13 @@ class Repo(TimeStampedModel):
                 if created:
                     branch.update()
                 started = build['started_at'] if build['started_at'] is not None else build['finished_at']
-                CIBuild.objects.get_or_create(
-                    repo=self,
-                    build_id=build['id'],
-                    defaults={
-                        'passed': TRAVIS_STATE[build['state']],
-                        'started': parse_datetime(started),
-                        'branch': branch,
-                    })
+                CIBuild.objects.get_or_create(repo=self,
+                                              build_id=build['id'],
+                                              defaults={
+                                                  'passed': TRAVIS_STATE[build['state']],
+                                                  'started': parse_datetime(started),
+                                                  'branch': branch,
+                                              })
 
     def update(self, pull=True):
         ok = True
@@ -812,7 +811,12 @@ class Image(models.Model):
         return f'{self.robotpkg}{py}:{self.target}'
 
     def get_build_args(self):
-        ret = {'TARGET': self.target, 'ROBOTPKG': self.robotpkg, 'REGISTRY': self.robotpkg.project.registry()}
+        ret = {
+            'TARGET': self.target,
+            'ROBOTPKG': self.robotpkg,
+            'CATEGORY': self.robotpkg.category
+            'REGISTRY': self.robotpkg.project.registry(),
+        }
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
         elif self.py3:
@@ -847,14 +851,13 @@ class Image(models.Model):
         headers = {}
         if not self.robotpkg.project.public:
             image_name = self.get_image_name().split('/', maxsplit=1)[1].split(':')[0]
-            token = requests.get(
-                f'{self.robotpkg.project.main_forge.url}/jwt/auth', {
-                    'client_id': 'docker',
-                    'offline_token': True,
-                    'service': 'container_registry',
-                    'scope': f'repository:{image_name}:push,pull'
-                },
-                auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
+            token = requests.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth', {
+                'client_id': 'docker',
+                'offline_token': True,
+                'service': 'container_registry',
+                'scope': f'repository:{image_name}:push,pull'
+            },
+                                 auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
             headers['Authorization'] = f'Bearer {token}'
         r = requests.get(self.get_image_url(), headers=headers)
         if r.status_code == 200:
@@ -984,24 +987,23 @@ def update_gitlab(forge, data):
         return
     logger.info(f'update {data["name"]} from {forge}')
     public = data['visibility'] not in ['private', 'internal']
-    project, created = Project.objects.get_or_create(
-        name=valid_name(data['name']), defaults={
-            'main_forge': forge,
-            'public': public
-        })
-    namespace, _ = Namespace.objects.get_or_create(
-        slug=data['namespace']['path'], defaults={'name': data['namespace']['name']})
-    repo, _ = Repo.objects.get_or_create(
-        forge=forge,
-        namespace=namespace,
-        project=project,
-        defaults={
-            'repo_id': data['id'],
-            'name': data['name'],
-            'url': data['web_url'],
-            'default_branch': data['default_branch'],
-            'clone_url': data['http_url_to_repo']
-        })
+    project, created = Project.objects.get_or_create(name=valid_name(data['name']),
+                                                     defaults={
+                                                         'main_forge': forge,
+                                                         'public': public
+                                                     })
+    namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
+                                                   defaults={'name': data['namespace']['name']})
+    repo, _ = Repo.objects.get_or_create(forge=forge,
+                                         namespace=namespace,
+                                         project=project,
+                                         defaults={
+                                             'repo_id': data['id'],
+                                             'name': data['name'],
+                                             'url': data['web_url'],
+                                             'default_branch': data['default_branch'],
+                                             'clone_url': data['http_url_to_repo']
+                                         })
     repo.name = data['name']
     repo.slug = data['path']
     repo.url = data['web_url']
@@ -1023,22 +1025,20 @@ def update_github(forge, namespace, data):
     if data['archived']:
         return
     logger.info(f'update {data["name"]} from {forge}')
-    project, _ = Project.objects.get_or_create(
-        name=valid_name(data['name']),
-        defaults={
-            'homepage': data['homepage'],
-            'main_namespace': namespace,
-            'main_forge': forge
-        })
-    repo, _ = Repo.objects.get_or_create(
-        forge=forge,
-        namespace=namespace,
-        project=project,
-        defaults={
-            'repo_id': data['id'],
-            'name': data['name'],
-            'clone_url': data['clone_url']
-        })
+    project, _ = Project.objects.get_or_create(name=valid_name(data['name']),
+                                               defaults={
+                                                   'homepage': data['homepage'],
+                                                   'main_namespace': namespace,
+                                                   'main_forge': forge
+                                               })
+    repo, _ = Repo.objects.get_or_create(forge=forge,
+                                         namespace=namespace,
+                                         project=project,
+                                         defaults={
+                                             'repo_id': data['id'],
+                                             'name': data['name'],
+                                             'clone_url': data['clone_url']
+                                         })
     repo.homepage = data['homepage']
     repo.url = data['html_url']
     repo.repo_id = data['id']
@@ -1072,15 +1072,14 @@ def update_travis(namespace, data):
     if project is None:
         return
     forge = Forge.objects.get(source=SOURCES.github)
-    repo, created = Repo.objects.get_or_create(
-        forge=forge,
-        namespace=namespace,
-        project=project,
-        defaults={
-            'name': data['name'],
-            'repo_id': 0,
-            'travis_id': data['id']
-        })
+    repo, created = Repo.objects.get_or_create(forge=forge,
+                                               namespace=namespace,
+                                               project=project,
+                                               defaults={
+                                                   'name': data['name'],
+                                                   'repo_id': 0,
+                                                   'travis_id': data['id']
+                                               })
     if created:
         repo.api_update()
     else:
