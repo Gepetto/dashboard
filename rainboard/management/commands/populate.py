@@ -16,11 +16,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info(f'updating licenses')
         for data in requests.get(LICENSES).json()['licenses']:
-            License.objects.get_or_create(
-                spdx_id=data['licenseId'], defaults={
-                    'name': data['name'],
-                    'url': data['detailsUrl']
-                })
+            License.objects.get_or_create(spdx_id=data['licenseId'],
+                                          defaults={
+                                              'name': data['name'],
+                                              'url': data['detailsUrl']
+                                          })
 
         logger.info(f'updating forges')
         for forge in Forge.objects.order_by('source'):
