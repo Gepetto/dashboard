@@ -21,7 +21,7 @@ cache:
 {% endif %}    - cd {{ robotpkg }}
     - make checkout MASTER_REPOSITORY="git ${CI_PROJECT_DIR}/.git"
     - make install
-    - cd $(make show-var VARNAME=WRKSRC)
+    - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.tests %}    - make test
 {% endif %}
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
@@ -38,7 +38,7 @@ cache:
     - echo -e 'CXXFLAGS+= --coverage\nLDFLAGS+= --coverage\nPKG_DEFAULT_OPTIONS= debug' >> /opt/openrobots/etc/robotpkg.conf
   after_script:
     - cd /root/robotpkg/{{ image.robotpkg.category }}/{{ image.robotpkg }}{% endwith %}
-    - cd $(make show-var VARNAME=WRKSRC)
+    - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.docs %}    - make doc
     - mv doc/doxygen-html ${CI_PROJECT_DIR}
 {% endif %}{% if project.tests%}    - mkdir -p ${CI_PROJECT_DIR}/coverage/
