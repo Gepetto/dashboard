@@ -1148,3 +1148,28 @@ def to_release_in_robotpkg():
         if robotpkg.pkgversion.split('r')[0] != robotpkg.project.version:
             if 'alpha' not in str(robotpkg.project.version):
                 print(robotpkg, robotpkg.pkgversion, robotpkg.project.version)
+
+
+def ordered_projects():
+    # TODO: clean, expose on API, add wip after current lst
+    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True) | Q(robotpkg__category='wip')
+    library_bad_ones = (Q(library__from_gepetto=False)
+                        | Q(library__robotpkg__isnull=True)
+                        | Q(library__robotpkg__category='wip'))
+
+    main = Project.objects.exclude(bad_ones)
+    ret = main.all().exclude(dependencies__isnull=False)
+    rest = main.all().exclude(id__in=ret)
+    lst = sorted(list(Robotpkg.objects.filter(project__in=ret).values_list('category', 'name')))
+    print(ret.count(), rest.count())
+
+    while rest.exists():
+        new_ret = []
+        for prj in rest:
+            if all(d.library in ret for d in prj.dependencies.exclude(library_bad_ones)):
+                new_ret.append(prj)
+        lst += sorted(list(Robotpkg.objects.filter(project__in=new_ret).values_list('category', 'name')))
+        ret = Project.objects.filter(Q(id__in=ret) | Q(id__in=[p.id for p in new_ret]))
+        rest = rest.exclude(id__in=[p.id for p in new_ret])
+        print(ret.count(), rest.count())
+    return lst
