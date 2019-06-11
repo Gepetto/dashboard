@@ -4,8 +4,6 @@ import re
 import time
 from subprocess import check_output
 
-import git
-import requests
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.db import models
@@ -17,6 +15,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
+import requests
+
+import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -589,7 +590,7 @@ class Repo(TimeStampedModel):
         if self.travis_id is not None:
             travis = Forge.objects.get(source=SOURCES.travis)
             for build in travis.api_list(f'/repo/{self.travis_id}/builds', name='builds'):
-                if self.project.tag_set.filter(name=build['branch']['name']).exists():
+                if build['branch'] is None or self.project.tag_set.filter(name=build['branch']['name']).exists():
                     continue
                 branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
                 branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
