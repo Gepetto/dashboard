@@ -418,7 +418,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         repo = self.repo_set.filter(forge__source=SOURCES.gitlab, namespace__group=True)
         if repo.exists():
             link = repo.first().url + '/pipeline_schedules'
-            return mark_safe(f'<a href="{link}">{self.cron}</a>')
+            return mark_safe(f'<a href="{link}">{self.cron()}</a>')
 
 
 class Repo(TimeStampedModel):
