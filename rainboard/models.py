@@ -415,7 +415,7 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def pipeline_schedules(self):
         """ provides a link to gitlab's CI schedules page showing then cron rule to use with this project """
-        repo = self.filter(forge__source=SOURCES.gitlab, namespace__group=True)
+        repo = self.repo_set.filter(forge__source=SOURCES.gitlab, namespace__group=True)
         if repo.exists():
             link = repo.first().url + '/pipeline_schedules'
             return mark_safe(f'<a href="{link}">{self.cron}</a>')
