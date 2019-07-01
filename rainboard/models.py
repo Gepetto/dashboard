@@ -408,6 +408,18 @@ class Project(Links, NamedModel, TimeStampedModel):
         travis = self.badge_travis() if self.public else mark_safe('')
         return travis + self.badge_gitlab() + self.badge_coverage()
 
+    def cron(self):
+        """ generate a cron-style interval description to run CI monthly on master """
+        hour, day = (self.pk // 30) % 24, self.pk % 30 + 1
+        return f'0 {hour} {day} * *'
+
+    def pipeline_schedules(self):
+        """ provides a link to gitlab's CI schedules page showing then cron rule to use with this project """
+        repo = self.filter(forge__source=SOURCES.gitlab, namespace__group=True)
+        if repo.exists():
+            link = repo.first().url + '/pipeline_schedules'
+            return mark_safe(f'<a href="{link}">{self.cron}</a>')
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)

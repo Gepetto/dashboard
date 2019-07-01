@@ -13,14 +13,19 @@
     {% else %}
     {% bootstrap_label 'UNLICENSED' label_class='label label-warning' %}
     {% endif %}
+    <br>
 
     {% if project.public %}
     {% bootstrap_label 'public' label_class='label label-success' %}
     {% else %}
     {% bootstrap_label 'private' label_class='label label-danger' %}
     {% endif %}
+    <br>
 
     {{ project.badges }}
+    <br>
+
+    {{ project.pipeline_schedules }}
   </div>
 
   <dl class="row" style="line-height: 1">
