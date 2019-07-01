@@ -7,7 +7,10 @@
   <h1>{{ project }}</h1>
   {% if project.cmake_name and project.cmake_name != project.name %}<h2>{{ project.cmake_name }}</h2>{% endif %}
 
-  <div class="float-right">
+  <div class="float-right text-right">
+    {{ project.badges }}
+    <br>
+
     {% if project.license %}
     {% bootstrap_label project.license label_class='label label-primary' %}
     {% else %}
@@ -20,9 +23,6 @@
     {% else %}
     {% bootstrap_label 'private' label_class='label label-danger' %}
     {% endif %}
-    <br>
-
-    {{ project.badges }}
     <br>
 
     {{ project.pipeline_schedules }}
