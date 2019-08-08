@@ -14,7 +14,7 @@ def add_targets(apps, schema_editor):
     # Disable dubnium, jessie & erbium
     Target.objects.filter(name='dubnium').update(active=False)
     Target.objects.filter(name='jessie').update(active=False)
-    Target.objects.filter(name='erbiurm').update(active=False)
+    Target.objects.filter(name='erbium').update(active=False)
 
     # Remove old images
     Image = apps.get_model('rainboard', 'Image')
