@@ -58,5 +58,6 @@ format:
     - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
   script:
     - check-clang-format.sh
-    - flake8 .
+    {% if project.has_python %}- flake8 .
     - yapf -dr .
+{% endif %}

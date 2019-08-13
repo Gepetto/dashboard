@@ -195,6 +195,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     archived = models.BooleanField(default=False)
     suffix = models.CharField(max_length=50, default='', blank=True)
     allow_format_failure = models.BooleanField(default=True)
+    has_python = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
