@@ -1166,7 +1166,7 @@ def to_release_in_robotpkg():
 
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
-    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True)
+    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
     library_bad_ones = Q(library__from_gepetto=False) | Q(library__robotpkg__isnull=True)
 
     main = Project.objects.exclude(bad_ones)
