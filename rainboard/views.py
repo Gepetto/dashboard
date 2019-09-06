@@ -135,7 +135,7 @@ def graph_svg(request):
 
 
 def ordered_projects(request):
-    return JsonResponse({'ret': models.ordered_projects})
+    return JsonResponse({'ret': models.ordered_projects()})
 
 
 class AuthenticatedOrReadOnlyModelViewSet(viewsets.ModelViewSet):
