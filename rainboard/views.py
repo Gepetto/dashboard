@@ -3,6 +3,7 @@ from subprocess import PIPE, run
 from django.http import Http404
 from django.http.response import HttpResponse, JsonResponse
 from django.views.generic import DetailView
+
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
@@ -131,6 +132,10 @@ def graph_svg(request):
         print('}', file=f)
     svg = run(['dot', '/tmp/graph', '-Tsvg'], stdout=PIPE).stdout.decode()
     return HttpResponse(svg, content_type='image/svg+xml')
+
+
+def ordered_projects(request):
+    return JsonResponse(models.order_projects)
 
 
 class AuthenticatedOrReadOnlyModelViewSet(viewsets.ModelViewSet):

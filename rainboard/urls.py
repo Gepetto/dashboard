@@ -27,6 +27,7 @@ urlpatterns = [
     path('contributors', views.ContributorsView.as_view(), name='contributors'),
     path('projects', views.ProjectsView.as_view(), name='projects'),
     path('projects/gepetto', views.GepettoProjectsView.as_view(), name='gepetto'),
+    path('projects/ordered', views.ordered_projects, name='ordered'),
     path('project/<str:slug>/robotpkg', views.ProjectView.as_view(), name='project'),
     path('project/<str:slug>/repos', views.ProjectReposView.as_view(), name='project-repos'),
     path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='project-branches'),

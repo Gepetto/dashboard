@@ -1165,11 +1165,9 @@ def to_release_in_robotpkg():
 
 
 def ordered_projects():
-    # TODO: clean, expose on API, add wip after current lst
-    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True) | Q(robotpkg__category='wip')
-    library_bad_ones = (Q(library__from_gepetto=False)
-                        | Q(library__robotpkg__isnull=True)
-                        | Q(library__robotpkg__category='wip'))
+    """ helper for gepetto/buildfarm/generate_all.py """
+    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True)
+    library_bad_ones = Q(library__from_gepetto=False) | Q(library__robotpkg__isnull=True)
 
     main = Project.objects.exclude(bad_ones)
     ret = main.all().exclude(dependencies__isnull=False)
