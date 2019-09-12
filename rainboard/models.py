@@ -1184,4 +1184,13 @@ def ordered_projects():
         ret = Project.objects.filter(Q(id__in=ret) | Q(id__in=[p.id for p in new_ret]))
         rest = rest.exclude(id__in=[p.id for p in new_ret])
         print(ret.count(), rest.count())
+
+    # Ensure that py-XX is after XX
+    switch = []
+    for i, (cat, pkg) in enumerate(lst):
+        if pkg.startswith('py-') and [cat, pkg[3:]] in lst and i < lst.index([cat, pkg[3:]]):
+            switch.append((i, lst.index([cat, pkg[3:]])))
+    for old, new in switch:
+        lst[old], lst[new] = lst[new], lst[old]
+
     return lst
