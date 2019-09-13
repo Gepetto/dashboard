@@ -1194,4 +1194,12 @@ def ordered_projects():
     for old, new in switch:
         lst[old], lst[new] = lst[new], lst[old]
 
+    # py-example-robot-data depends on py-pinocchio
+    # even though pinocchio could depend on example-robot-data
+
+    example = lst.index(('wip', 'py-example-robot-data'))
+    pinocchio = lst.index(('math', 'py-pinocchio'))
+    example = lst.pop(example)
+    lst.insert(pinocchio, example)
+
     return lst
