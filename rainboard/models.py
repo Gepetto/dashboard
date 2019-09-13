@@ -1188,8 +1188,9 @@ def ordered_projects():
     # Ensure that py-XX is after XX
     switch = []
     for i, (cat, pkg) in enumerate(lst):
-        if pkg.startswith('py-') and [cat, pkg[3:]] in lst and i < lst.index([cat, pkg[3:]]):
-            switch.append((i, lst.index([cat, pkg[3:]])))
+        main = (cat, pkg[3:])
+        if pkg.startswith('py-') and main in lst and i < lst.index(main):
+            switch.append((i, lst.index(main)))
     for old, new in switch:
         lst[old], lst[new] = lst[new], lst[old]
 
