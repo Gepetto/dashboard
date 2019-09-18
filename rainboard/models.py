@@ -594,10 +594,11 @@ class Repo(TimeStampedModel):
                     continue
                 image = images.first()
                 if image.allow_failure and GITLAB_STATUS[data['status']]:
-                    mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
-                    time.sleep(1)
                     image.allow_failure = False
                     image.save()
+                    mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
+                    print('  success', data['web_url'])
+                    time.sleep(2)
 
     def get_builds_github(self):
         if self.travis_id is not None:
