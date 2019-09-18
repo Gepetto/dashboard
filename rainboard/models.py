@@ -5,7 +5,6 @@ import time
 from subprocess import check_output
 
 from django.conf import settings
-from django.core.mail import mail_admins
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Length
@@ -596,9 +595,7 @@ class Repo(TimeStampedModel):
                 if image.allow_failure and GITLAB_STATUS[data['status']]:
                     image.allow_failure = False
                     image.save()
-                    mail_admins('Success !', 'allow_failure est devenu inutile sur ' + data['web_url'])
                     print('  success', data['web_url'])
-                    time.sleep(2)
 
     def get_builds_github(self):
         if self.travis_id is not None:
