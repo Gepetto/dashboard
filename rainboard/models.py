@@ -1,9 +1,10 @@
 import json
 import logging
 import re
-import time
 from subprocess import check_output
 
+import git
+import requests
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -14,9 +15,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
-import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
