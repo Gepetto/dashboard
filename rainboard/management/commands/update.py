@@ -20,12 +20,12 @@ class Command(BaseCommand):
             forge.get_projects()
 
         log(f'\nUpdating all repos\n')
-        for repo in Repo.objects.all():
+        for repo in Repo.objects.exclude(project__archived=True):
             log(f' {repo}')
             repo.update()
 
         log(f'\nUpdating all branches\n')
-        for branch in Branch.objects.all():
+        for branch in Branch.objects.exclude(project__archived=True):
             log(f' {branch.project} - {branch}')
             branch.update(pull=False)
 
