@@ -47,5 +47,5 @@ class Command(BaseCommand):
                               repo__namespace=F('project__main_namespace'),
                               repo__forge__source=SOURCES.gitlab).update(keep_doc=True)
 
-        log(f'\nDelet perso\n')
+        log(f'\nDelete perso\n')
         call_command('delete_perso')
