@@ -35,6 +35,7 @@ urlpatterns = [
     path('project/<str:slug>/contributors', views.ProjectContributorsView.as_view(), name='project-contributors'),
     path('project/<str:slug>/.gitlab-ci.yml', views.ProjectGitlabView.as_view(), name='project-gitlab'),
     path('doc', views.json_doc, name='doc'),
+    path('images', views.images_list, name='images'),
     path('docker', views.docker, name='docker'),
     path('graph.svg', views.graph_svg, name='graph_svg'),
     path('graph', TemplateView.as_view(template_name='rainboard/graph.html'), name='graph'),
