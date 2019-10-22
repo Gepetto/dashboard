@@ -114,7 +114,7 @@ def images_list(request):
     """
     get the list of docker images
     """
-    return '\n'.join(sorted(set(img.get_image_name() for img in models.Image.objects.all())))
+    return HttpResponse('\n'.join(sorted(set(img.get_image_name() for img in models.Image.objects.all()))))
 
 
 def docker(request):
