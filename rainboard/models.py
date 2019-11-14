@@ -5,6 +5,7 @@ from subprocess import check_output
 
 import git
 import requests
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -14,8 +15,6 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
-
-from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -1162,13 +1161,14 @@ def to_release_in_robotpkg():
 
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
+    fields = 'category', 'name', 'project__main_namespace__slug'
     bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
     library_bad_ones = Q(library__from_gepetto=False) | Q(library__robotpkg__isnull=True)
 
     main = Project.objects.exclude(bad_ones)
     ret = main.all().exclude(dependencies__isnull=False)
     rest = main.all().exclude(id__in=ret)
-    lst = sorted(list(Robotpkg.objects.filter(project__in=ret).values_list('category', 'name')))
+    lst = sorted(list(Robotpkg.objects.filter(project__in=ret).values_list(*fields)))
     print(ret.count(), rest.count())
 
     while rest.exists():
@@ -1176,7 +1176,7 @@ def ordered_projects():
         for prj in rest:
             if all(d.library in ret for d in prj.dependencies.exclude(library_bad_ones)):
                 new_ret.append(prj)
-        lst += sorted(list(Robotpkg.objects.filter(project__in=new_ret).values_list('category', 'name')))
+        lst += sorted(list(Robotpkg.objects.filter(project__in=new_ret).values_list(*fields)))
         ret = Project.objects.filter(Q(id__in=ret) | Q(id__in=[p.id for p in new_ret]))
         rest = rest.exclude(id__in=[p.id for p in new_ret])
         print(ret.count(), rest.count())
