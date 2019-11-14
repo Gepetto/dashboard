@@ -1183,8 +1183,8 @@ def ordered_projects():
 
     # Ensure that py-XX is after XX
     switch = []
-    for i, (cat, pkg) in enumerate(lst):
-        main = (cat, pkg[3:])
+    for i, (cat, pkg, ns) in enumerate(lst):
+        main = (cat, pkg[3:], ns)
         if pkg.startswith('py-') and main in lst and i < lst.index(main):
             switch.append((i, lst.index(main)))
     for old, new in switch:
@@ -1193,8 +1193,8 @@ def ordered_projects():
     # py-example-robot-data depends on py-pinocchio
     # even though pinocchio could depend on example-robot-data
 
-    example = lst.index(('wip', 'py-example-robot-data'))
-    pinocchio = lst.index(('math', 'py-pinocchio'))
+    example = lst.index(('wip', 'py-example-robot-data', 'gepetto'))
+    pinocchio = lst.index(('math', 'py-pinocchio', 'stack-of-tasks'))
     example = lst.pop(example)
     lst.insert(pinocchio, example)
 
