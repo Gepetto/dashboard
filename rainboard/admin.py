@@ -1,6 +1,10 @@
-from django.contrib.admin import ModelAdmin, site
+from django.contrib.admin import ModelAdmin, TabularInline, site
 
 from . import models
+
+
+class RobotpkgInline(TabularInline):
+    model = models.Robotpkg
 
 
 class ContributorAdmin(ModelAdmin):
@@ -14,6 +18,7 @@ class DependencyAdmin(ModelAdmin):
 
 class ProjectAdmin(ModelAdmin):
     search_fields = ('name', 'slug')
+    inlines = [RobotpkgInline]
 
 
 site.register(models.Contributor, ContributorAdmin)
