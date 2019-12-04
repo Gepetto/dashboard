@@ -3,9 +3,6 @@ import logging
 import re
 from subprocess import check_output
 
-import git
-import requests
-from autoslug import AutoSlugField
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -15,6 +12,11 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
+
+import requests
+
+import git
+from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -135,7 +137,7 @@ class Forge(Links, NamedModel):
                                                 'group': data['kind'] == 'group'
                                             })
         for data in self.api_list('/users'):
-            Namespace.objects.get_or_create(slug=data['username'], defaults={'name': data['name']})
+            Namespace.objects.get_or_create(slug=data['username'].lower(), defaults={'name': data['name']})
 
     def get_namespaces_redmine(self):
         pass  # TODO
