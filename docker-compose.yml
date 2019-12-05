@@ -16,7 +16,7 @@ services:
     image: memcached:alpine
     restart: unless-stopped
   app:
-    image: eur0c.laas.fr:5000/gepetto/dashboard:master
+    image: memmos.laas.fr:5000/gepetto/dashboard:master
     build: .
     restart: unless-stopped
     volumes:

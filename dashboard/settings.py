@@ -157,5 +157,5 @@ RAINBOARD_DATA = Path('/srv/dashboard')
 RAINBOARD_GITS = RAINBOARD_DATA / 'repositories'
 RAINBOARD_RPKG = RAINBOARD_DATA / 'robotpkg'
 PRIVATE_REGISTRY = 'gepgitlab.laas.fr:4567'
-PUBLIC_REGISTRY = 'eur0c.laas.fr:5000'
+PUBLIC_REGISTRY = 'memmos.laas.fr:5000'
 GITHUB_USER = 'hrp2-14'
