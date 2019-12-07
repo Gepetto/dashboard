@@ -30,6 +30,7 @@ DOC_URL = 'http://projects.laas.fr/gepetto/doc'
 RPKG_LICENSES = {
     'gnu-lgpl-v3': 'LGPL-3.0',
     'gnu-lgpl-v2': 'LGPL-2.0',
+    'gnu-lgpl-v2.1': 'LGPL-2.1',
     'mit': 'MIT',
     'gnu-gpl-v3': 'GPL-3.0',
     '2-clause-bsd': 'BSD-2-Clause',
@@ -232,7 +233,8 @@ class Project(Links, NamedModel, TimeStampedModel):
             if branch.startswith('remotes/'):
                 branch = branch[8:]
             if branch.count('/') < 2:
-                logger.error(f'wrong branch "{branch}" in {self.git_path()}')
+                if branch != 'master':
+                    logger.error(f'wrong branch "{branch}" in {self.git_path()}')
                 continue
             forge, namespace, name = branch.split('/', maxsplit=2)
             namespace, _ = Namespace.objects.get_or_create(slug=namespace)
