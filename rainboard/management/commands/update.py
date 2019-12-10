@@ -28,7 +28,7 @@ class Command(BaseCommand):
             repo.update()
 
         log(f'\nUpdating all branches\n')
-        for branch in Branch.objects.exclude(project__archived=True, project__from_gepetto=False):
+        for branch in Branch.objects.filter(project__archived=False, project__from_gepetto=True):
             log(f' {branch.project} - {branch}')
             branch.update(pull=False)
 
