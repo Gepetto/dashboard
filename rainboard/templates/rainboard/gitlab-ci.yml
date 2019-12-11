@@ -9,6 +9,9 @@ cache:
     - ccache
 
 {% for robotpkg in project.ordered_robotpkg %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
+  retry:
+    - max: 2
+    - when: runner_system_failure
   except:
     - gh-pages
   script:
