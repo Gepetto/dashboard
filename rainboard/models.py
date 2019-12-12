@@ -3,6 +3,8 @@ import logging
 import re
 from subprocess import check_output
 
+import git
+import requests
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -13,9 +15,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
-import git
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -746,6 +745,8 @@ class Robotpkg(NamedModel):
     description = models.TextField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
 
+    same_py = models.BooleanField(default=True)
+
     def main_page(self):
         if self.category != 'wip':
             return f'{RPKG_URL}/robotpkg/{self.category}/{self.name}'
@@ -796,7 +797,7 @@ class Robotpkg(NamedModel):
         return self.image_set.filter(created__isnull=False, target__active=True).order_by('target__name')
 
     def without_py(self):
-        if 'py-' in self.name:
+        if 'py-' in self.name and self.same_py:
             return Robotpkg.objects.filter(name=self.name.replace('py-', '')).first()
 
 
