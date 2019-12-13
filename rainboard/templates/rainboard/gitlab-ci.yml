@@ -56,6 +56,9 @@ cache:
 format:
 {% if project.allow_format_failure %}  allow_failure: true
 {% endif %}  image: gepetto/linters
+  retry:
+    max: 2
+    when: runner_system_failure
   before_script:
     - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
     - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
