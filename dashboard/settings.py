@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'fr-FR')
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'fr')
 TIME_ZONE = os.environ.get('TIME_ZONE', 'Europe/Paris')
 USE_I18N = True
 USE_L10N = True
@@ -159,3 +159,10 @@ RAINBOARD_RPKG = RAINBOARD_DATA / 'robotpkg'
 PRIVATE_REGISTRY = 'gepgitlab.laas.fr:4567'
 PUBLIC_REGISTRY = 'memmos.laas.fr:5000'
 GITHUB_USER = 'hrp2-14'
+
+AUTHENTICATION_BACKENDS = ["django_auth_ldap.backend.LDAPBackend"]
+
+AUTH_LDAP_SERVER_URI = "ldap://ldap.laas.fr"
+AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=users,dc=laas,dc=fr"
+AUTH_LDAP_START_TLS = True
+AUTH_LDAP_USER_ATTR_MAP = {"first_name": "givenName", "last_name": "sn", "email": "laas-mainMail"}

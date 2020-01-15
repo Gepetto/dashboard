@@ -11,7 +11,9 @@ RUN apt-get update -qq && apt-get install -qqy \
     git \
     gnupg2 \
     graphviz \
+    libldap2-dev \
     libpq-dev \
+    libsasl2-dev \
     netcat-openbsd \
     msmtp \
  && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \

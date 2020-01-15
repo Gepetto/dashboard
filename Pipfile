@@ -7,10 +7,11 @@ verify_ssl = true
 yapf = "*"
 
 [packages]
-ndh = ">=3.9.0"
-django = "<2.3"
+ndh = "*"
+django = "<3.0"
 django-filter = "*"
 "django-tables2" = "*"
 requests = "*"
 GitPython = "*"
 djangorestframework = "<3.11"
+django-auth-ldap = "*"

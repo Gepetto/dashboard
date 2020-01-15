@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e402bedac8025bdc5456575686da37a79528bc654b3ad3fff77d9e1f4f86d53a"
+            "sha256": "923b880a12f7931cc6a4a9fd6cef8049e0931069e5817797f30bfdb9600a4738"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -16,11 +16,11 @@
     "default": {
         "beautifulsoup4": {
             "hashes": [
-                "sha256:5279c36b4b2ec2cb4298d723791467e3000e5384a43ea0cdf5d45207c7e97169",
-                "sha256:6135db2ba678168c07950f9a16c4031822c6f4aec75a65e0a97bc5ca09789931",
-                "sha256:dcdef580e18a76d54002088602eba453eec38ebbcafafeaabd8cab12b6155d57"
+                "sha256:05fd825eb01c290877657a56df4c6e4c311b3965bda790c613a3d6fb01a5462a",
+                "sha256:9fbb4d6e48ecd30bcacc5b63b94088192dcda178513b2ae3c394229f8911b887",
+                "sha256:e1505eeed31b0f4ce2dbb3bc8eb256c04cc2b3b72af7d551a4ab6efd5cbe5dae"
             ],
-            "version": "==4.8.1"
+            "version": "==4.8.2"
         },
         "certifi": {
             "hashes": [
@@ -38,11 +38,19 @@
         },
         "django": {
             "hashes": [
-                "sha256:a4ad4f6f9c6a4b7af7e2deec8d0cbff28501852e5010d6c2dc695d3d1fae7ca0",
-                "sha256:fa98ec9cc9bf5d72a08ebf3654a9452e761fbb8566e3f80de199cbc15477e891"
+                "sha256:662a1ff78792e3fd77f16f71b1f31149489434de4b62a74895bd5d6534e635a5",
+                "sha256:687c37153486cf26c3fdcbdd177ef16de38dc3463f094b5f9c9955d91f277b14"
             ],
             "index": "pypi",
-            "version": "==2.2.8"
+            "version": "==2.2.9"
+        },
+        "django-auth-ldap": {
+            "hashes": [
+                "sha256:4d68d21058bd57a316a9e1fcd7a36d0f25d054d4d9d9ec85f766a4991176b454",
+                "sha256:5f48232c85ddfa33e3573153e6080526ac2eef5e7ec9cf42b5c4ba3c62afb96d"
+            ],
+            "index": "pypi",
+            "version": "==2.1.0"
         },
         "django-autoslug": {
             "hashes": [
@@ -106,11 +114,31 @@
         },
         "ndh": {
             "hashes": [
-                "sha256:16f110cc4294264052247e7dbcb568e2dde9f7d11132af95e6be4f2eae8d537f",
-                "sha256:bc5e995cd2529a85aa1b97a001caffc732b1881f34f1bfd753ae54fac24b751f"
+                "sha256:4ff247628ca159bd35917e21dde58fa67f7a907a189a1d020a029ac44b257fa6",
+                "sha256:bb40b9d071b331cbbb8aa829b64a628ea9357a05c3760be8700341b2fb116c11"
             ],
             "index": "pypi",
-            "version": "==3.9.4"
+            "version": "==3.10.3"
+        },
+        "pyasn1": {
+            "hashes": [
+                "sha256:39c7e2ec30515947ff4e87fb6f456dfc6e84857d34be479c9d4a4ba4bf46aa5d",
+                "sha256:aef77c9fb94a3ac588e87841208bdec464471d9871bd5050a287cc9a475cd0ba"
+            ],
+            "version": "==0.4.8"
+        },
+        "pyasn1-modules": {
+            "hashes": [
+                "sha256:905f84c712230b2c592c19470d3ca8d552de726050d1d1716282a1f6146be65e",
+                "sha256:a50b808ffeb97cb3601dd25981f6b016cbb3d31fbf57a8b8a87428e6158d0c74"
+            ],
+            "version": "==0.2.8"
+        },
+        "python-ldap": {
+            "hashes": [
+                "sha256:7d1c4b15375a533564aad3d3deade789221e450052b21ebb9720fb822eccdb8e"
+            ],
+            "version": "==3.2.0"
         },
         "pytz": {
             "hashes": [
