@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dashboard.middleware.LAASPermsMiddleware',
 ]
 
 ROOT_URLCONF = f'{PROJECT}.urls'
@@ -166,3 +167,5 @@ AUTH_LDAP_SERVER_URI = "ldap://ldap.laas.fr"
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=users,dc=laas,dc=fr"
 AUTH_LDAP_START_TLS = True
 AUTH_LDAP_USER_ATTR_MAP = {"first_name": "givenName", "last_name": "sn", "email": "laas-mainMail"}
+
+LAAS_NETWORKS = ['140.93.0.0/21', '2001:660:6602:4::/64']
