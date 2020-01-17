@@ -373,7 +373,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
 
     def doc_coverage_image(self):
-        images = Image.objects.filter(robotpkg__project=self, py3=False, target__name='16.04')
+        images = Image.objects.filter(robotpkg__project=self, py3=False, target__name='18.04')
         return images.order_by(Length('robotpkg__name').desc()).first()
 
     def print_deps(self):
