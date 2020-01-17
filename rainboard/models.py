@@ -13,9 +13,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
 import git
+import requests
 from autoslug import AutoSlugField
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
@@ -374,7 +373,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
 
     def doc_coverage_image(self):
-        images = Image.objects.filter(robotpkg__project=self, py3=False, target__name='18.04')
+        images = Image.objects.filter(robotpkg__project=self, py3=False, target__main=True)
         return images.order_by(Length('robotpkg__name').desc()).first()
 
     def print_deps(self):
