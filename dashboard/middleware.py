@@ -27,4 +27,4 @@ class LAASPermsMiddleware:
                    or request.method in permissions.SAFE_METHODS and ip_laas(request))
         print('allowed', allowed)
 
-        return HttpResponseForbidden()
+        return self.get_response(request)
