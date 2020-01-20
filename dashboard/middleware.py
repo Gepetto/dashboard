@@ -1,4 +1,5 @@
 from ipaddress import ip_address, ip_network
+from pprint import pprint
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
@@ -8,6 +9,7 @@ from rest_framework import permissions
 
 def ip_laas(request: HttpRequest) -> bool:
     forwarded_for = ip_address(request.META.get('HTTP_X_FORWARDED_FOR'))
+    pprint(request.META)
     for net in settings.LAAS_NETWORKS:
         print(forwarded_for, 'in', ip_network(net))
     return any(forwarded_for in ip_network(net) for net in settings.LAAS_NETWORKS)
