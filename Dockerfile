@@ -5,6 +5,8 @@ EXPOSE 8000
 RUN mkdir /app
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1
+
 RUN apt-get update -qq && apt-get install -qqy \
     apt-transport-https \
     curl \
