@@ -13,9 +13,11 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import requests
+
+import git
 from autoslug import AutoSlugField
+from autoslug.utils import slugify
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -131,7 +133,7 @@ class Forge(Links, NamedModel):
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
-            Namespace.objects.get_or_create(slug=data['path'],
+            Namespace.objects.get_or_create(slug=slugify(data['path']),
                                             defaults={
                                                 'name': data['name'],
                                                 'group': data['kind'] == 'group'
