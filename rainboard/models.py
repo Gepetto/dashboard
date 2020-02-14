@@ -139,7 +139,7 @@ class Forge(Links, NamedModel):
                                                 'group': data['kind'] == 'group'
                                             })
         for data in self.api_list('/users'):
-            Namespace.objects.get_or_create(slug=data['username'].lower(), defaults={'name': data['name']})
+            Namespace.objects.get_or_create(slug=slugify(data['username']), defaults={'name': data['name']})
 
     def get_namespaces_redmine(self):
         pass  # TODO
