@@ -27,6 +27,7 @@ class LAASPermsMiddleware:
         allowed = (request.path.startswith('/admin/') or request.path.startswith('/accounts/')
                    or request.user and request.user.is_authenticated
                    or request.method in permissions.SAFE_METHODS and ip_laas(request))
-        print('allowed', allowed)
 
-        return self.get_response(request)
+        if allowed:
+            return self.get_response(request)
+        return HttpResponseForbidden()
