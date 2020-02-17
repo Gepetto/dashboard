@@ -53,6 +53,9 @@ class Command(BaseCommand):
         log(f'\nDelete perso\n')
         call_command('delete_perso')
 
+        log(f'\nclean obsolete Images\n')
+        Image.objects.filter(robotpkg__project__archived=True).delete()
+
         log(f'\nLook for missing images\n')
         for img in Image.objects.filter(created__lt=timezone.now() - timedelta(days=7)):
             log(f' {img}')
