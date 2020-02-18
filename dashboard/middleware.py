@@ -1,7 +1,8 @@
 from ipaddress import ip_address, ip_network
 
 from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import reverse
 
 from rest_framework import permissions
 
@@ -27,4 +28,4 @@ class LAASPermsMiddleware:
 
         if allowed:
             return self.get_response(request)
-        return HttpResponseForbidden()
+        return HttpResponseRedirect(reverse('login'))
