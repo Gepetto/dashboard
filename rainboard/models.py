@@ -27,7 +27,7 @@ logger = logging.getLogger('rainboard.models')
 
 MAIN_BRANCHES = ['master', 'devel']
 RPKG_URL = 'http://robotpkg.openrobots.org'
-DOC_URL = 'http://projects.laas.fr/gepetto/doc'
+DOC_URL = 'https://gepettoweb.laas.fr/doc'
 RPKG_LICENSES = {
     'gnu-lgpl-v3': 'LGPL-3.0',
     'gnu-lgpl-v2': 'LGPL-2.0',

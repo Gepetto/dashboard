@@ -1,4 +1,4 @@
-# http://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
+# https://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
 
 variables:
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
