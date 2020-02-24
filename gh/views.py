@@ -46,7 +46,9 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     gh_ref = gh_remote.refs[ref_s]
     if data['after'] == "0000000000000000000000000000000000000000":
         print("branch deleted")
-        git_repo.delete_head([gh_ref_s, gl_ref_s, ref_s], force=True)
+        for ref in [gh_ref_s, gl_ref_s, ref_s]:
+            if ref in git_repo.branches:
+                git_repo.delete_head(ref, force=True)
         gitlab = Forge.objects.get(slug='gitlab')
         project_u = f'{namespace.slug}/{project.slug}'.replace('/', '%2F')
         branch_u = ref_s.replace('/', '%2F')
