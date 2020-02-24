@@ -9,8 +9,9 @@ import requests
 from autoslug.utils import slugify
 from django.conf import settings
 from django.http import HttpRequest
-from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError
-from django.shortcuts import get_object_or_404
+from django.http.response import (HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect,
+                                  HttpResponseServerError)
+from django.shortcuts import get_object_or_404, reverse
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
@@ -18,11 +19,6 @@ from rainboard.models import Forge, Namespace, Project
 
 from . import models
 
-
-def log(request: HttpRequest, rep: str = 'ok') -> HttpResponse:
-    """Just print the body."""
-    pprint(loads(request.body.decode()))
-    return HttpResponse(rep)
 
 
 def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
@@ -95,31 +91,33 @@ def webhook(request: HttpRequest) -> HttpResponse:
     # validate ip source
     forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     networks = requests.get('https://api.github.com/meta').json()['hooks']
-    if any(ip_address(forwarded_for) in ip_network(net) for net in networks):
-        print('from github IP')
-    else:
+    if not any(ip_address(forwarded_for) in ip_network(net) for net in networks):
         print('not from github IP')
+        return HttpResponseRedirect(reverse('login'))
 
     # validate signature
     signature = request.META.get('HTTP_X_HUB_SIGNATURE')
     if signature is None:
         print('no signature')
-    else:
-        algo, signature = signature.split('=')
-        if algo != 'sha1':
-            return HttpResponseServerError('I only speak sha1.', status=501)
+        return HttpResponseRedirect(reverse('login'))
+    algo, signature = signature.split('=')
+    if algo != 'sha1':
+        print('signature not sha-1')
+        return HttpResponseServerError('I only speak sha1.', status=501)
 
-        mac = hmac.new(force_bytes(settings.GITHUB_WEBHOOK_KEY), msg=force_bytes(request.body), digestmod=sha1)
-        if not hmac.compare_digest(force_bytes(mac.hexdigest()), force_bytes(signature)):
-            return HttpResponseForbidden('wrong signature.')
+    mac = hmac.new(force_bytes(settings.GITHUB_WEBHOOK_KEY), msg=force_bytes(request.body), digestmod=sha1)
+    if not hmac.compare_digest(force_bytes(mac.hexdigest()), force_bytes(signature)):
+        print('wrong signature')
+        return HttpResponseForbidden('wrong signature.')
 
     # process event
     event = request.META.get('HTTP_X_GITHUB_EVENT', 'ping')
     if event == 'ping':
-        return log(request, 'pong')
+        pprint(loads(request.body.decode()))
+        return HttpResponse('pong')
     if event == 'push':
         return push(request, 'push event detected')
     if event == 'check_suite':
         return check_suite(request, 'check_suite event detected')
 
-    return log(request, event)
+    return HttpResponseForbidden('event not found')
