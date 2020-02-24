@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
-from rainboard.models import Namespace, Project
+from rainboard.models import Forge, Namespace, Project
 
 from . import models
 
@@ -48,6 +48,15 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     gh_remote = git_repo.remotes[gh_remote_s]
     gh_remote.fetch()
     gh_ref = gh_remote.refs[ref_s]
+    if data['arter'] == "0000000000000000000000000000000000000000":
+        print("branch deleted")
+        git_repo.delete_head([gh_ref_s, gl_ref_s, ref_s], force=True)
+        gitlab = Forge.objects.get(slug='gitlab')
+        project_u = f'{namespace.slug}/{project.slug}'.replace('/', '%2F')
+        branch_u = ref_s.replace('/', '%2F')
+        url = f'/projects/{project_u}/repository/branches/{branch_u}'
+        requests.delete(gitlab.api_url() + url, verify=gitlab.verify, headers=gitlab.headers())
+
     if str(gh_ref.commit) != data['after']:
         fail = f'push: wrong commit: {gh_ref.commit} vs {data["after"]}'
         print(fail)
