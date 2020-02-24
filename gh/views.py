@@ -56,6 +56,7 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
         branch_u = ref_s.replace('/', '%2F')
         url = f'/projects/{project_u}/repository/branches/{branch_u}'
         requests.delete(gitlab.api_url() + url, verify=gitlab.verify, headers=gitlab.headers())
+        return HttpResponse(rep)
 
     if str(gh_ref.commit) != data['after']:
         fail = f'push: wrong commit: {gh_ref.commit} vs {data["after"]}'
