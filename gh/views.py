@@ -29,7 +29,24 @@ def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
 
 def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
     """Manage Github's Pull Requests."""
-    loads(request.body.decode())
+    data = loads(request.body.decode())
+    namespace = get_object_or_404(Namespace, slug=slugify(data['repository']['owner']['login']))
+    project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['repository']['name']))
+    git_repo = project.git()
+    remote_s = f'github/{data["pull_request"]["head"]["repo"]["owner"]["login"]}'
+    if remote_s not in git_repo.remotes:
+        git_repo.create_remote(remote_s, data["pull_request"]["head"]["repo"]["clone_url"])
+    remote = git_repo.remotes[remote_s]
+    remote.fetch()
+    branch = f'pr/{data["number"]}'
+    commit = data['pull_request']['head']['sha']
+    if branch in git_repo.branches:
+        git_repo.heads[branch] = commit
+    else:
+        git_repo.create_head(branch, commit=commit)
+    print(f'pushing {commit} on {branch} on gitlab')
+    gl_remote = git_repo.remotes[f'gitlab/{namespace.slug}']
+    gl_remote.push(branch)
     return HttpResponse(rep)
 
 
