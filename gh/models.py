@@ -1,3 +1,7 @@
-from django.db import models  # noqa
+from django.db import models
 
-# Create your models here.
+# from ..rainboard import models as rb_models
+
+
+class GithubCheckSuite(models.Model):
+    id = models.PositiveIntegerField(primary_key=True)
