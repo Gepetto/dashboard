@@ -20,11 +20,16 @@ from rainboard.models import Forge, Namespace, Project
 from . import models
 
 
-
 def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     """Manage Github's check suites."""
     data = loads(request.body.decode())
     models.GithubCheckSuite.objects.get_or_create(id=data['check_suite']['id'])
+    return HttpResponse(rep)
+
+
+def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
+    """Manage Github's Pull Requests."""
+    loads(request.body.decode())
     return HttpResponse(rep)
 
 
@@ -121,5 +126,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
         return push(request, 'push event detected')
     if event == 'check_suite':
         return check_suite(request, 'check_suite event detected')
+    if event == 'pull_request':
+        return pull_request(request, 'check_suite event detected')
 
     return HttpResponseForbidden('event not found')
