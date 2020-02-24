@@ -15,6 +15,7 @@ from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
 from rainboard.models import Namespace, Project
+
 from . import models
 
 
@@ -37,6 +38,7 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     namespace = get_object_or_404(Namespace, slug=slugify(data['repository']['owner']['name']))
     project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['repository']['name']))
     ref_s = data['ref'][11:]  # strip 'refs/heads/'
+    print(f'push detected on github: {ref_s}')
     gh_remote_s = f'github/{namespace.slug}'
     gl_remote_s = f'gitlab/{namespace.slug}'
     gh_ref_s = f'{gh_remote_s}/{ref_s}'
@@ -68,6 +70,7 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     gl_remote.fetch()
     gl_ref = gl_remote.refs[ref_s]
     if str(gl_ref.commit) != data['after']:
+        print(f'pushing {data["after"]} on {ref_s} on gitlab')
         gl_remote.push(ref_s)
 
     return HttpResponse(rep)
