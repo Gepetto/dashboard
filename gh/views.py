@@ -53,5 +53,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
         return log(request, 'pong')
     if event == 'push':
         return log(request, 'push event detected')
+    else:
+        return log(request, f'event: {event}')
 
     return log(request, event)
