@@ -109,8 +109,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
     if event == 'ping':
         return log(request, 'pong')
     if event == 'push':
-        print('push event detected')
-        return push(request)
+        return push(request, 'push event detected')
     if event == 'check_suite':
         return check_suite(request, 'check_suite event detected')
 
