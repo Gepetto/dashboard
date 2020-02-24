@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
-from ..rainboard.models import Namespace, Project
+from rainboard.models import Namespace, Project
 from . import models
 
 
