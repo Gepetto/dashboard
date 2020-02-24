@@ -2,6 +2,8 @@
 import hmac
 from hashlib import sha1
 from ipaddress import ip_address, ip_network
+from json import loads
+from pprint import pprint
 
 import requests
 from django.conf import settings
@@ -12,21 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 def log(request: HttpRequest, rep: str = 'ok') -> HttpResponse:
-    """Just print everything out."""
-    print(f'{request = }')
-    print(f'{request.scheme = }')
-    print(f'{request.body = }')
-    print(f'{request.path = }')
-    print(f'{request.path_info = }')
-    print(f'{request.method = }')
-    print(f'{request.encoding = }')
-    print(f'{request.content_type = }')
-    print(f'{request.content_params = }')
-    print(f'{request.GET = }')
-    print(f'{request.POST = }')
-    print(f'{request.COOKIES = }')
-    print(f'{request.META = }')
-    print(f'{request.headers = }')
+    """Just print the body."""
+    pprint(loads(request.body.decode()))
     return HttpResponse(rep)
 
 
