@@ -20,7 +20,6 @@ from rainboard.models import Forge, Namespace, Project
 from . import models
 
 
-
 def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     """Manage Github's check suites."""
     data = loads(request.body.decode())
