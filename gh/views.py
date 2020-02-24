@@ -33,7 +33,7 @@ def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
 
 
 def push(request: HttpRequest, rep: str) -> HttpResponse:
-    """Someone pushed on github. Synchronise current repo & gitlab."""
+    """Someone pushed on github. Synchronise local repo & gitlab."""
     data = loads(request.body.decode())
     namespace = get_object_or_404(Namespace, slug=slugify(data['repository']['owner']['name']))
     project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['repository']['name']))
@@ -68,8 +68,7 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
 
     gl_remote = git_repo.remotes[gl_remote_s]
     gl_remote.fetch()
-    gl_ref = gl_remote.refs[ref_s]
-    if str(gl_ref.commit) != data['after']:
+    if ref_s not in gl_remote.refs or str(gl_remote.refs[ref_s].commit) != data['after']:
         print(f'pushing {data["after"]} on {ref_s} on gitlab')
         gl_remote.push(ref_s)
 
