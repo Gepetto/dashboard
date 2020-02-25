@@ -3,6 +3,7 @@ variables:
   GIT_DEPTH: "3"
   SECRET_KEY: "pipo"
   GITHUB_WEBHOOK_KEY: "pipo"
+  GITLAB_WEBHOOK_KEY: "pipo"
   REGISTRY: "memmos.laas.fr:5000"
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
 
@@ -19,6 +20,6 @@ build:
   image: docker
   script:
     - docker build -t ${DOCKER_TAG} .
-    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY ${DOCKER_TAG} ./manage.py migrate
-    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY ${DOCKER_TAG} ./manage.py test
+    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY ${DOCKER_TAG} ./manage.py migrate
+    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY ${DOCKER_TAG} ./manage.py test
     - docker push ${DOCKER_TAG}
