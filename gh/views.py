@@ -110,7 +110,12 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
 def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
     """Something happened on a Gitlab pipeline. Tell Github if necessary."""
     print('pipeline')
-    pprint(loads(request.body.decode()))
+    data = loads(request.body.decode())
+    namespace = get_object_or_404(Namespace, slug=slugify(data['project']['namespace']))
+    project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['project']['name']))
+    branch, commit, status = (data['object_attributes'][key] for key in ['ref', 'sha', 'status'])
+    print(namespace, project, branch, commit)
+    pprint(data)
     return HttpResponse(rep)
 
 
