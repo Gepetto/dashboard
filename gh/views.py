@@ -170,8 +170,8 @@ def gl_webhook(request: HttpRequest) -> HttpResponse:
     if token is None:
         print('no token')
         return HttpResponseRedirect(reverse('login'))
-    if token != settings.GITHUB_WEBHOOK_KEY:
-        print(f'wrong token: {token}')
+    if token != settings.GITLAB_WEBHOOK_KEY:
+        print('wrong token')
         return HttpResponseForbidden('wrong token.')
 
     event = request.META.get('HTTP_X_GITLAB_EVENT', 'ping')
