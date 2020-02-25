@@ -5,8 +5,6 @@ from ipaddress import ip_address, ip_network
 from json import loads
 from pprint import pprint
 
-import requests
-from autoslug.utils import slugify
 from django.conf import settings
 from django.http import HttpRequest
 from django.http.response import (HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect,
@@ -15,6 +13,10 @@ from django.shortcuts import get_object_or_404, reverse
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
+import requests
+from autoslug.utils import slugify
+
+from dashboard.middleware import ip_laas
 from rainboard.models import Forge, Namespace, Project
 
 from . import models
@@ -105,6 +107,13 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     return HttpResponse(rep)
 
 
+def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
+    """Something happened on a Gitlab pipeline. Tell Github if necessary."""
+    print('pipeline')
+    pprint(loads(request.body.decode()))
+    return HttpResponse(rep)
+
+
 @csrf_exempt
 def webhook(request: HttpRequest) -> HttpResponse:
     """
@@ -145,5 +154,31 @@ def webhook(request: HttpRequest) -> HttpResponse:
         return check_suite(request, 'check_suite event detected')
     if event == 'pull_request':
         return pull_request(request, 'check_suite event detected')
+
+    return HttpResponseForbidden('event not found')
+
+
+@csrf_exempt
+def gl_webhook(request: HttpRequest) -> HttpResponse:
+    # validate ip source
+    if not ip_laas(request):
+        print('not from LAAS IP')
+        return HttpResponseRedirect(reverse('login'))
+
+    # validate token
+    token = request.META.get('HTTP_X_GITLAB_TOKEN')
+    if token is None:
+        print('no token')
+        return HttpResponseRedirect(reverse('login'))
+    if token != settings.GITHUB_WEBHOOK_KEY:
+        print('wrong token')
+        return HttpResponseForbidden('wrong token.')
+
+    event = request.META.get('HTTP_X_GITLAB_EVENT', 'ping')
+    if event == 'ping':
+        pprint(loads(request.body.decode()))
+        return HttpResponse('pong')
+    if event == 'Pipeline Hook':
+        return pipeline(request, 'pipeline event detected')
 
     return HttpResponseForbidden('event not found')
