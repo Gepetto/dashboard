@@ -89,10 +89,6 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
         git_repo.branches[gh_ref_s].commit = data['after']
     else:
         git_repo.create_head(gh_ref_s, commit=data['after'])
-    if gl_ref_s in git_repo.branches:
-        git_repo.branches[gl_ref_s].commit = data['after']
-    else:
-        git_repo.create_head(gl_ref_s, commit=data['after'])
     if ref_s in git_repo.branches:
         git_repo.branches[ref_s].commit = data['after']
     else:
@@ -101,6 +97,11 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     if gl_remote_s not in git_repo.remotes:
         print(f'project {project} not available on {gl_remote_s}')
         return HttpResponse(rep)
+
+    if gl_ref_s in git_repo.branches:
+        git_repo.branches[gl_ref_s].commit = data['after']
+    else:
+        git_repo.create_head(gl_ref_s, commit=data['after'])
 
     gl_remote = git_repo.remotes[gl_remote_s]
     gl_remote.fetch()
