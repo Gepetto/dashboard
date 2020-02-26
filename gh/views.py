@@ -98,6 +98,10 @@ def push(request: HttpRequest, rep: str) -> HttpResponse:
     else:
         git_repo.create_head(ref_s, commit=data['after'])
 
+    if gl_remote_s not in git_repo.remotes:
+        print(f'project {project} not available on {gl_remote_s}')
+        return HttpResponse(rep)
+
     gl_remote = git_repo.remotes[gl_remote_s]
     gl_remote.fetch()
     if ref_s not in gl_remote.refs or str(gl_remote.refs[ref_s].commit) != data['after']:
@@ -114,8 +118,8 @@ def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
     namespace = get_object_or_404(Namespace, slug=slugify(data['project']['namespace']))
     project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['project']['name']))
     branch, commit, status = (data['object_attributes'][key] for key in ['ref', 'sha', 'status'])
-    print(namespace, project, branch, commit)
-    pprint(data)
+    # status in ['pending', 'running', 'success', 'failed']
+    print(namespace, project, branch, commit, status)
     return HttpResponse(rep)
 
 
