@@ -3,6 +3,8 @@ import logging
 import re
 from subprocess import check_output
 
+import git
+import requests
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -13,9 +15,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
-
-import git
 from autoslug import AutoSlugField
 from autoslug.utils import slugify
 from ndh.models import Links, NamedModel, TimeStampedModel
@@ -238,7 +237,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                     logger.error(f'wrong branch "{branch}" in {self.git_path()}')
                 continue
             forge, namespace, name = branch.split('/', maxsplit=2)
-            namespace, _ = Namespace.objects.get_or_create(slug=namespace)
+            namespace, _ = Namespace.objects.get_or_create(name=namespace, slug=slugify(namespace))
             forge = Forge.objects.get(slug=forge)
             repo, created = Repo.objects.get_or_create(forge=forge,
                                                        namespace=namespace,
