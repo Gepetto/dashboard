@@ -237,7 +237,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                     logger.error(f'wrong branch "{branch}" in {self.git_path()}')
                 continue
             forge, namespace, name = branch.split('/', maxsplit=2)
-            namespace, _ = Namespace.objects.get_or_create(name=namespace, slug=slugify(namespace))
+            namespace, _ = Namespace.objects.get_or_create(slug=slugify(namespace), defaults={'name': namespace})
             forge = Forge.objects.get(slug=forge)
             repo, created = Repo.objects.get_or_create(forge=forge,
                                                        namespace=namespace,
