@@ -1200,4 +1200,12 @@ def ordered_projects():
     for old, new in switch:
         lst[old], lst[new] = lst[new], lst[old]
 
-    return lst
+    def get_deps(cat, pkg, ns, lst):
+        with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
+            cont = file_handle.read()
+        deps = [dep_pkg for dep_cat, dep_pkg, _ in lst if f'\ninclude ../../{dep_cat}/{dep_pkg}/depend.mk\n' in cont]
+        if pkg.startswith('py-') and (cat, pkg[3:], ns) in lst:
+            deps.append(pkg[3:])
+        return list(set(deps))
+
+    return [[cat, pkg, ns, get_deps(cat, pkg, ns, lst)] for cat, pkg, ns in lst]
