@@ -57,5 +57,5 @@ class Command(BaseCommand):
         Image.objects.filter(robotpkg__project__archived=True).delete()
 
         log(f'\nLook for missing images\n')
-        for img in Image.objects.filter(created__lt=timezone.now() - timedelta(days=7)):
+        for img in Image.objects.filter(created__lt=timezone.now() - timedelta(days=7), target__active=True):
             log(f' {img}')
