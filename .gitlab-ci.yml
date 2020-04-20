@@ -6,7 +6,7 @@ variables:
   GITLAB_WEBHOOK_KEY: "pipo"
   REGISTRY: "memmos.laas.fr:5000"
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
-  PYTHONWARNINGS: "true"
+  PYTHONWARNINGS: "always"
 
 format:
   image: gepetto/linters
