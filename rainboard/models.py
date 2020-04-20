@@ -390,7 +390,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         return f'https://travis-ci.org/{self.main_namespace.slug}/{self.slug}'
 
     def url_gitlab(self):
-        return f'https://gepgitlab.laas.fr/{self.main_namespace.slug}/{self.slug}'
+        return f'https://gitlab.laas.fr/{self.main_namespace.slug}/{self.slug}'
 
     def badge(self, link, img, alt):
         return mark_safe(f'<a href="{link}"><img src="{img}" alt="{alt}" /></a> ')
