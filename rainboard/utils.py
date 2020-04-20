@@ -16,6 +16,9 @@ INVALID_MAILS = ('localhost', 'none', 'noreply', 'example')
 def slugify_with_dots(value):
     """
     slugify a name but keep dots
+
+    >>> slugify_with_dots('C’est la fête :3. yay.')
+    'cest-la-fete-3.-yay.'
     """
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s\.-]', '', value).strip().lower()
@@ -36,6 +39,12 @@ def api_next(source, req):
 def domain(url):
     """
     Extracts the domain of an url
+
+    >>> domain('https://gitlab.laas.fr/pipo')
+    'gitlab.laas.fr'
+
+    >>> domain('gitlab.laas.fr/pipo')
+    'gitlab.laas.fr'
     """
     if '://' in url or url.startswith('//'):
         url = url.split('//')[1]
@@ -43,6 +52,12 @@ def domain(url):
 
 
 def domain_link(url):
+    """
+    get a link to an url, showing the domain name.
+
+    >>> domain_link('https://gitlab.laas.fr/pipo')
+    '<a href="https://gitlab.laas.fr/pipo">gitlab.laas.fr</a>'
+    """
     dn = domain(url)
     return mark_safe(f'<a href="{url}">{dn}</a>')
 
@@ -65,4 +80,15 @@ def invalid_mail(mail):
 
 
 def valid_name(name):
+    """
+    Replace dashes and underscores by spaces, and lowercase.
+
+    >>> valid_name('TALOS_Metapkg-ros_control_sot')
+    'talos metapkg ros control sot'
+    """
     return name.replace('_', ' ').replace('-', ' ').lower()
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
