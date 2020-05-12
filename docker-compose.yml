@@ -34,8 +34,8 @@ services:
       - web
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host: rainboard.${DOMAIN_NAME:-localhost}"
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host(`rainboard.${DOMAIN_NAME:-localhost}`)"
   nginx:
     image: nim65s/ndh:nginx
     restart: unless-stopped
@@ -44,8 +44,8 @@ services:
     networks:
       - web
     labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host: rainboard.${DOMAIN_NAME:-localhost}; PathPrefix: /static, /media"
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host(`rainboard.${DOMAIN_NAME:-localhost}`) && PathPrefix(`/static`, `/media`)"
 
 networks:
   web:
