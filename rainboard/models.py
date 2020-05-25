@@ -1027,7 +1027,8 @@ def update_gitlab(forge, data):
     repo.url = data['web_url']
     repo.repo_id = data['id']
     repo.clone_url = data['http_url_to_repo']
-    repo.open_issues = data['open_issues_count']
+    if 'open_issues_count' in data:
+        repo.open_issues = data['open_issues_count']
     repo.default_branch = data['default_branch']
     repo.description = data['description']
     # TODO license (https://gitlab.com/gitlab-org/gitlab-ce/issues/28267), open_pr
