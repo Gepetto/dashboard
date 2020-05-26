@@ -189,7 +189,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
-    from_gepetto = models.BooleanField(default=True)
+    from_gepetto = models.BooleanField(default=False)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
     suffix = models.CharField(max_length=50, default='', blank=True)
