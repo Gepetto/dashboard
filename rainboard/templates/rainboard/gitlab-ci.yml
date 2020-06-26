@@ -2,7 +2,6 @@
 
 variables:
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
-  CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
 
 cache:
   paths:
@@ -16,6 +15,8 @@ cache:
     - gh-pages
   script:
     - mkdir -p ccache
+    - echo "CCACHE_DIR=${CI_PROJECT_DIR}/ccache" >> /opt/openrobots/etc/robotpkg.conf
+
     - cd /root/robotpkg/{{ robotpkg.category }}
     - git pull
 {% if robotpkg.without_py %}    - cd {{ robotpkg.without_py }}
