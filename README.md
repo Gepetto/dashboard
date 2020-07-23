@@ -12,6 +12,7 @@ echo SECRET_KEY=$(openssl rand -base64 32) >> .env
 echo EMAIL_HOST_PASSWORD=xxx >> .env
 echo GITHUB_WEBHOOK_KEY=xxx >> .env
 echo GITHUB_TOKEN=xxx >> .env
+echo GITLAB_WEBHOOK_KEY=xxx >> .env
 echo GITLAB_TOKEN=xxx >> .env
 echo REDMINE_TOKEN=xxx >> .env
 echo OPENROB_TOKEN=xxx >> .env
