@@ -8,7 +8,6 @@ import requests
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.db.models.functions import Length
 from django.db.utils import DataError
 from django.template.loader import get_template
 from django.utils import timezone
@@ -374,8 +373,8 @@ class Project(Links, NamedModel, TimeStampedModel):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
 
     def doc_coverage_image(self):
-        images = Image.objects.filter(robotpkg__project=self, py3=False, target__main=True)
-        return images.order_by(Length('robotpkg__name').desc()).first()
+        images = Image.objects.filter(robotpkg__project=self, target__main=True)
+        return images.order_by('-py3', '-debug').first()  # 18.04 / Python 3 / Debug is the preferred image
 
     def print_deps(self):
         return mark_safe(', '.join(d.library.get_link() for d in self.dependencies.all()))
@@ -799,7 +798,27 @@ class Robotpkg(NamedModel):
         self.save()
 
     def valid_images(self):
-        return self.image_set.filter(created__isnull=False, target__active=True).order_by('target__name')
+        def is_valid(_base_image, _image):
+            """The image is valid if it has less than one different parameter from the base image."""
+            if _image == self.project.doc_coverage_image():
+                #  There is no need to keep this image because it is already tested by doc-coverage
+                return False
+
+            base_param = (_base_image.target.name, _base_image.py3, _base_image.debug)
+            param = (_image.target.name, _image.py3, _image.debug)
+
+            diff = 0  # Number of different parameters between the base image and the current image
+            for i in range(len(base_param)):
+                if base_param[i] != param[i]:
+                    diff += 1
+            return diff <= 1
+
+        # 18.04 / Python 3 / Release is the preferred base image
+        base_images = Image.objects.filter(robotpkg__project=self.project, target__main=True)
+        base_image = base_images.order_by('-py3', 'debug').first()
+
+        images = self.image_set.filter(created__isnull=False, target__active=True).order_by('target__name')
+        return (image for image in images if is_valid(base_image, image))
 
     def without_py(self):
         if 'py-' in self.name and self.same_py:
@@ -825,7 +844,12 @@ class Image(models.Model):
         unique_together = ('robotpkg', 'target', 'py3', 'debug')
 
     def __str__(self):
-        py = '-py3' if self.py3 else ''
+        if self.py3:
+            py = '-py3'
+        elif self.robotpkg.name.startswith('py-'):
+            py = '-py2'
+        else:
+            py = ''
         return f'{self.robotpkg}{py}:{self.target}'
 
     def get_build_args(self):
