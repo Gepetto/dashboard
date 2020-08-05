@@ -1,6 +1,7 @@
 import django_filters
 
 from . import models, utils
+from .models import Namespace, GEPETTO_SLUGS
 
 
 def filter_valid_name(queryset, name, value):
@@ -12,7 +13,18 @@ class ProjectFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = models.Project
-        fields = ('name', 'from_gepetto', 'archived')
+        fields = ('name', 'main_namespace__from_gepetto', 'archived')
+
+
+class IssuePrFilter(django_filters.rest_framework.FilterSet):
+    namespace = django_filters.ModelChoiceFilter(queryset=Namespace.objects.filter(slug__in=GEPETTO_SLUGS),
+                                                 field_name='repo__namespace',
+                                                 label='namespace')
+    name = django_filters.CharFilter(field_name='repo__project__name', label='name', lookup_expr='icontains')
+
+    class Meta:
+        model = models.IssuePr
+        fields = ('name', 'namespace', 'is_issue')
 
 
 class ContributorFilter(django_filters.rest_framework.FilterSet):

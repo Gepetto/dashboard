@@ -29,6 +29,7 @@ class ProjectTable(StrippedTable):
     pr = tables.Column(accessor='open_pr', orderable=False)
     rpkgs = tables.Column(accessor='rpkgs', orderable=False)
     badges = tables.Column(accessor='badges', orderable=False)
+    from_gepetto = tables.BooleanColumn(accessor='main_namespace__from_gepetto')
 
     class Meta:
         model = models.Project
@@ -121,3 +122,19 @@ class ContributorProjectTable(ContributorTable):
 
     class Meta:
         fields = ('names', 'mails', 'projects')
+
+
+class IssuePrTable(StrippedTable):
+    name = tables.Column(accessor='repo__project__name')
+
+    class Meta:
+        model = models.IssuePr
+        fields = ('repo__namespace', 'name', 'title', 'url', 'days_since_updated')
+        order_by = '-days_since_updated'
+
+    def render_name(self, record):
+        return record.repo.project.get_link()
+
+    def render_url(self, record):
+        rendered_name = 'issue #' if record.is_issue else 'PR #'
+        return mark_safe(f'<a href="{record.url}">{rendered_name}{record.number}</a>')

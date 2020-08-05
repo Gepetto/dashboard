@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from dashboard import settings
 from . import models, utils
+from .models import IssuePr, Repo
 
 
 class RainboardTests(TestCase):
@@ -51,5 +52,28 @@ class RainboardTests(TestCase):
                 '<h1>rainboard tests 2</h1>',
                 'Main forge</dt> <dd class="col-9"><a href="https://github.com">Github</a></dd>',
                 '<label class="label label-primary">BSD-2-Clause</label>',
+        ]:
+            self.assertIn(chunk, content)
+
+        # Test issues and pull requests view
+        repo = Repo.objects.create(name='foo',
+                                   forge=models.Forge.objects.get(source=utils.SOURCES.github),
+                                   namespace=models.Namespace.objects.get(slug='gepetto'),
+                                   project=project,
+                                   default_branch='master',
+                                   repo_id=4,
+                                   clone_url='https://github.com')
+
+        IssuePr.objects.create(title='Test issue', repo=repo, number=7, url='https://github.com', is_issue=True)
+
+        response = self.client.get(reverse('rainboard:issues_pr'), HTTP_X_FORWARDED_FOR='140.93.5.4')
+        self.assertEqual(response.status_code, 200)
+
+        content = response.content.decode()
+        for chunk in [
+                '<title>Gepetto Packages</title>', '<a class="btn btn-primary" href="/issues/update">Update</a>',
+                '<button class="btn btn-primary">filter</button>',
+                f'<a href="/project/{project.slug}/robotpkg">{project.name}</a>', '<td >Test issue</td>',
+                '<a href="https://github.com">issue #7</a>'
         ]:
             self.assertIn(chunk, content)

@@ -1,7 +1,8 @@
-from subprocess import PIPE, run
+from subprocess import PIPE, Popen, run
 
 from django.http import Http404
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.views.generic import DetailView
 
 from django_filters.views import FilterView
@@ -34,7 +35,7 @@ class ProjectsView(SingleTableMixin, FilterView):
 
 
 class GepettoProjectsView(ProjectsView):
-    queryset = models.Project.objects.filter(from_gepetto=True, archived=False)
+    queryset = models.Project.objects.filter(main_namespace__from_gepetto=True, archived=False)
 
 
 class ProjectView(DetailView):
@@ -100,6 +101,21 @@ class ContributorsView(SingleTableMixin, DistinctMixin, FilterView):
     strict = False
 
 
+class IssuesPrView(SingleTableMixin, FilterView):
+    model = models.IssuePr
+    table_class = tables.IssuePrTable
+    filterset_class = filters.IssuePrFilter
+
+
+def update_issues_pr(request):
+    # Update issues and pull requests in a subprocess because it takes a long time to run
+    Popen([
+        'timeout', '600', './manage.py', 'shell', '-c',
+        'from rainboard.management.commands.update import update_issues_pr; update_issues_pr()'
+    ])
+    return HttpResponseRedirect(reverse('rainboard:issues_pr'))
+
+
 def json_doc(request):
     """
     Get the list of project / namespace / branch of which we want to keep the doc
@@ -129,10 +145,10 @@ def docker(request):
 def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
         print('digraph { rankdir=LR;', file=f)
-        for project in models.Project.objects.filter(from_gepetto=True, archived=False):
+        for project in models.Project.objects.filter(main_namespace__from_gepetto=True, archived=False):
             print(f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}', file=f)
-        for dep in models.Dependency.objects.filter(project__from_gepetto=True,
-                                                    library__from_gepetto=True,
+        for dep in models.Dependency.objects.filter(project__main_namespace__from_gepetto=True,
+                                                    library__main_namespace__from_gepetto=True,
                                                     project__archived=False,
                                                     library__archived=False):
             print(f'I{dep.library.pk} -> I{dep.project.pk};', file=f)
