@@ -48,10 +48,12 @@ CMAKE_FIELDS = {
 }
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
 GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
+GEPETTO_SLUGS = ['gepetto', 'stack-of-tasks', 'humanoid-path-planner', 'loco-3d']
 
 
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
+    from_gepetto = models.BooleanField(default=False)
     slug_gitlab = models.CharField(max_length=200, default='')
     slug_github = models.CharField(max_length=200, default='')
 
@@ -199,7 +201,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
-    from_gepetto = models.BooleanField(default=False)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
     suffix = models.CharField(max_length=50, default='', blank=True)
@@ -665,6 +666,27 @@ class Repo(TimeStampedModel):
             logger.error(str(self.delete()))
 
 
+class IssuePr(models.Model):
+    title = models.CharField(max_length=200)
+    repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
+    number = models.PositiveSmallIntegerField()
+    days_since_updated = models.PositiveSmallIntegerField(blank=True, null=True)
+    url = models.URLField(max_length=200)
+    is_issue = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('repo', 'number', 'is_issue')
+
+    def update(self, skip_label):
+        gh = self.repo.project.github()
+        issue_pr = gh.get_issue(number=self.number) if self.is_issue else gh.get_pull(number=self.number)
+        self.days_since_updated = (timezone.now() - issue_pr.updated_at).days
+        if issue_pr.state == 'closed' or skip_label in [label.name for label in issue_pr.get_labels()]:
+            self.delete()
+        else:
+            self.save()
+
+
 class Commit(NamedModel, TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
@@ -988,7 +1010,7 @@ class Tag(models.Model):
 
 class GepettistQuerySet(models.QuerySet):
     def gepettist(self):
-        return self.filter(projects__from_gepetto=True, projects__archived=False)
+        return self.filter(projects__main_namespace__from_gepetto=True, projects__archived=False)
 
 
 class Contributor(models.Model):
@@ -1009,7 +1031,8 @@ class Contributor(models.Model):
         return ', '.join(str(mail) for mail in self.contributormail_set.filter(invalid=False))
 
     def contributed(self):
-        return ', '.join(str(project) for project in self.projects.filter(from_gepetto=True, archived=False))
+        return ', '.join(
+            str(project) for project in self.projects.filter(main_namespace__from_gepetto=True, archived=False))
 
 
 class ContributorName(models.Model):
@@ -1231,8 +1254,8 @@ def to_release_in_robotpkg():
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
     fields = 'category', 'name', 'project__main_namespace__slug'
-    bad_ones = Q(from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
-    library_bad_ones = Q(library__from_gepetto=False) | Q(library__robotpkg__isnull=True)
+    bad_ones = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
+    library_bad_ones = Q(library__main_namespace__from_gepetto=False) | Q(library__robotpkg__isnull=True)
 
     main = Project.objects.exclude(bad_ones)
     ret = main.all().exclude(dependencies__isnull=False)

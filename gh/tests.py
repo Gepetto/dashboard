@@ -3,7 +3,6 @@ import re
 
 import git
 from hashlib import sha1
-from os import getenv
 
 from autoslug.utils import slugify
 from django.conf import settings
