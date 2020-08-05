@@ -1,11 +1,12 @@
 # https://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
 
-variables:
+{% if project.ccache %}variables:
   CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
 
 cache:
   paths:
     - ccache
+{% endif %}
 
 {% for robotpkg in project.ordered_robotpkg %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   retry:
@@ -14,9 +15,9 @@ cache:
   except:
     - gh-pages
   script:
-    - mkdir -p ccache
+{% if project.ccache %}    - mkdir -p ccache
     - echo "CCACHE_DIR=${CI_PROJECT_DIR}/ccache" >> /opt/openrobots/etc/robotpkg.conf
-
+{% endif %}
     - cd /root/robotpkg/{{ robotpkg.category }}
     - git pull
 {% if robotpkg.without_py %}    - cd {{ robotpkg.without_py }}

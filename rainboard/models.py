@@ -3,8 +3,6 @@ import logging
 import re
 from subprocess import check_output
 
-import git
-import requests
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -14,6 +12,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
+import requests
+
+import git
 from autoslug import AutoSlugField
 from autoslug.utils import slugify
 from github import Github
@@ -207,6 +208,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
+    ccache = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -1253,7 +1255,7 @@ def to_release_in_robotpkg():
 
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
-    fields = 'category', 'name', 'project__main_namespace__slug'
+    fields = 'category', 'name', 'project__main_namespace__slug', 'project__ccache'
     bad_ones = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
     library_bad_ones = Q(library__main_namespace__from_gepetto=False) | Q(library__robotpkg__isnull=True)
 
@@ -1290,4 +1292,4 @@ def ordered_projects():
             deps.append(pkg[3:])
         return sorted(set(deps))
 
-    return [[cat, pkg, ns, get_deps(cat, pkg, ns, lst)] for cat, pkg, ns in lst]
+    return [[cat, pkg, ns, get_deps(cat, pkg, ns, lst), ccache] for cat, pkg, ns, ccache in lst]
