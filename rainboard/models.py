@@ -16,6 +16,8 @@ from django.utils.safestring import mark_safe
 
 from autoslug import AutoSlugField
 from autoslug.utils import slugify
+from github import Github
+from gitlab import Gitlab
 from ndh.models import Links, NamedModel, TimeStampedModel
 from ndh.utils import enum_to_choices, query_sum
 
@@ -50,6 +52,15 @@ GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': N
 
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
+    slug_gitlab = models.CharField(max_length=200, default='')
+    slug_github = models.CharField(max_length=200, default='')
+
+    def save(self, *args, **kwargs):
+        if self.slug_gitlab == '':
+            self.slug_gitlab = self.slug
+        if self.slug_github == '':
+            self.slug_github = self.slug
+        super(Namespace, self).save(*args, **kwargs)
 
 
 class License(models.Model):
@@ -194,6 +205,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     suffix = models.CharField(max_length=50, default='', blank=True)
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
+    accept_pr_to_master = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -208,6 +220,17 @@ class Project(Links, NamedModel, TimeStampedModel):
             logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
             return git.Repo.init(path)
         return git.Repo(str(path / '.git'))
+
+    def github(self):
+        github_forge = Forge.objects.get(slug='github')
+        gh = Github(github_forge.token)
+        return gh.get_repo(f'{self.main_namespace.slug_github}/{self.slug}')
+
+    def gitlab(self):
+        gitlab_forge = Forge.objects.get(slug='gitlab')
+        gl = Gitlab(gitlab_forge.url, private_token=gitlab_forge.token)
+        gl_repo = gl.projects.get(f'{self.main_namespace.slug_gitlab}/{self.slug}')
+        return gl_repo
 
     def main_repo(self):
         forge = self.main_forge if self.main_forge else get_default_forge(self)
@@ -389,7 +412,18 @@ class Project(Links, NamedModel, TimeStampedModel):
         return f'https://travis-ci.org/{self.main_namespace.slug}/{self.slug}'
 
     def url_gitlab(self):
-        return f'https://gitlab.laas.fr/{self.main_namespace.slug}/{self.slug}'
+        return f'https://gitlab.laas.fr/{self.main_namespace.slug_gitlab}/{self.slug}'
+
+    def remote_url_gitlab(self):
+        gitlab_forge = Forge.objects.get(source=SOURCES.gitlab)
+        return self.url_gitlab().replace('://', f'://gitlab-ci-token:{gitlab_forge.token}@')
+
+    def url_github(self):
+        return f'https://github.com/{self.main_namespace.slug_github}/{self.slug}'
+
+    def remote_url_github(self):
+        github_forge = Forge.objects.get(source=SOURCES.github)
+        return self.url_github().replace('://', f'://{settings.GITHUB_USER}:{github_forge.token}@')
 
     def badge(self, link, img, alt):
         return mark_safe(f'<a href="{link}"><img src="{img}" alt="{alt}" /></a> ')

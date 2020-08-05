@@ -8,7 +8,7 @@ from rest_framework import permissions
 
 def ip_laas(request: HttpRequest) -> bool:
     """check if request comes from settings.LAAS_NETWORKS."""
-    forwarded_for = ip_address(request.META.get('HTTP_X_FORWARDED_FOR'))
+    forwarded_for = ip_address(request.META.get('HTTP_X_FORWARDED_FOR').split(', ')[0])
     return any(forwarded_for in ip_network(net) for net in settings.LAAS_NETWORKS)
 
 

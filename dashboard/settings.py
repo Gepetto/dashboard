@@ -28,6 +28,7 @@ SERVER_EMAIL = f'{EMAIL_USER}+{PROJECT}@{EMAIL_FQDN}'
 DEFAULT_FROM_EMAIL = f'{PROJECT_VERBOSE} <{EMAIL_USER}@{EMAIL_FQDN}>'
 EMAIL_BACKEND = 'django.core.mail.backends.%s' % ('filebased.EmailBackend' if DEBUG else 'smtp.EmailBackend')
 EMAIL_SUBJECT_PREFIX = f'[{PROJECT_VERBOSE}] '
+EMAIL_FILE_PATH = 'email/'
 
 ADMINS = ((os.environ.get('ADMIN_NAME',
                           f'{PROJECT_VERBOSE} webmaster'), os.environ.get('ADMIN_MAIL', f'webmaster@{DOMAIN_NAME}')), )
@@ -141,11 +142,18 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.NullHandler',
         },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.security.DisallowedHost': {
             'handlers': ['null'],
             'propagate': False,
+        },
+        'gh': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     },
 }
