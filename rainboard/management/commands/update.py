@@ -64,12 +64,12 @@ class Command(BaseCommand):
             forge.get_projects()
 
         log(f'\nUpdating all repos\n')
-        for repo in Repo.objects.filter(project__archived=False, project__from_gepetto=True):
+        for repo in Repo.objects.filter(project__archived=False, project__main_namespace__from_gepetto=True):
             log(f' {repo}')
             repo.update()
 
         log(f'\nUpdating all branches\n')
-        for branch in Branch.objects.filter(project__archived=False, project__from_gepetto=True):
+        for branch in Branch.objects.filter(project__archived=False, project__main_namespace__from_gepetto=True):
             log(f' {branch.project} - {branch}')
             branch.update(pull=False)
 
@@ -77,12 +77,12 @@ class Command(BaseCommand):
         update_robotpkg(settings.RAINBOARD_RPKG)
 
         log(f'\nUpdating gepetto projects\n')
-        for project in Project.objects.filter(archived=False, from_gepetto=True):
+        for project in Project.objects.filter(archived=False, main_namespace__from_gepetto=True):
             log(f' {project}')
             project.update(only_main_branches=False)
 
         log(f'\nUpdating Robotpkg\n')
-        for robotpkg in Robotpkg.objects.filter(project__archived=False, project__from_gepetto=True):
+        for robotpkg in Robotpkg.objects.filter(project__archived=False, project__main_namespace__from_gepetto=True):
             log(f' {robotpkg}')
             robotpkg.update(pull=False)
 
