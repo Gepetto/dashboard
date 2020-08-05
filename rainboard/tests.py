@@ -3,6 +3,7 @@ import doctest
 from django.test import TestCase
 from django.urls import reverse
 
+from dashboard import settings
 from . import models, utils
 
 
@@ -13,24 +14,24 @@ class RainboardTests(TestCase):
         self.assertEqual(test_count, 5)
 
     def test_models(self):
-        self.assertEqual(models.License.objects.count(), 0)
-        self.assertEqual(models.Project.objects.count(), 0)
+        license_count = models.License.objects.count()
+        project_count = models.Project.objects.count()
         models.License.objects.create(name='BSD 2-Clause "Simplified" License',
                                       spdx_id='BSD-2-Clause',
                                       url='http://spdx.org/licenses/BSD-2-Clause.json')
-        models.Project.objects.create(name='Rainboard Tests',
+        models.Project.objects.create(name='Rainboard Tests 2',
                                       main_namespace=models.Namespace.objects.get(slug='gepetto'),
                                       main_forge=models.Forge.objects.get(source=utils.SOURCES.github),
                                       license=models.License.objects.first())
-        self.assertEqual(models.License.objects.count(), 1)
-        self.assertEqual(models.Project.objects.count(), 1)
+        self.assertEqual(models.License.objects.count(), license_count + 1)
+        self.assertEqual(models.Project.objects.count(), project_count + 1)
 
-        project = models.Project.objects.first()
+        project = models.Project.objects.get(name='rainboard tests 2')
 
-        self.assertEqual(project.slug, 'rainboard-tests')
+        self.assertEqual(project.slug, 'rainboard-tests-2')
         self.assertEqual(project.registry(), 'memmos.laas.fr:5000')
-        self.assertEqual(project.url_travis(), 'https://travis-ci.org/gepetto/rainboard-tests')
-        self.assertEqual(project.url_gitlab(), 'https://gitlab.laas.fr/gepetto/rainboard-tests')
+        self.assertEqual(project.url_travis(), 'https://travis-ci.org/gepetto/rainboard-tests-2')
+        self.assertEqual(project.url_gitlab(), 'https://gitlab.laas.fr/gepetto/rainboard-tests-2')
         badges = project.badges()
         for chunk in ['<img src="https://gitlab.laas', 'travis-ci', 'href="https://gepettoweb.laas']:
             self.assertIn(chunk, badges)
@@ -47,7 +48,7 @@ class RainboardTests(TestCase):
         content = response.content.decode()
         for chunk in [
                 '<title>Gepetto Packages</title>',
-                '<h1>rainboard tests</h1>',
+                '<h1>rainboard tests 2</h1>',
                 'Main forge</dt> <dd class="col-9"><a href="https://github.com">Github</a></dd>',
                 '<label class="label label-primary">BSD-2-Clause</label>',
         ]:

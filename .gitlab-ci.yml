@@ -21,6 +21,6 @@ build:
   image: docker
   script:
     - docker build -t ${DOCKER_TAG} .
-    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY -e PYTHONWARNINGS ${DOCKER_TAG} ./manage.py migrate
-    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY -e PYTHONWARNINGS ${DOCKER_TAG} ./manage.py test
+    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY -e GITHUB_PIPELINE_TOKEN -e GITLAB_PIPELINE_TOKEN -e PYTHONWARNINGS ${DOCKER_TAG} ./manage.py migrate
+    - docker run --rm -e SECRET_KEY -e GITHUB_WEBHOOK_KEY -e GITLAB_WEBHOOK_KEY -e GITHUB_PIPELINE_TOKEN -e GITLAB_PIPELINE_TOKEN -e PYTHONWARNINGS ${DOCKER_TAG} ./manage.py test
     - docker push ${DOCKER_TAG}
