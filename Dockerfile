@@ -20,7 +20,9 @@ RUN apt-get update -qq && apt-get install -qqy \
     msmtp \
  && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
  && echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" >> /etc/apt/sources.list \
- && apt-get update -qq && apt-get install -qqy docker-ce
+ && apt-get update -qq && apt-get install -qqy docker-ce \
+ && git config --global user.email "rainboard@laas.fr" \
+ && git config --global user.name "rainboard.laas.fr"
 
 RUN pip3 install --no-cache-dir \
     gunicorn \
