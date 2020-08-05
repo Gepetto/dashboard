@@ -1257,7 +1257,8 @@ def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
     fields = 'category', 'name', 'project__main_namespace__slug', 'project__ccache'
     bad_ones = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
-    library_bad_ones = Q(library__main_namespace__from_gepetto=False) | Q(library__robotpkg__isnull=True)
+    library_bad_ones = (Q(library__main_namespace__from_gepetto=False) | Q(library__robotpkg__isnull=True)
+                        | Q(library__archived=True))
 
     main = Project.objects.exclude(bad_ones)
     ret = main.all().exclude(dependencies__isnull=False)
@@ -1277,8 +1278,8 @@ def ordered_projects():
 
     # Ensure that py-XX is after XX
     switch = []
-    for i, (cat, pkg, ns) in enumerate(lst):
-        main = (cat, pkg[3:], ns)
+    for i, (cat, pkg, ns, ccache) in enumerate(lst):
+        main = (cat, pkg[3:], ns, ccache)
         if pkg.startswith('py-') and main in lst and i < lst.index(main):
             switch.append((i, lst.index(main)))
     for old, new in switch:
@@ -1287,7 +1288,7 @@ def ordered_projects():
     def get_deps(cat, pkg, ns, lst):
         with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
             cont = file_handle.read()
-        deps = [dep_pkg for dep_cat, dep_pkg, _ in lst if f'\ninclude ../../{dep_cat}/{dep_pkg}/depend.mk\n' in cont]
+        deps = [d_pkg for d_cat, d_pkg, _, _ in lst if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
         if pkg.startswith('py-') and (cat, pkg[3:], ns) in lst:
             deps.append(pkg[3:])
         return sorted(set(deps))
