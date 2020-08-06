@@ -916,6 +916,7 @@ class Image(models.Model):
             'ROBOTPKG': self.robotpkg,
             'CATEGORY': self.robotpkg.category,
             'REGISTRY': self.robotpkg.project.registry(),
+            'CCACHE': self.robotpkg.project.ccache,
         }
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
