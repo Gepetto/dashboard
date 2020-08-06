@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from functools import cmp_to_key
 from subprocess import check_output
 
 from django.conf import settings
@@ -1258,40 +1259,39 @@ def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
     fields = 'category', 'name', 'project__main_namespace__slug', 'project__ccache'
     bad_ones = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
-    library_bad_ones = (Q(library__main_namespace__from_gepetto=False) | Q(library__robotpkg__isnull=True)
-                        | Q(library__archived=True))
 
-    main = Project.objects.exclude(bad_ones)
-    ret = main.all().exclude(dependencies__isnull=False)
-    rest = main.all().exclude(id__in=ret)
-    lst = sorted(list(Robotpkg.objects.filter(project__in=ret).values_list(*fields)))
-    print(ret.count(), rest.count())
+    projects = Project.objects.exclude(bad_ones)
+    rpkgs = list(Robotpkg.objects.filter(project__in=projects).values_list(*fields))
 
-    while rest.exists():
-        new_ret = []
-        for prj in rest:
-            if all(d.library in ret for d in prj.dependencies.exclude(library_bad_ones)):
-                new_ret.append(prj)
-        lst += sorted(list(Robotpkg.objects.filter(project__in=new_ret).values_list(*fields)))
-        ret = Project.objects.filter(Q(id__in=ret) | Q(id__in=[p.id for p in new_ret]))
-        rest = rest.exclude(id__in=[p.id for p in new_ret])
-        print(ret.count(), rest.count())
+    deps_cache = {}
 
-    # Ensure that py-XX is after XX
-    switch = []
-    for i, (cat, pkg, ns, ccache) in enumerate(lst):
-        main = (cat, pkg[3:], ns, ccache)
-        if pkg.startswith('py-') and main in lst and i < lst.index(main):
-            switch.append((i, lst.index(main)))
-    for old, new in switch:
-        lst[old], lst[new] = lst[new], lst[old]
-
-    def get_deps(cat, pkg, ns, lst):
+    def get_deps(cat, pkg, ns, rpkgs, ccache):
+        """Get the robotpkg dependencies for a given robotpkg."""
         with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
             cont = file_handle.read()
-        deps = [d_pkg for d_cat, d_pkg, _, _ in lst if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
-        if pkg.startswith('py-') and (cat, pkg[3:], ns, ccache) in lst:
+        deps = [d_pkg for d_cat, d_pkg, _, _ in rpkgs if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
+        if pkg.startswith('py-') and (cat, pkg[3:], ns, ccache) in rpkgs:
             deps.append(pkg[3:])
-        return sorted(set(deps))
+        deps_cache[pkg] = sorted(set(deps))
+        return deps_cache[pkg]
 
-    return [[cat, pkg, ns, get_deps(cat, pkg, ns, lst), ccache] for cat, pkg, ns, ccache in lst]
+    rpkgs = [[cat, pkg, ns, get_deps(cat, pkg, ns, rpkgs, ccache), ccache] for cat, pkg, ns, ccache in rpkgs]
+
+    def get_rdeps(deps):
+        """Recursively get robotpkg dependencies for a given robotpkg."""
+        rdeps = set()
+        current = set(deps)
+        while current:
+            rdeps |= current
+            new = set()
+            for dep in current:
+                new |= set(deps_cache[dep])
+            current = new
+        return rdeps
+
+    def project_sort_key(prj):
+        """Generate a key to sort projects: by number of recursive dependencies, then python bindings, then name."""
+        cat, pkg, ns, deps, ccache = prj
+        return (len(get_rdeps(deps)), 1 if pkg.startswith('py-') else 0, pkg)
+
+    return sorted(rpkgs, key=project_sort_key)
