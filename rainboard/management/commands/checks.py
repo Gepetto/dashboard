@@ -43,7 +43,7 @@ class Command(BaseCommand):
                     rattr = getattr(repo, attr_name)
                     logger.warning(f"project {project}'s repo {repo.git_remote()} {attr_name}: {attr} Vs. {rattr}")
 
-        print(f'\nChecking robotpkgs\n')
+        print('\nChecking robotpkgs\n')
 
         for robotpkg in Robotpkg.objects.all():
             repo, project_repo = robotpkg.master_repository, robotpkg.project.main_repo().url

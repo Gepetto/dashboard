@@ -3,7 +3,10 @@ from ipaddress import ip_address, ip_network
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import reverse
+
 from rest_framework import permissions
+
+ALLOWED_URLS = ('admin', 'accounts', 'gh')
 
 
 def ip_laas(request: HttpRequest) -> bool:
@@ -21,7 +24,6 @@ class LAASPermsMiddleware:
         or if the user is authenticated,
         or if the request comes from a trusted IP.
         """
-        ALLOWED_URLS = ('admin', 'accounts', 'gh')
         allowed = (any(request.path.startswith(f'/{url}/') for url in ALLOWED_URLS)
                    or request.user and request.user.is_authenticated
                    or request.method in permissions.SAFE_METHODS and ip_laas(request))

@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Fetch all remotes'
 
     def handle(self, *args, **options):
-        logger.info(f'Fetching all repos')
+        logger.info('Fetching all repos')
         for project in Project.objects.all():
             logger.info(f' updating branches for {project}')
             project.update_branches(main=False, pull=True)

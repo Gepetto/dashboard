@@ -11,5 +11,5 @@ class Command(BaseCommand):
     help = 'Delete personnal projects'
 
     def handle(self, *args, **options):
-        logger.info(f'removing unwanted projects:')
+        logger.info('removing unwanted projects:')
         logger.info(str(Project.objects.filter(main_namespace__group=False).delete()))

@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from functools import cmp_to_key
 from subprocess import check_output
 
 from django.conf import settings
@@ -844,12 +843,12 @@ class Robotpkg(NamedModel):
         last_commit = next(repo.iter_commits(paths=repo_path, max_count=1))
         self.updated = last_commit.authored_datetime
 
-        license = check_output(['make', 'show-var', f'VARNAME=LICENSE'], cwd=cwd).decode().strip()
+        license = check_output(['make', 'show-var', 'VARNAME=LICENSE'], cwd=cwd).decode().strip()
         if license in RPKG_LICENSES:
             self.license = License.objects.get(spdx_id=RPKG_LICENSES[license])
         else:
             logger.warning(f'Unknown robotpkg license: {license}')
-        self.public = not bool(check_output(['make', 'show-var', f'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
+        self.public = not bool(check_output(['make', 'show-var', 'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
         with (cwd / 'DESCR').open() as f:
             self.description = f.read().strip()
 

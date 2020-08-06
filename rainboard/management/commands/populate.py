@@ -14,7 +14,7 @@ class Command(BaseCommand):
     help = 'populates licenses, projets, namespaces and repos from forges'
 
     def handle(self, *args, **options):
-        logger.info(f'updating licenses')
+        logger.info('updating licenses')
         for data in requests.get(LICENSES).json()['licenses']:
             License.objects.get_or_create(spdx_id=data['licenseId'],
                                           defaults={
@@ -22,12 +22,12 @@ class Command(BaseCommand):
                                               'url': data['detailsUrl']
                                           })
 
-        logger.info(f'updating forges')
+        logger.info('updating forges')
         for forge in Forge.objects.order_by('source'):
             logger.info(f' updating {forge}')
             forge.get_projects()
 
-        logger.info(f'updating repos')
+        logger.info('updating repos')
         for repo in Repo.objects.all():
             logger.info(f' updating {repo}')
             repo.api_update()
