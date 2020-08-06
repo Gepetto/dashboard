@@ -1289,7 +1289,7 @@ def ordered_projects():
         with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
             cont = file_handle.read()
         deps = [d_pkg for d_cat, d_pkg, _, _ in lst if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
-        if pkg.startswith('py-') and (cat, pkg[3:], ns) in lst:
+        if pkg.startswith('py-') and (cat, pkg[3:], ns, ccache) in lst:
             deps.append(pkg[3:])
         return sorted(set(deps))
 
