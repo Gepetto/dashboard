@@ -682,7 +682,7 @@ class IssuePr(models.Model):
     def update(self, skip_label):
         gh = self.repo.project.github()
         issue_pr = gh.get_issue(number=self.number) if self.is_issue else gh.get_pull(number=self.number)
-        self.days_since_updated = (timezone.now() - issue_pr.updated_at).days
+        self.days_since_updated = (timezone.now() - timezone.make_aware(issue_pr.updated_at)).days
         if issue_pr.state == 'closed' or skip_label in [label.name for label in issue_pr.get_labels()]:
             self.delete()
         else:
