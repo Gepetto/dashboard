@@ -36,5 +36,6 @@ for model in [
         models.Target,
         models.ContributorName,
         models.ContributorMail,
+        models.IssuePr,
 ]:
     site.register(model)
