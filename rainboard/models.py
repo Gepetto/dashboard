@@ -772,6 +772,7 @@ class TargetQuerySet(models.QuerySet):
 class Target(NamedModel):
     active = models.BooleanField(default=True)
     main = models.BooleanField(default=False)
+    py2_available = models.BooleanField(default=True)
 
     objects = TargetQuerySet.as_manager()
 
@@ -823,6 +824,8 @@ class Robotpkg(NamedModel):
         for target in Target.objects.active():
             for py3 in py3s:
                 for debug in debugs:
+                    if not target.py2_available and not py3:
+                        continue
                     Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()
 
     def update(self, pull=True):
