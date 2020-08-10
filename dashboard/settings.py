@@ -172,7 +172,7 @@ GITHUB_USER = 'hrp2-14'
 GITHUB_WEBHOOK_KEY = os.environ['GITHUB_WEBHOOK_KEY']
 GITLAB_WEBHOOK_KEY = os.environ['GITLAB_WEBHOOK_KEY']
 
-AUTHENTICATION_BACKENDS = ["django_auth_ldap.backend.LDAPBackend"]
+AUTHENTICATION_BACKENDS = ["django_auth_ldap.backend.LDAPBackend", "django.contrib.auth.backends.ModelBackend"]
 
 AUTH_LDAP_SERVER_URI = "ldap://ldap.laas.fr"
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=users,dc=laas,dc=fr"
