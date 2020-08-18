@@ -824,9 +824,8 @@ class Robotpkg(NamedModel):
         for target in Target.objects.active():
             for py3 in py3s:
                 for debug in debugs:
-                    if not target.py2_available and not py3:
-                        continue
-                    Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()
+                    if target.py2_available or py3 or not self.name.startswith('py-'):
+                        Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()
 
     def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
