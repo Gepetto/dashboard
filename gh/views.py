@@ -120,6 +120,9 @@ def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     if branch.startswith('pr/'):  # Don't sync pr/XX branches here, they are already handled by pull_request()
         return HttpResponse(rep)
 
+    if branch.startswith('release/'):  # Don't sync release/X.Y.Z branches at all
+        return HttpResponse(rep)
+
     # Fetch the latest commit from gitlab
     if gl_remote_name in git_repo.remotes:
         gl_remote = git_repo.remote(gl_remote_name)
