@@ -7,9 +7,6 @@ from hashlib import sha1
 from ipaddress import ip_address, ip_network
 from json import loads
 
-import git
-import github
-from autoslug.utils import slugify
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.http import HttpRequest
@@ -19,9 +16,14 @@ from django.shortcuts import get_object_or_404, reverse
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
 
+import git
+import github
+from autoslug.utils import slugify
+
 from dashboard.middleware import ip_laas
 from rainboard.models import Namespace, Project
 from rainboard.utils import SOURCES
+
 from . import models
 
 logger = logging.getLogger(__name__)
@@ -54,8 +56,9 @@ def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
         if not project.accept_pr_to_master and pr_branch == 'master' \
                 and 'devel' in [b.name for b in gh.get_branches()] and login != namespace.slug_github:
             logger.info(f"{namespace.slug}/{project.slug}: New pr {data['number']} to master")
-            pr.create_issue_comment("This project doesn't accept pull requests on master, please change the base "
-                                    "branch of your pull request to devel.")
+            pr.create_issue_comment("Hi ! This project doesn't usually accept pull requests on master. If this wasn't "
+                                    "intentionnal, you can change the base branch of this pull request to devel "
+                                    "(No need to close it for that). Best, a bot.")
 
     gh_remote_name = f'github/{login}'
     if gh_remote_name not in git_repo.remotes:
