@@ -34,7 +34,7 @@ class RainboardTests(TestCase):
         self.assertEqual(project.url_travis(), 'https://travis-ci.org/gepetto/rainboard-tests-2')
         self.assertEqual(project.url_gitlab(), 'https://gitlab.laas.fr/gepetto/rainboard-tests-2')
         badges = project.badges()
-        for chunk in ['<img src="https://gitlab.laas', 'travis-ci', 'href="https://gepettoweb.laas']:
+        for chunk in ['<img src="https://gitlab.laas', 'href="https://gepettoweb.laas']:
             self.assertIn(chunk, badges)
 
         # Test Middleware
