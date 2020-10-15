@@ -442,8 +442,8 @@ class Project(Links, NamedModel, TimeStampedModel):
                           f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
 
     def badges(self):
-        travis = self.badge_travis() if self.public else mark_safe('')
-        return travis + self.badge_gitlab() + self.badge_coverage()
+        # travis = self.badge_travis() if self.public else mark_safe('')
+        return self.badge_gitlab() + self.badge_coverage()
 
     def cron(self):
         """ generate a cron-style interval description to run CI monthly on master """
