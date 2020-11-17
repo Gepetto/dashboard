@@ -19,7 +19,6 @@ from django.views.decorators.csrf import csrf_exempt
 import git
 import github
 from autoslug.utils import slugify
-
 from dashboard.middleware import ip_laas
 from rainboard.models import Namespace, Project
 from rainboard.utils import SOURCES
@@ -104,6 +103,10 @@ def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
 def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     """Someone pushed on github or gitlab. Synchronise local & remote repos."""
     data = loads(request.body.decode())
+    slug = slugify(data['repository']['name'])
+
+    if 'ros-release' in slug:  # Don't sync ros-release repositories
+        return HttpResponse(rep)
 
     if source == SOURCES.gitlab:
         namespace = get_object_or_404(Namespace,
@@ -111,14 +114,14 @@ def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     else:
         namespace = get_object_or_404(Namespace, slug_github=slugify(data['repository']['owner']['login']))
 
-    project = get_object_or_404(Project, main_namespace=namespace, slug=slugify(data['repository']['name']))
+    project = get_object_or_404(Project, main_namespace=namespace, slug=slug)
 
     branch = data['ref'][11:]  # strip 'refs/heads/'
     commit = data['after']
     gl_remote_name = f'gitlab/{namespace.slug}'
     gh_remote_name = f'github/{namespace.slug}'
     git_repo = project.git()
-    logger.debug(f'{namespace.slug}/{project.slug}: Push detected on {source.name} {branch} (commit {commit})')
+    logger.debug(f'{namespace.slug}/{slug}: Push detected on {source.name} {branch} (commit {commit})')
 
     if branch.startswith('pr/'):  # Don't sync pr/XX branches here, they are already handled by pull_request()
         return HttpResponse(rep)
@@ -148,14 +151,14 @@ def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
                 project.github().get_git_ref(f'heads/{branch}').delete()
             else:
                 project.gitlab().branches.delete(branch)
-            logger.info(f'{namespace.slug}/{project.slug}: Deleted branch {branch}')
+            logger.info(f'{namespace.slug}/{slug}: Deleted branch {branch}')
         return HttpResponse(rep)
 
     # Make sure we fetched the latest commit
     ref = gl_remote.refs[branch] if source == SOURCES.gitlab else gh_remote.refs[branch]
     if str(ref.commit) != commit:
         fail = f'Push: wrong commit: {ref.commit} vs {commit}'
-        logger.error(f'{namespace.slug}/{project.slug}: ' + fail)
+        logger.error(f'{namespace.slug}/{slug}: ' + fail)
         return HttpResponseBadRequest(fail)
 
     # Update the branch to the latest commit
@@ -167,19 +170,19 @@ def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     # Push the changes to other remote
     try:
         if source == SOURCES.gitlab and (branch not in gh_remote.refs or str(gh_remote.refs[branch].commit) != commit):
-            logger.info(f'{namespace.slug}/{project.slug}: Pushing {commit} on {branch} on github')
+            logger.info(f'{namespace.slug}/{slug}: Pushing {commit} on {branch} on github')
             git_repo.git.push(gh_remote_name, branch)
         elif branch not in gl_remote.refs or str(gl_remote.refs[branch].commit) != commit:
-            logger.info(f'{namespace.slug}/{project.slug}: Pushing {commit} on {branch} on gitlab')
+            logger.info(f'{namespace.slug}/{slug}: Pushing {commit} on {branch} on gitlab')
             git_repo.git.push(gl_remote_name, branch)
         else:
             return HttpResponse('already synced')
     except git.exc.GitCommandError:
         # Probably failed because of a force push
-        logger.exception(f'{namespace.slug}/{project.slug}: Forge sync failed')
+        logger.exception(f'{namespace.slug}/{slug}: Forge sync failed')
         message = traceback.format_exc()
         message = re.sub(r'://.*@', '://[REDACTED]@', message)  # Hide access tokens in the mail
-        mail_admins(f'Forge sync failed for {namespace.slug}/{project.slug}', message)
+        mail_admins(f'Forge sync failed for {namespace.slug}/{slug}', message)
 
     return HttpResponse(rep)
 
