@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update -qq && apt-get install -qqy \
     apt-transport-https \
     curl \
+    gcc \
     git \
     gnupg2 \
     graphviz \
