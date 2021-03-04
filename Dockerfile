@@ -9,8 +9,8 @@ ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update -qq && apt-get install -qqy \
     apt-transport-https \
+    build-essential \
     curl \
-    gcc \
     git \
     gnupg2 \
     graphviz \
