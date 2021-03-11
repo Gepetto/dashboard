@@ -31,6 +31,11 @@ logger = logging.getLogger(__name__)
 def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     """Manage Github's check suites."""
     data = loads(request.body.decode())
+    slug = slugify(data['repository']['name'])
+
+    if 'ros-release' in slug:  # Don't run check suites on ros-release repositories
+        return HttpResponse(rep)
+
     models.GithubCheckSuite.objects.get_or_create(id=data['check_suite']['id'])
     return HttpResponse(rep)
 
