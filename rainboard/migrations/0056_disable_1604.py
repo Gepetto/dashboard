@@ -9,9 +9,8 @@ def disable_trusty(apps, schema_editor):
     trusty.active = False
     trusty.save()
     Robotpkg = apps.get_model('rainboard', 'Robotpkg')
-    for project in ['eigenpy', 'hpp-fcl', 'pinocchio', 'tsid', 'crocoddyl']:
-        for rpkg in Robotpkg.objects.filter(project__slug=project):
-            rpkg.extended_target.add(trusty)
+    for rpkg in Robotpkg.objects.filter(project__slug__in=['eigenpy', 'hpp-fcl', 'pinocchio', 'tsid', 'crocoddyl']):
+        rpkg.extended_target.add(trusty)
 
 
 class Migration(migrations.Migration):
