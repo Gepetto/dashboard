@@ -12,7 +12,6 @@ def disable_trusty(apps, schema_editor):
     for project in ['eigenpy', 'hpp-fcl', 'pinocchio', 'tsid', 'crocoddyl']:
         for rpkg in Robotpkg.objects.filter(project__slug=project):
             rpkg.extended_target.add(trusty)
-            rpkg.extended_target.save()
 
 
 class Migration(migrations.Migration):
