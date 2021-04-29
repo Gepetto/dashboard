@@ -182,3 +182,5 @@ AUTH_LDAP_USER_ATTR_MAP = {"first_name": "givenName", "last_name": "sn", "email"
 LAAS_NETWORKS = ['140.93.0.0/21', '2001:660:6602:4::/64']
 
 LOGIN_REDIRECT_URL = '/projects'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
