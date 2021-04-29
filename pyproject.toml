@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "dashboard"
+version = "0.1.0"
+description = "Gepetto Software Development Dashboard"
+authors = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
+license = "BSD-2-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+ndh = "^3.10.4"
+django-filter = "^2.4.0"
+django-tables2 = "^2.3.4"
+httpx = "^0.18.1"
+GitPython = "^3.1.15"
+djangorestframework = "^3.12.4"
+django-auth-ldap = "^2.4.0"
+python-gitlab = "^2.7.1"
+PyGithub = "^1.55"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.31.0"
+ipython = "^7.22.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

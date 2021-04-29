@@ -2,7 +2,6 @@ FROM python:slim-buster
 
 EXPOSE 8000
 
-RUN mkdir /app
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
@@ -28,12 +27,13 @@ RUN apt-get update -qq && apt-get install -qqy \
 RUN pip3 install --no-cache-dir \
     gunicorn \
     ipython \
-    pipenv \
+    poetry \
     psycopg2-binary \
     python-memcached
 
-ADD Pipfile Pipfile.lock ./
-RUN pipenv install --system --deploy
+ADD pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false --local \
+ && poetry install --no-dev --no-root --no-interaction --no-ansi
 
 ADD . .
 
