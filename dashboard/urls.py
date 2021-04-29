@@ -1,11 +1,11 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include, path
 from django.conf.urls.static import static
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-    url(r'gh/', include('gh.urls')),
-    url(r'', include('rainboard.urls')),
+    path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('gh/', include('gh.urls')),
+    path('', include('rainboard.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
