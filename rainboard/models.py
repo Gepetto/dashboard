@@ -88,7 +88,7 @@ class Forge(Links, NamedModel):
         logger.debug(f'requesting api {self} {url}, page {page}')
         try:
             return httpx.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
-        except httpx.exceptions.ConnectionError:
+        except httpx.HTTPError:
             logger.error(f'requesting api {self} {url}, page {page} - SECOND TRY')
             return httpx.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
 
@@ -494,7 +494,7 @@ class Repo(TimeStampedModel):
             return httpx.get(self.api_url() + url, {'page': page},
                              verify=self.forge.verify,
                              headers=self.forge.headers())
-        except httpx.exceptions.ConnectionError:
+        except httpx.HTTPError:
             logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
             return httpx.get(self.api_url() + url, {'page': page},
                              verify=self.forge.verify,
