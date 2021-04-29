@@ -881,7 +881,8 @@ class Robotpkg(NamedModel):
         base_images = Image.objects.filter(robotpkg__project=self.project, target__main=True)
         base_image = base_images.order_by('-py3', 'debug').first()
 
-        images = self.image_set.filter(created__isnull=False, target__active=True).order_by('target__name')
+        images = self.image_set.filter(Q(target__active=True) | Q(target__robotpkg=self),
+                                       created__isnull=False).order_by('target__name')
         return (image for image in images if is_valid(base_image, image))
 
     def without_py(self):
