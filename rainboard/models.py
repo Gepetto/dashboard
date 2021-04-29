@@ -976,7 +976,7 @@ class Image(models.Model):
 
 class CIBuild(models.Model):
     repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
-    passed = models.NullBooleanField()
+    passed = models.BooleanField(null=True)
     build_id = models.PositiveIntegerField()
     started = models.DateTimeField()
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
@@ -993,7 +993,7 @@ class CIBuild(models.Model):
 
 class CIJob(models.Model):
     repo = models.ForeignKey(Repo, on_delete=models.CASCADE)
-    passed = models.NullBooleanField()
+    passed = models.BooleanField(null=True)
     job_id = models.PositiveIntegerField()
     started = models.DateTimeField()
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
