@@ -16,10 +16,10 @@ djangorestframework = "^3.12.4"
 django-auth-ldap = "^2.4.0"
 python-gitlab = "^2.7.1"
 PyGithub = "^1.55"
+ipython = "^7.22.0"
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.31.0"
-ipython = "^7.22.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
