@@ -491,12 +491,14 @@ class Repo(TimeStampedModel):
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
         try:
-            return httpx.get(self.api_url() + url, params={'page': page},
+            return httpx.get(self.api_url() + url,
+                             params={'page': page},
                              verify=self.forge.verify,
                              headers=self.forge.headers())
         except httpx.HTTPError:
             logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
-            return httpx.get(self.api_url() + url, params={'page': page},
+            return httpx.get(self.api_url() + url,
+                             params={'page': page},
                              verify=self.forge.verify,
                              headers=self.forge.headers())
 
@@ -956,12 +958,13 @@ class Image(models.Model):
         headers = {}
         if not self.robotpkg.project.public:
             image_name = self.get_image_name().split('/', maxsplit=1)[1].split(':')[0]
-            token = httpx.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth', params={
-                'client_id': 'docker',
-                'offline_token': True,
-                'service': 'container_registry',
-                'scope': f'repository:{image_name}:push,pull'
-            },
+            token = httpx.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth',
+                              params={
+                                  'client_id': 'docker',
+                                  'offline_token': True,
+                                  'service': 'container_registry',
+                                  'scope': f'repository:{image_name}:push,pull'
+                              },
                               auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
             headers['Authorization'] = f'Bearer {token}'
         r = httpx.get(self.get_image_url(), headers=headers)
