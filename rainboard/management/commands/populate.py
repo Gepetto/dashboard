@@ -1,6 +1,6 @@
 import logging
 
-import requests
+import httpx
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         logger.info('updating licenses')
-        for data in requests.get(LICENSES).json()['licenses']:
+        for data in httpx.get(LICENSES).json()['licenses']:
             License.objects.get_or_create(spdx_id=data['licenseId'],
                                           defaults={
                                               'name': data['name'],

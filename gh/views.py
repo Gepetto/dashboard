@@ -231,7 +231,7 @@ def webhook(request: HttpRequest) -> HttpResponse:
     """
     # validate ip source
     forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR').split(', ')[0]
-    # networks = requests.get('https://api.github.com/meta').json()['hooks'] # Fails if API rate limit exceeded
+    # networks = httpx.get('https://api.github.com/meta').json()['hooks'] # Fails if API rate limit exceeded
     networks = ['185.199.108.0/22', '140.82.112.0/20']
     if not any(ip_address(forwarded_for) in ip_network(net) for net in networks):
         logger.warning('not from github IP')

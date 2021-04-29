@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import requests
+import httpx
 
 import git
 from autoslug import AutoSlugField
@@ -87,10 +87,10 @@ class Forge(Links, NamedModel):
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self} {url}, page {page}')
         try:
-            return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
-        except requests.exceptions.ConnectionError:
+            return httpx.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+        except httpx.exceptions.ConnectionError:
             logger.error(f'requesting api {self} {url}, page {page} - SECOND TRY')
-            return requests.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
+            return httpx.get(self.api_url() + url, {'page': page}, verify=self.verify, headers=self.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
@@ -491,14 +491,14 @@ class Repo(TimeStampedModel):
     def api_req(self, url='', name=None, page=1):
         logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
         try:
-            return requests.get(self.api_url() + url, {'page': page},
-                                verify=self.forge.verify,
-                                headers=self.forge.headers())
-        except requests.exceptions.ConnectionError:
+            return httpx.get(self.api_url() + url, {'page': page},
+                             verify=self.forge.verify,
+                             headers=self.forge.headers())
+        except httpx.exceptions.ConnectionError:
             logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
-            return requests.get(self.api_url() + url, {'page': page},
-                                verify=self.forge.verify,
-                                headers=self.forge.headers())
+            return httpx.get(self.api_url() + url, {'page': page},
+                             verify=self.forge.verify,
+                             headers=self.forge.headers())
 
     def api_data(self, url=''):
         req = self.api_req(url)
@@ -810,6 +810,8 @@ class Robotpkg(NamedModel):
 
     same_py = models.BooleanField(default=True)
 
+    extended_target = models.ManyToManyField(Target)
+
     def main_page(self):
         if self.category != 'wip':
             return f'{RPKG_URL}/robotpkg/{self.category}/{self.name}'
@@ -821,7 +823,7 @@ class Robotpkg(NamedModel):
     def update_images(self):
         py3s = [False, True] if self.name.startswith('py-') else [False]
         debugs = [False, True]
-        for target in Target.objects.active():
+        for target in list(Target.objects.active()) + list(self.extended_target.all()):
             for py3 in py3s:
                 for debug in debugs:
                     if target.py2_available or py3 or not self.name.startswith('py-'):
@@ -954,15 +956,15 @@ class Image(models.Model):
         headers = {}
         if not self.robotpkg.project.public:
             image_name = self.get_image_name().split('/', maxsplit=1)[1].split(':')[0]
-            token = requests.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth', {
+            token = httpx.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth', {
                 'client_id': 'docker',
                 'offline_token': True,
                 'service': 'container_registry',
                 'scope': f'repository:{image_name}:push,pull'
             },
-                                 auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
+                              auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
             headers['Authorization'] = f'Bearer {token}'
-        r = requests.get(self.get_image_url(), headers=headers)
+        r = httpx.get(self.get_image_url(), headers=headers)
         if r.status_code == 200:
             self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
             self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
