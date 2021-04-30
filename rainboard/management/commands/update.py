@@ -32,17 +32,18 @@ def update_issues_pr():
                     if issue.pull_request is None:
                         db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
                                                                     number=issue.number,
-                                                                    url=url,
                                                                     is_issue=True,
-                                                                    defaults={'title': issue.title})
+                                                                    defaults={'title': issue.title, 'url': url})
                     else:
                         db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
                                                                     number=issue.number,
-                                                                    url=url,
                                                                     is_issue=False,
-                                                                    defaults={'title': issue.title})
+                                                                    defaults={'title': issue.title, 'url': url})
                     if db_issue.title != issue.title:
                         db_issue.title = issue.title
+                        db_issue.save()
+                    if db_issue.url != issue.url:
+                        db_issue.url = issue.url
                         db_issue.save()
 
         except github.UnknownObjectException:
