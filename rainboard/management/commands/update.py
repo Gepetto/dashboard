@@ -30,18 +30,20 @@ def update_issues_pr():
                     url = re.sub('api\\.github\\.com/repos', 'github.com', issue.url)
 
                     if issue.pull_request is None:
-                        IssuePr.objects.get_or_create(repo=main_repo,
-                                                      number=issue.number,
-                                                      url=url,
-                                                      is_issue=True,
-                                                      defaults={'title': issue.title})
-
+                        db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
+                                                                    number=issue.number,
+                                                                    url=url,
+                                                                    is_issue=True,
+                                                                    defaults={'title': issue.title})
                     else:
-                        IssuePr.objects.get_or_create(repo=main_repo,
-                                                      number=issue.number,
-                                                      url=url,
-                                                      is_issue=False,
-                                                      defaults={'title': issue.title})
+                        db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
+                                                                    number=issue.number,
+                                                                    url=url,
+                                                                    is_issue=False,
+                                                                    defaults={'title': issue.title})
+                    if db_issue.title != issue.title:
+                        db_issue.title = issue.title
+                        db_issue.save()
 
         except github.UnknownObjectException:
             print(f'Project not found: {project.main_namespace.slug}/{project.slug}')
