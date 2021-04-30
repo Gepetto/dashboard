@@ -1102,7 +1102,7 @@ def update_gitlab(forge, data):
                                                          'main_forge': forge,
                                                          'public': public
                                                      })
-    namespace, _ = Namespace.objects.get_or_create(slug=data['namespace']['path'],
+    namespace, _ = Namespace.objects.get_or_create(slug__iexact=data['namespace']['path'],
                                                    defaults={'name': data['namespace']['name']})
     repo, _ = Repo.objects.get_or_create(forge=forge,
                                          namespace=namespace,
