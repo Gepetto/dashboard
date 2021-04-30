@@ -29,20 +29,15 @@ def update_issues_pr():
                         and SKIP_LABEL not in [label.name for label in issue.get_labels()]:
                     url = re.sub('api\\.github\\.com/repos', 'github.com', issue.url)
 
-                    if issue.pull_request is None:
-                        db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
-                                                                    number=issue.number,
-                                                                    is_issue=True,
-                                                                    defaults={'title': issue.title, 'url': url})
-                    else:
-                        db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
-                                                                    number=issue.number,
-                                                                    is_issue=False,
-                                                                    defaults={'title': issue.title, 'url': url})
-                    if db_issue.title != issue.title:
+                    db_issue, _ = IssuePr.objects.get_or_create(repo=main_repo,
+                                                                number=issue.number,
+                                                                is_issue=bool(issue.pull_request is None),
+                                                                defaults={
+                                                                    'title': issue.title,
+                                                                    'url': url,
+                                                                })
+                    if db_issue.title != issue.title or db_issue.url != issue.url:
                         db_issue.title = issue.title
-                        db_issue.save()
-                    if db_issue.url != issue.url:
                         db_issue.url = issue.url
                         db_issue.save()
 
