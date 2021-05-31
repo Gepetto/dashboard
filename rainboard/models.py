@@ -339,9 +339,11 @@ class Project(Links, NamedModel, TimeStampedModel):
         branch = str(self.main_branch()).split('/', maxsplit=2)[2]
         self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[branch].commit
 
+    def main_gitlab_repo(self):
+        return self.repo_set.get(forge__source=SOURCES.gitlab, namespace=self.main_namespace)
+
     def ci_jobs(self):
-        if self.main_forge.source == SOURCES.gitlab:
-            self.main_repo().get_jobs_gitlab()
+        self.main_gitlab_repo().get_jobs_gitlab()
 
     def update(self, only_main_branches=True):
         if self.main_namespace is None:
