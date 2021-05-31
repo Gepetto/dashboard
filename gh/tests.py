@@ -1,6 +1,5 @@
 import hmac
 import re
-import time
 from hashlib import sha1
 
 from django.conf import settings
@@ -363,7 +362,6 @@ class GhTests(TestCase):
                                          pr_number=pr_master.number)
         self.assertEqual(response.status_code, 200)
         self.assertTrue([c.body for c in pr_master.get_issue_comments() if not_accepted_string in c.body])
-        time.sleep(30)
         self.assertIn(f'pr/{pr_master.number}', [b.name for b in self.gitlab.branches.list()])
 
         # Test pr on devel
