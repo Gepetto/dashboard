@@ -363,7 +363,7 @@ class GhTests(TestCase):
                                          pr_number=pr_master.number)
         self.assertEqual(response.status_code, 200)
         self.assertTrue([c.body for c in pr_master.get_issue_comments() if not_accepted_string in c.body])
-        sleep(30)
+        time.sleep(30)
         self.assertIn(f'pr/{pr_master.number}', [b.name for b in self.gitlab.branches.list()])
 
         # Test pr on devel
