@@ -56,11 +56,6 @@ class Command(BaseCommand):
         def log(message):
             self.stdout.write(message)
 
-        log('updating forges')
-        for forge in Forge.objects.order_by('source'):
-            log(f' updating {forge}')
-            forge.get_projects()
-
         log('\nUpdating all repos\n')
         for repo in Repo.objects.filter(project__archived=False, project__main_namespace__from_gepetto=True):
             log(f' {repo}')
@@ -100,3 +95,8 @@ class Command(BaseCommand):
             log(f' {img}')
 
         update_issues_pr()
+
+        log('updating forges')
+        for forge in Forge.objects.order_by('source'):
+            log(f' updating {forge}')
+            forge.get_projects()
