@@ -12,9 +12,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import httpx
-
 import git
+import httpx
 from autoslug import AutoSlugField
 from autoslug.utils import slugify
 from github import Github
@@ -622,19 +621,25 @@ class Repo(TimeStampedModel):
             if not created and ci_job.passed != GITLAB_STATUS[data['status']]:
                 ci_job.passed = GITLAB_STATUS[data['status']]
                 ci_job.save()
-            if self == self.project.main_repo() and data['name'].startswith('robotpkg-'):
-                py3 = '-py3' in data['name']
-                debug = '-debug' in data['name']
-                target = next(target for target in Target.objects.all() if target.name in data['name']).name
-                robotpkg = data['name'][9:-(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
-                images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
-                if not images.exists():
-                    continue
-                image = images.first()
-                if image.allow_failure and GITLAB_STATUS[data['status']]:
-                    image.allow_failure = False
-                    image.save()
-                    print('  success', data['web_url'])
+            if self == self.project.main_repo():
+                if data['name'] == 'format':
+                    if self.project.allow_format_failure and GITLAB_STATUS[data['status']]:
+                        self.project.allow_format_failure = False
+                        self.project.save()
+                        print(' format success', data['web_url'])
+                elif data['name'].startswith('robotpkg-'):
+                    py3 = '-py3' in data['name']
+                    debug = '-debug' in data['name']
+                    target = next(target for target in Target.objects.all() if target.name in data['name']).name
+                    robotpkg = data['name'][9:-(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
+                    images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
+                    if not images.exists():
+                        continue
+                    image = images.first()
+                    if image.allow_failure and GITLAB_STATUS[data['status']]:
+                        image.allow_failure = False
+                        image.save()
+                        print('  success', data['web_url'])
 
     def get_builds_github(self):
         if self.travis_id is not None:
