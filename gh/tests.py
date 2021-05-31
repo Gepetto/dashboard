@@ -1,16 +1,16 @@
 import hmac
 import re
-
-import git
+import time
 from hashlib import sha1
 
-from autoslug.utils import slugify
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 
-from rainboard.models import Project, Namespace, Forge
+import git
+from autoslug.utils import slugify
+from rainboard.models import Forge, Namespace, Project
 
 
 def redact_token(func):
@@ -363,6 +363,7 @@ class GhTests(TestCase):
                                          pr_number=pr_master.number)
         self.assertEqual(response.status_code, 200)
         self.assertTrue([c.body for c in pr_master.get_issue_comments() if not_accepted_string in c.body])
+        sleep(30)
         self.assertIn(f'pr/{pr_master.number}', [b.name for b in self.gitlab.branches.list()])
 
         # Test pr on devel
