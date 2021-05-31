@@ -95,7 +95,7 @@ class Forge(Links, NamedModel):
         req = self.api_req(url)
         return req.json() if req.status_code == 200 else []  # TODO
 
-    def api_list(self, url='', name=None):
+    def api_list(self, url='', name=None, limit=None):
         page = 1
         while page:
             req = self.api_req(url, name, page)
@@ -106,6 +106,8 @@ class Forge(Links, NamedModel):
                 data = data[name]
             yield from data
             page = api_next(self.source, req)
+            if limit is not None and page > limit:
+                break
 
     def headers(self):
         return {
@@ -608,7 +610,7 @@ class Repo(TimeStampedModel):
                 ci_build.save()
 
     def get_jobs_gitlab(self):
-        for data in self.api_list('/jobs'):
+        for data in self.api_list('/jobs', limit=4):
             branch_name = f'{self.forge.slug}/{self.namespace.slug}/{data["ref"]}'
             branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
             if created:
