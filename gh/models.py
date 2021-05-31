@@ -4,4 +4,4 @@ from django.db import models
 
 
 class GithubCheckSuite(models.Model):
-    id = models.PositiveIntegerField(primary_key=True)
+    id = models.PositiveBigIntegerField(primary_key=True)
