@@ -509,7 +509,7 @@ class Repo(TimeStampedModel):
         req = self.api_req(url)
         return req.json() if req.status_code == 200 else []  # TODO
 
-    def api_list(self, url='', name=None):
+    def api_list(self, url='', name=None, limit=None):
         page = 1
         while page:
             req = self.api_req(url, name, page)
@@ -523,6 +523,8 @@ class Repo(TimeStampedModel):
                     return []  # TODO
             yield from data
             page = api_next(self.forge.source, req)
+            if limit is not None and page > limit:
+                break
 
     def api_update(self):
         data = self.api_data()
