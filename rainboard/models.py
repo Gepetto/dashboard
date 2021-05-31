@@ -626,7 +626,7 @@ class Repo(TimeStampedModel):
                 py3 = '-py3' in data['name']
                 debug = '-debug' in data['name']
                 target = next(target for target in Target.objects.all() if target.name in data['name']).name
-                robotpkg = data['name'][9:-(2 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
+                robotpkg = data['name'][9:-(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
                 images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
                 if not images.exists():
                     continue
