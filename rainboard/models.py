@@ -106,7 +106,7 @@ class Forge(Links, NamedModel):
                 data = data[name]
             yield from data
             page = api_next(self.source, req)
-            if limit is not None and page > limit:
+            if limit is not None and page is not None and page > limit:
                 break
 
     def headers(self):
@@ -523,7 +523,7 @@ class Repo(TimeStampedModel):
                     return []  # TODO
             yield from data
             page = api_next(self.forge.source, req)
-            if limit is not None and page > limit:
+            if limit is not None and page is not None and page > limit:
                 break
 
     def api_update(self):
