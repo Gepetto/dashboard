@@ -35,7 +35,8 @@ class ProjectsView(SingleTableMixin, FilterView):
 
 
 class GepettoProjectsView(ProjectsView):
-    queryset = models.Project.objects.filter(main_namespace__from_gepetto=True, archived=False)
+    queryset = models.Project.objects.filter(main_namespace__from_gepetto=True,
+                                             archived=False).exclude(name__endswith='release')
 
 
 class ProjectView(DetailView):
@@ -145,7 +146,8 @@ def docker(request):
 def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
         print('digraph { rankdir=LR;', file=f)
-        for project in models.Project.objects.filter(main_namespace__from_gepetto=True, archived=False):
+        for project in models.Project.objects.filter(main_namespace__from_gepetto=True,
+                                                     archived=False).exclude(name__endswith='release'):
             print(f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}', file=f)
         for dep in models.Dependency.objects.filter(project__main_namespace__from_gepetto=True,
                                                     library__main_namespace__from_gepetto=True,

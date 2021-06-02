@@ -177,7 +177,7 @@ class Forge(Links, NamedModel):
         for data in self.api_list('/projects'):
             update_gitlab(self, data)
 
-        for orphan in Project.objects.filter(main_namespace=None):
+        for orphan in Project.objects.filter(main_namespace=None).exclude(name__endswith='release'):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
             if repo:
                 update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))

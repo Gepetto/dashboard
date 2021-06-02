@@ -17,7 +17,8 @@ SKIP_LABEL = 'skip dashboard'  # Issues and prs with this label will not be adde
 
 def update_issues_pr():
     print('\nUpdating issues and pull requests')
-    for project in Project.objects.filter(archived=False, main_namespace__from_gepetto=True):
+    for project in Project.objects.filter(archived=False,
+                                          main_namespace__from_gepetto=True).exclude(name__endswith='release'):
         try:
             gh = project.github()
             main_repo = project.repo_set.filter(namespace=project.main_namespace, forge__source=SOURCES.github).first()
@@ -70,7 +71,8 @@ class Command(BaseCommand):
         update_robotpkg(settings.RAINBOARD_RPKG)
 
         log('\nUpdating gepetto projects\n')
-        for project in Project.objects.filter(archived=False, main_namespace__from_gepetto=True):
+        for project in Project.objects.filter(archived=False,
+                                              main_namespace__from_gepetto=True).exclude(name__endswith='release'):
             log(f' {project}')
             project.update(only_main_branches=False)
 
