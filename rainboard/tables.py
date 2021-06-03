@@ -23,6 +23,7 @@ class NamespaceTable(StrippedTable):
 
 
 class ProjectTable(StrippedTable):
+    pipeline_results = tables.Column(accessor='pipeline_results', orderable=False)
     commits_since = tables.Column(accessor='commits_since', orderable=False)
     repos = tables.Column(accessor='repos', orderable=False)
     issues = tables.Column(accessor='open_issues', orderable=False)

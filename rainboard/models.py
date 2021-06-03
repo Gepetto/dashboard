@@ -462,6 +462,19 @@ class Project(Links, NamedModel, TimeStampedModel):
             link = repo.first().url + '/pipeline_schedules'
             return mark_safe(f'<a href="{link}">{self.cron()}</a>')
 
+    def pipeline_results(self):
+        """ Show state and link to latest master & devel gitlab pipelines """
+        repo = self.main_gitlab_repo()
+        ret = []
+        for branch in ['master', 'main', 'devel']:
+            build = repo.cibuild_set.filter(branch__name__endswith=branch).first()
+            if build is not None:
+                link = repo.url + f'/-/pipelines/{build.build_id}'
+                sym = '✓' if build.passed else '✘'
+                ret.append(f'<a href="{link}">{branch}: {sym}</a>')
+
+        return mark_safe('<br>'.join(ret))
+
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
