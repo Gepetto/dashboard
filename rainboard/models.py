@@ -345,7 +345,9 @@ class Project(Links, NamedModel, TimeStampedModel):
         return self.repo_set.get(forge__source=SOURCES.gitlab, namespace=self.main_namespace)
 
     def ci_jobs(self):
-        self.main_gitlab_repo().get_jobs_gitlab()
+        r = self.main_gitlab_repo()
+        r.get_jobs_gitlab()
+        r.get_builds_gitlab()
 
     def update(self, only_main_branches=True):
         if self.main_namespace is None:
@@ -591,7 +593,7 @@ class Repo(TimeStampedModel):
         return getattr(self, f'get_builds_{self.forge.get_source_display()}')()
 
     def get_builds_gitlab(self):
-        for pipeline in self.api_list('/pipelines'):
+        for pipeline in self.api_list('/pipelines', limit=2):
             pid, ref = pipeline['id'], pipeline['ref']
             if self.project.tag_set.filter(name=ref).exists():
                 continue
