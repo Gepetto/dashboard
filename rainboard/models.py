@@ -50,6 +50,8 @@ TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': Fals
 GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
 GEPETTO_SLUGS = ['gepetto', 'stack-of-tasks', 'humanoid-path-planner', 'loco-3d']
 
+BAD_ONES = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
+
 
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
@@ -1291,9 +1293,8 @@ def to_release_in_robotpkg():
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
     fields = 'category', 'name', 'project__main_namespace__slug', 'project__ccache'
-    bad_ones = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
 
-    projects = Project.objects.exclude(bad_ones)
+    projects = Project.objects.exclude(BAD_ONES)
     rpkgs = list(Robotpkg.objects.filter(project__in=projects).values_list(*fields))
 
     deps_cache = {}

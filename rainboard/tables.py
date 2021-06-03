@@ -1,6 +1,7 @@
-import django_tables2 as tables
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+
+import django_tables2 as tables
 
 from . import models, utils
 
@@ -34,8 +35,7 @@ class ProjectTable(StrippedTable):
 
     class Meta:
         model = models.Project
-        fields = ('main_namespace', 'name', 'public', 'from_gepetto', 'archived', 'license', 'homepage', 'updated',
-                  'version')
+        fields = ('main_namespace', 'name', 'public', 'from_gepetto', 'license', 'homepage', 'updated', 'version')
 
     def render_name(self, record):
         return record.get_link()

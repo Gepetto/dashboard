@@ -1,14 +1,14 @@
 import re
 from datetime import timedelta
 
-import github
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 from django.utils import timezone
 
-from rainboard.models import Branch, Forge, Image, Project, Repo, Robotpkg, IssuePr
+import github
+from rainboard.models import BAD_ONES, Branch, Forge, Image, IssuePr, Project, Repo, Robotpkg
 from rainboard.utils import SOURCES, update_robotpkg
 
 MIN_DAYS_SINCE_UPDATED = 10  # Only show issues and pull requests older than this
@@ -17,8 +17,7 @@ SKIP_LABEL = 'skip dashboard'  # Issues and prs with this label will not be adde
 
 def update_issues_pr():
     print('\nUpdating issues and pull requests')
-    for project in Project.objects.filter(archived=False,
-                                          main_namespace__from_gepetto=True).exclude(name__endswith='release'):
+    for project in Project.objects.exclude(BAD_ONES):
         try:
             gh = project.github()
             main_repo = project.repo_set.filter(namespace=project.main_namespace, forge__source=SOURCES.github).first()
@@ -71,8 +70,7 @@ class Command(BaseCommand):
         update_robotpkg(settings.RAINBOARD_RPKG)
 
         log('\nUpdating gepetto projects\n')
-        for project in Project.objects.filter(archived=False,
-                                              main_namespace__from_gepetto=True).exclude(name__endswith='release'):
+        for project in Project.objects.exclude(BAD_ONES):
             log(f' {project}')
             project.update(only_main_branches=False)
 

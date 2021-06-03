@@ -1,7 +1,7 @@
 from subprocess import PIPE, Popen, run
 
 from django.http import Http404
-from django.http.response import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import DetailView
 
@@ -35,8 +35,7 @@ class ProjectsView(SingleTableMixin, FilterView):
 
 
 class GepettoProjectsView(ProjectsView):
-    queryset = models.Project.objects.filter(main_namespace__from_gepetto=True,
-                                             archived=False).exclude(name__endswith='release')
+    queryset = models.Project.objects.exclude(models.BAD_ONES)
 
 
 class ProjectView(DetailView):
@@ -146,8 +145,7 @@ def docker(request):
 def graph_svg(request):
     with open('/tmp/graph', 'w') as f:
         print('digraph { rankdir=LR;', file=f)
-        for project in models.Project.objects.filter(main_namespace__from_gepetto=True,
-                                                     archived=False).exclude(name__endswith='release'):
+        for project in models.Project.objects.exclude(models.BAD_ONES):
             print(f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}', file=f)
         for dep in models.Dependency.objects.filter(project__main_namespace__from_gepetto=True,
                                                     library__main_namespace__from_gepetto=True,
