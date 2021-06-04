@@ -148,6 +148,8 @@ class Forge(Links, NamedModel):
 
     def get_namespaces_gitlab(self):
         for data in self.api_list('/namespaces'):
+            if data['name'] == 'dockering':
+                continue
             Namespace.objects.get_or_create(slug=slugify(data['path']),
                                             defaults={
                                                 'name': data['name'],
