@@ -6,7 +6,7 @@ from subprocess import check_output
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.db.utils import DataError
+from django.db.utils import DataError, IntegrityError
 from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -150,11 +150,18 @@ class Forge(Links, NamedModel):
         for data in self.api_list('/namespaces'):
             if data['name'] == 'dockering':
                 continue
-            Namespace.objects.get_or_create(slug=slugify(data['path']),
-                                            defaults={
-                                                'name': data['name'],
-                                                'group': data['kind'] == 'group'
-                                            })
+            try:
+                Namespace.objects.get_or_create(slug=slugify(data['path']),
+                                                defaults={
+                                                    'name': data['name'],
+                                                    'group': data['kind'] == 'group'
+                                                })
+            except IntegrityError:
+                Namespace.objects.get_or_create(slug=slugify(data['path']),
+                                                defaults={
+                                                    'name': data['name'] + ' 2',
+                                                    'group': data['kind'] == 'group'
+                                                })
         for data in self.api_list('/users'):
             Namespace.objects.get_or_create(slug=slugify(data['username']), defaults={'name': data['name']})
 
