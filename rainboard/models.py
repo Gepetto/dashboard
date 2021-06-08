@@ -814,6 +814,7 @@ class Target(NamedModel):
     active = models.BooleanField(default=True)
     main = models.BooleanField(default=False)
     py2_available = models.BooleanField(default=True)
+    public = models.BooleanField(default=True)
 
     objects = TargetQuerySet.as_manager()
 
@@ -956,12 +957,16 @@ class Image(models.Model):
             py = ''
         return f'{self.robotpkg}{py}:{self.target}'
 
+    @property
+    def public(self):
+        return self.target.public and self.robotpkg.project.public
+
     def get_build_args(self):
         ret = {
             'TARGET': self.target,
             'ROBOTPKG': self.robotpkg,
             'CATEGORY': self.robotpkg.category,
-            'REGISTRY': self.robotpkg.project.registry(),
+            'REGISTRY': settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
             'CCACHE': self.robotpkg.project.ccache,
         }
         if not self.robotpkg.project.public:
