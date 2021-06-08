@@ -163,6 +163,8 @@ class Forge(Links, NamedModel):
                                                     'group': data['kind'] == 'group'
                                                 })
         for data in self.api_list('/users'):
+            if data['name'] == 'dockering':
+                continue
             Namespace.objects.get_or_create(slug=slugify(data['username']), defaults={'name': data['name']})
 
     def get_namespaces_redmine(self):
