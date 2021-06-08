@@ -966,7 +966,7 @@ class Image(models.Model):
             'TARGET': self.target,
             'ROBOTPKG': self.robotpkg,
             'CATEGORY': self.robotpkg.category,
-            'REGISTRY': settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
+            'REGISTRY': settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY,
             'CCACHE': self.robotpkg.project.ccache,
         }
         if not self.robotpkg.project.public:
