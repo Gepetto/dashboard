@@ -3,6 +3,10 @@ import logging
 import re
 from subprocess import check_output
 
+import git
+import httpx
+from autoslug import AutoSlugField
+from autoslug.utils import slugify
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -11,11 +15,6 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
-
-import git
-import httpx
-from autoslug import AutoSlugField
-from autoslug.utils import slugify
 from github import Github
 from gitlab import Gitlab
 from ndh.models import Links, NamedModel, TimeStampedModel
@@ -474,6 +473,18 @@ class Project(Links, NamedModel, TimeStampedModel):
         if repo.exists():
             link = repo.first().url + '/pipeline_schedules'
             return mark_safe(f'<a href="{link}">{self.cron()}</a>')
+
+    def pipeline_result(self, branch):
+        repo = self.main_gitlab_repo()
+        build = repo.cibuild_set.filter(branch__name__endswith=branch).first()
+        return None if build is None else build.passed
+
+    def master_result(self):
+        master = self.pipeline_result('master')
+        return self.pipeline_result('main') if master is None else master
+
+    def devel_result(self):
+        return self.pipeline_result('devel')
 
     def pipeline_results(self):
         """ Show state and link to latest master & devel gitlab pipelines """

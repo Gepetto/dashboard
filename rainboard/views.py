@@ -3,8 +3,7 @@ from subprocess import PIPE, Popen, run
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.views.generic import DetailView
-
+from django.views.generic import DetailView, TemplateView
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
@@ -236,3 +235,10 @@ class ContributorMailViewSet(AuthenticatedOrReadOnlyModelViewSet):
 class DependencyViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Dependency.objects.all()
     serializer_class = serializers.DependencySerializer
+
+
+class BoardView(TemplateView):
+    template_name = 'rainboard/board.html'
+
+    def get_context_data(self, **kwargs):
+        return {'projects': models.Project.objects.exclude(models.BAD_ONES)}

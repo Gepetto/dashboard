@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load django_tables2 bootstrap4 %}
+
+{% block content %}
+
+<h1>Projects</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Project</th>
+      <th scope="col">Master</th>
+      <th scope="col">Devel</th>
+      <th scope="col">Commits since</th>
+      <th scope="col">Issues</th>
+      <th scope="col">PR</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for project in projects %}
+    <tr>
+      <th scope="row">{{ project.get_link }}</th>
+      <td>{{ project.master_result|yesno:"✔,✘,?" }}</td>
+      <td>{{ project.devel_result|yesno:"✔,✘,?" }}</td>
+      <td>{{ project.commits_since }}</td>
+      <td>{{ project.open_issues }}
+      <td>{{ project.open_pr }}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
