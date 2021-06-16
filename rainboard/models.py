@@ -370,7 +370,8 @@ class Project(Links, NamedModel, TimeStampedModel):
         tags = self.tag_set.filter(name__startswith='v')  # TODO: implement SQL ordering for semver
         if tags.exists():
             self.version = '%i.%i.%i' % sorted(
-                tuple(int(v) for v in t.name[1:].split('.')) for t in tags if '-' not in t.name)[-1]
+                tuple(int(v) for v in t.name[1:].split('.'))
+                for t in tags if not any(v in t.name for v in ['-', 'rc']))[-1]
         robotpkg = self.robotpkg_set.order_by('-updated').first()
         branch = self.branch_set.order_by('-updated').first()
         branch_updated = branch is not None and branch.updated is not None
