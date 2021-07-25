@@ -37,7 +37,7 @@ services:
       traefik.enable: "true"
       traefik.http.routers.rainboard-app.rule: "Host(`rainboard.${DOMAIN_NAME:-localhost}`)"
   nginx:
-    image: nim65s/ndh:nginx
+    image: nim65s/ndh
     restart: unless-stopped
     volumes:
       - "srv:/srv"
