@@ -65,9 +65,9 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
         gh = await sync_to_async(project.github)()
         pr = await sync_to_async(gh.get_pull)(data["number"])
         pr_branch = pr.base.ref
-        if not project.accept_pr_to_master and pr_branch == 'master' and 'devel' in [
-                b.name for b in await sync_to_async(gh.get_branches)()
-        ] and login != namespace.slug_github:
+        branches = [b.name for b in await sync_to_async(gh.get_branches)()]
+        if (not project.accept_pr_to_master and pr_branch == 'master' and 'devel' in branches
+                and login != namespace.slug_github):
             logger.info(f"{namespace.slug}/{project.slug}: New pr {data['number']} to master")
             await sync_to_async(pr.create_issue_comment)(PR_MASTER_MSG)
 
@@ -117,7 +117,6 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
 
 async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     """Someone pushed on github or gitlab. Synchronise local & remote repos."""
-    logger.debug('start gh.views.push')
     data = loads(request.body.decode())
     slug = slugify(data['repository']['name'])
 
@@ -211,7 +210,6 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
 
 async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
     """Something happened on a Gitlab pipeline. Tell Github if necessary."""
-    logger.debug('start gh.views.pipeline')
     data = loads(request.body.decode())
     branch, commit, gl_status, pipeline_id = (data['object_attributes'][key] for key in ['ref', 'sha', 'status', 'id'])
     namespace = await sync_to_async(get_object_or_404)(Namespace,
@@ -256,7 +254,6 @@ async def webhook(request: HttpRequest) -> HttpResponse:
 
     thx https://simpleisbetterthancomplex.com/tutorial/2016/10/31/how-to-handle-github-webhooks-using-django.html
     """
-    logger.info('GH webhook')
     # validate ip source
     forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR').split(', ')[0]
     # networks = httpx.get('https://api.github.com/meta').json()['hooks'] # Fails if API rate limit exceeded

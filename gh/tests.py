@@ -59,7 +59,6 @@ class GhTests(TestCase):
             if branch_name in gl_branches:
                 cls.gitlab.branches.delete(branch_name)
 
-        logging.basicConfig(level=logging.DEBUG)
         LOGGER.info('start gh tests')
 
     def assertSync(self, branch):
@@ -125,7 +124,6 @@ class GhTests(TestCase):
         msg = force_bytes(request_body)
         signature = 'sha1=' + hmac.new(force_bytes(settings.GITHUB_WEBHOOK_KEY), msg, digestmod=sha1).hexdigest()
         LOGGER.info('posting a simulated gh webhook event')
-        LOGGER.debug(f'with: {data}')
         return await self.async_client.post(reverse('webhook'),
                                             data,
                                             content_type='application/json',
@@ -362,53 +360,35 @@ class GhTests(TestCase):
 
     async def test_pr(self):
         """Test github's pull requests."""
-        LOGGER.debug('test_pr: 0')
         await self.sync()
-        LOGGER.debug('test_pr: 1')
         not_accepted_string = "doesn't usually accept pull requests on master"
-        LOGGER.debug('test_pr: 2')
 
         # Test pr on master
         last_commit = self.github.get_branch("devel").commit.sha
-        LOGGER.debug('test_pr: 3')
         github = await sync_to_async(self.project.github)()
-        LOGGER.debug('test_pr: 4')
         pr_master = github.create_pull(title="Test pr on master", body='', head="devel", base="master")
-        LOGGER.debug('test_pr: 5')
         response = await self.gh_webhook_event('pull_request',
                                                last_commit=last_commit,
                                                pr_action="opened",
                                                pr_login="foo",
                                                pr_number=pr_master.number)
-        LOGGER.debug('test_pr: 6')
         self.assertEqual(response.status_code, 200)
-        LOGGER.debug('test_pr: 7')
         self.assertTrue([c.body for c in pr_master.get_issue_comments() if not_accepted_string in c.body])
-        LOGGER.debug('test_pr: 8')
-        await sleep(60)
-        LOGGER.debug('test_pr: 9')
+        await sleep(30)
         self.assertIn(f'pr/{pr_master.number}', [b.name for b in self.gitlab.branches.list()])
-        LOGGER.debug('test_pr: 10')
 
         # Test pr on devel
         last_commit = self.github.get_branch("master").commit.sha
-        LOGGER.debug('test_pr: 11')
         pr_devel = github.create_pull(title="Test pr on devel", body='', head="master", base="devel")
-        LOGGER.debug('test_pr: 12')
         response = await self.gh_webhook_event('pull_request',
                                                last_commit=last_commit,
                                                pr_action="opened",
                                                pr_login="foo",
                                                pr_number=pr_devel.number)
-        LOGGER.debug('test_pr: 13')
         self.assertEqual(response.status_code, 200)
-        LOGGER.debug('test_pr: 14')
         self.assertFalse([c.body for c in pr_devel.get_issue_comments() if not_accepted_string in c.body])
-        LOGGER.debug('test_pr: 15')
-        await sleep(60)
-        LOGGER.debug('test_pr: 16')
+        await sleep(30)
         self.assertIn(f'pr/{pr_devel.number}', [b.name for b in self.gitlab.branches.list()])
-        LOGGER.debug('test_pr: 17')
 
         # Close the pr
         for pr in [pr_master, pr_devel]:
@@ -418,5 +398,5 @@ class GhTests(TestCase):
                                                    pr_login="foo",
                                                    pr_number=pr.number)
             self.assertEqual(response.status_code, 200)
-            await sleep(60)
+            await sleep(30)
             self.assertNotIn(f'pr/{pr.number}', [b.name for b in self.gitlab.branches.list()])
