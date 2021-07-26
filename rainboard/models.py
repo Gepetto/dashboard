@@ -18,7 +18,7 @@ from django.utils.safestring import mark_safe
 from github import Github
 from gitlab import Gitlab
 from ndh.models import Links, NamedModel, TimeStampedModel
-from ndh.utils import enum_to_choices, query_sum
+from ndh.utils import query_sum
 
 from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_name
 
@@ -76,7 +76,7 @@ class License(models.Model):
 
 
 class Forge(Links, NamedModel):
-    source = models.PositiveSmallIntegerField(choices=enum_to_choices(SOURCES))
+    source = models.PositiveSmallIntegerField(choices=SOURCES.choices)
     url = models.URLField(max_length=200)
     token = models.CharField(max_length=50, blank=True, null=True)
     verify = models.BooleanField(default=True)

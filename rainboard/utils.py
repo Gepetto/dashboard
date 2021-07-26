@@ -1,14 +1,14 @@
 import logging
 import re
 import unicodedata
-from enum import IntEnum
 
 import git
 from django.utils.safestring import mark_safe
+from django.db.models import IntegerChoices
 
 logger = logging.getLogger('rainboard.utils')
 
-SOURCES = IntEnum('Sources', 'github gitlab redmine robotpkg travis')
+SOURCES = IntegerChoices('Sources', 'github gitlab redmine robotpkg travis')
 INVALID_MAILS = ('localhost', 'none', 'noreply', 'example')
 
 
