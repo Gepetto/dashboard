@@ -39,7 +39,6 @@
           <dt class="col-3 text-right">Commits since</dt> <dd class="col-9">{{ project.commits_since }}</dd>
               <dt class="col-3 text-right">Has tests</dt> <dd class="col-9">{{ project.tests|yesno:"✔,✘" }}</dd>
                <dt class="col-3 text-right">Has docs</dt> <dd class="col-9">{{ project.docs|yesno:"✔,✘" }}</dd>
-    <dt class="col-3 text-right">Also build in Debug</dt> <dd class="col-9">{{ project.debug|yesno:"✔,✘" }}</dd>
            <dt class="col-3 text-right">From Gepetto</dt> <dd class="col-9">{{ project.main_namespace.from_gepetto|yesno:"✔,✘" }}</dd>
                <dt class="col-3 text-right">Archived</dt> <dd class="col-9">{{ project.archived|yesno:"✔,✘" }}</dd>
            <dt class="col-3 text-right">Dependencies</dt> <dd class="col-9">{{ project.print_deps }}</dd>

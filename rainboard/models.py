@@ -3,10 +3,6 @@ import logging
 import re
 from subprocess import check_output
 
-import git
-import httpx
-from autoslug import AutoSlugField
-from autoslug.utils import slugify
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -15,6 +11,11 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
+
+import git
+import httpx
+from autoslug import AutoSlugField
+from autoslug.utils import slugify
 from github import Github
 from gitlab import Gitlab
 from ndh.models import Links, NamedModel, TimeStampedModel
@@ -167,7 +168,7 @@ class Forge(Links, NamedModel):
             Namespace.objects.get_or_create(slug=slugify(data['username']), defaults={'name': data['name']})
 
     def get_namespaces_redmine(self):
-        pass  # TODO
+        pass
 
     def get_namespaces_travis(self):
         pass
@@ -195,7 +196,7 @@ class Forge(Links, NamedModel):
                 update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))
 
     def get_projects_redmine(self):
-        pass  # TODO
+        pass
 
     def get_projects_travis(self):
         for namespace in Namespace.objects.all():
@@ -424,8 +425,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
 
     def doc_coverage_image(self):
-        images = Image.objects.filter(robotpkg__project=self, target__main=True)
-        return images.order_by('-py3', '-debug').first()  # 18.04 / Python 3 / Debug is the preferred image
+        return Image.objects.get(robotpkg__project=self, target__main=True)
 
     def print_deps(self):
         return mark_safe(', '.join(d.library.get_link() for d in self.dependencies.all()))
@@ -685,7 +685,7 @@ class Repo(TimeStampedModel):
                     debug = '-debug' in data['name']
                     target = next(target for target in Target.objects.all() if target.name in data['name']).name
                     robotpkg = data['name'][9:-(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
-                    images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target, debug=debug, py3=py3)
+                    images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target)
                     if not images.exists():
                         continue
                     image = images.first()
@@ -832,7 +832,6 @@ class TargetQuerySet(models.QuerySet):
 class Target(NamedModel):
     active = models.BooleanField(default=True)
     main = models.BooleanField(default=False)
-    py2_available = models.BooleanField(default=True)
     public = models.BooleanField(default=True)
 
     objects = TargetQuerySet.as_manager()
@@ -882,13 +881,8 @@ class Robotpkg(NamedModel):
         return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
 
     def update_images(self):
-        py3s = [False, True] if self.name.startswith('py-') else [False]
-        debugs = [False, True]
         for target in list(Target.objects.active()) + list(self.extended_target.all()):
-            for py3 in py3s:
-                for debug in debugs:
-                    if target.py2_available or py3 or not self.name.startswith('py-'):
-                        Image.objects.get_or_create(robotpkg=self, target=target, py3=py3, debug=debug)[0].update()
+            Image.objects.get_or_create(robotpkg=self, target=target)[0].update()
 
     def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
@@ -921,28 +915,7 @@ class Robotpkg(NamedModel):
         self.save()
 
     def valid_images(self):
-        def is_valid(_base_image, _image):
-            """The image is valid if it has less than one different parameter from the base image."""
-            if _image == self.project.doc_coverage_image():
-                #  There is no need to keep this image because it is already tested by doc-coverage
-                return False
-
-            base_param = (_base_image.target.name, _base_image.py3, _base_image.debug)
-            param = (_image.target.name, _image.py3, _image.debug)
-
-            diff = 0  # Number of different parameters between the base image and the current image
-            for i in range(len(base_param)):
-                if base_param[i] != param[i]:
-                    diff += 1
-            return diff <= 1
-
-        # 18.04 / Python 3 / Release is the preferred base image
-        base_images = Image.objects.filter(robotpkg__project=self.project, target__main=True)
-        base_image = base_images.order_by('-py3', 'debug').first()
-
-        images = self.image_set.filter(Q(target__active=True) | Q(target__robotpkg=self),
-                                       created__isnull=False).order_by('target__name')
-        return (image for image in images if is_valid(base_image, image))
+        return self.image_set.filter(target__active=True, created__isnull=False).order_by('target__name')
 
     def without_py(self):
         if 'py-' in self.name and self.same_py:
@@ -960,21 +933,13 @@ class Image(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE)
     created = models.DateTimeField(blank=True, null=True)
     image = models.CharField(max_length=12, blank=True, null=True)
-    py3 = models.BooleanField(default=False)
-    debug = models.BooleanField(default=False)
     allow_failure = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('robotpkg', 'target', 'py3', 'debug')
+        unique_together = ('robotpkg', 'target')
 
     def __str__(self):
-        if self.py3:
-            py = '-py3'
-        elif self.robotpkg.name.startswith('py-'):
-            py = '-py2'
-        else:
-            py = ''
-        return f'{self.robotpkg}{py}:{self.target}'
+        return f'{self.robotpkg}:{self.target}'
 
     @property
     def public(self):
@@ -989,9 +954,7 @@ class Image(models.Model):
             'CCACHE': self.robotpkg.project.ccache,
         }
         if not self.robotpkg.project.public:
-            ret['IMAGE'] = 'robotpkg-jrl-py3' if self.py3 else 'robotpkg-jrl'
-        elif self.py3:
-            ret['IMAGE'] = 'robotpkg-py3'
+            ret['IMAGE'] = 'robotpkg-jrl'
         return ret
 
     def get_image_name(self):
@@ -1004,8 +967,7 @@ class Image(models.Model):
         return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project.slug}/{manifest}'
 
     def get_job_name(self):
-        mode = 'debug' if self.debug else 'release'
-        return f'robotpkg-{self}-{mode}'.replace(':', '-')
+        return f'robotpkg-{self}'.replace(':', '-')
 
     def build(self):
         args = self.get_build_args()
@@ -1129,7 +1091,7 @@ class ContributorMail(models.Model):
 class Dependency(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='dependencies')
     library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='rdeps')
-    robotpkg = models.BooleanField(default=False)  # TODO NYI
+    robotpkg = models.BooleanField(default=False)
     cmake = models.BooleanField(default=False)
     ros = models.BooleanField(default=False)
     mandatory = models.BooleanField(default=True)

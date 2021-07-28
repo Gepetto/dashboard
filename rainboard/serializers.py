@@ -25,7 +25,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ('id', 'name', 'slug', 'public', 'main_namespace', 'main_forge', 'license', 'homepage', 'description',
-                  'version', 'updated', 'tests', 'docs', 'debug', 'from_gepetto', 'archived', 'created', 'updated')
+                  'version', 'updated', 'tests', 'docs', 'from_gepetto', 'archived', 'created', 'updated')
 
 
 class RepoSerializer(serializers.ModelSerializer):
@@ -60,7 +60,7 @@ class RobotpkgSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Image
-        fields = ('id', 'robotpkg', 'target', 'created', 'image', 'py3', 'debug')
+        fields = ('id', 'robotpkg', 'target', 'created', 'image')
 
 
 class ContributorSerializer(serializers.ModelSerializer):
