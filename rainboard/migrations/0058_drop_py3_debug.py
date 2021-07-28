@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 def remove_all_images(apps, schema_editor):
     Image = apps.get_model('rainboard', 'Image')
-    Image.objects.delete()
+    Image.objects.all().delete()
 
 
 def create_all_images(apps, schema_editor):
