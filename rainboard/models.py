@@ -425,7 +425,11 @@ class Project(Links, NamedModel, TimeStampedModel):
         return settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
 
     def doc_coverage_image(self):
-        return Image.objects.get(robotpkg__project=self, target__main=True)
+        images = Image.objects.filter(robotpkg__project=self, target__main=True)
+        if images.count() == 1:
+            return images.first()
+        if images.count() == 2:
+            return next(image for image in images if image.robotpkg.name.startswith('py-'))
 
     def print_deps(self):
         return mark_safe(', '.join(d.library.get_link() for d in self.dependencies.all()))
