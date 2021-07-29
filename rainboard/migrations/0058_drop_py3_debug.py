@@ -9,6 +9,7 @@ def remove_all_images(apps, schema_editor):
 
 
 def create_all_images(apps, schema_editor):
+    # TODO: doesn't work, run this manually :/
     Robotpkg = apps.get_model('rainboard', 'Robotpkg')
     for rpkg in Robotpkg.objects.all():
         rpkg.update_images()
@@ -44,5 +45,5 @@ class Migration(migrations.Migration):
             model_name='image',
             name='py3',
         ),
-        migrations.RunPython(create_all_images),
+        # migrations.RunPython(create_all_images),
     ]
