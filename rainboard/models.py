@@ -174,8 +174,8 @@ class Forge(Links, NamedModel):
         pass
 
     def get_projects(self):
-        getattr(self, f'get_namespaces_{self.get_source_display()}')()
-        return getattr(self, f'get_projects_{self.get_source_display()}')()
+        getattr(self, f'get_namespaces_{self.get_source_display().lower()}')()
+        return getattr(self, f'get_projects_{self.get_source_display().lower()}')()
 
     def get_projects_github(self):
         for org in Namespace.objects.filter(group=True):
@@ -587,7 +587,7 @@ class Repo(TimeStampedModel):
                 self.archived = True
                 self.save()
             else:
-                return getattr(self, f'api_update_{self.forge.get_source_display()}')(data)
+                return getattr(self, f'api_update_{self.forge.get_source_display().lower()}')(data)
 
     def api_update_gitlab(self, data):
         update_gitlab(self.forge, data)
@@ -639,7 +639,7 @@ class Repo(TimeStampedModel):
         return main_branch.behind if main_branch is not None else 0
 
     def get_builds(self):
-        return getattr(self, f'get_builds_{self.forge.get_source_display()}')()
+        return getattr(self, f'get_builds_{self.forge.get_source_display().lower()}')()
 
     def get_builds_gitlab(self):
         for pipeline in self.api_list('/pipelines', limit=2):
