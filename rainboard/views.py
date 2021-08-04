@@ -2,8 +2,10 @@ from subprocess import PIPE, Popen, run
 
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
+
 from django_filters.views import FilterView
 from django_tables2 import RequestConfig
 from django_tables2.views import SingleTableMixin, SingleTableView
@@ -137,7 +139,7 @@ def docker(request):
     filters = request.GET.dict()
     if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
         cmd = filters.pop('cmd')
-    if 'target__name' in filters:
+    if 'target__name' in filters and not get_object_or_404(models.Target, name=filters['target__name']).active:
         filters['robotpkg__extended_target__name'] = filters['target__name']
     else:
         filters['target__active'] = True
