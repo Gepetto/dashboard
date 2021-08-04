@@ -137,7 +137,11 @@ def docker(request):
     filters = request.GET.dict()
     if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
         cmd = filters.pop('cmd')
-    images = models.Image.objects.filter(target__active=True).filter(**filters)
+    if 'target__name' in filters:
+        filters['robotpkg__extended_target__name'] = filters['target__name']
+    else:
+        filters['target__active'] = True
+    images = models.Image.objects.filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
 
 
