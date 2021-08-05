@@ -2,7 +2,6 @@ from subprocess import PIPE, Popen, run
 
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
 
