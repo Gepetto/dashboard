@@ -5,7 +5,7 @@ from subprocess import check_output
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.utils import DataError, IntegrityError
 from django.template.loader import get_template
 from django.utils import timezone
@@ -919,7 +919,7 @@ class Robotpkg(NamedModel):
         self.save()
 
     def valid_images(self):
-        return self.image_set.filter(target__active=True, created__isnull=False).order_by('target__name')
+        return self.image_set.active().filter(created__isnull=False).order_by('target__name')
 
     def without_py(self):
         if 'py-' in self.name and self.same_py:
@@ -932,12 +932,19 @@ class Robotpkg(NamedModel):
 #     passed = models.BooleanField(default=False)
 
 
+class ImageQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(Q(target__active=True) | Q(target=F('robotpkg__extended_target')))
+
+
 class Image(models.Model):
     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
     target = models.ForeignKey(Target, on_delete=models.CASCADE)
     created = models.DateTimeField(blank=True, null=True)
     image = models.CharField(max_length=12, blank=True, null=True)
     allow_failure = models.BooleanField(default=False)
+
+    objects = ImageQuerySet.as_manager()
 
     class Meta:
         unique_together = ('robotpkg', 'target')

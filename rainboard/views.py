@@ -75,7 +75,7 @@ class ProjectImagesView(ProjectTableView):
     order_by = 'target'
 
     def get_object_list(self):
-        return models.Image.objects.filter(robotpkg__project=self.object, target__active=True)
+        return models.Image.objects.active().filter(robotpkg__project=self.object)
 
 
 class ProjectContributorsView(ProjectTableView):
@@ -139,11 +139,7 @@ def docker(request):
     filters = request.GET.dict()
     if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
         cmd = filters.pop('cmd')
-    if 'target__name' in filters and not get_object_or_404(models.Target, name=filters['target__name']).active:
-        filters['robotpkg__extended_target__name'] = filters['target__name']
-    else:
-        filters['target__active'] = True
-    images = models.Image.objects.filter(**filters)
+    images = models.Image.objects.active().filter(**filters)
     return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
 
 
