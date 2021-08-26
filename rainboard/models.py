@@ -48,7 +48,7 @@ CMAKE_FIELDS = {
 }
 TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
 GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
-GEPETTO_SLUGS = ['gepetto', 'stack-of-tasks', 'humanoid-path-planner', 'loco-3d']
+GEPETTO_SLUGS = ['gepetto', 'stack-of-tasks', 'humanoid-path-planner', 'loco-3d', 'simple-robotics']
 
 BAD_ONES = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
 
