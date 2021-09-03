@@ -54,6 +54,7 @@ cache:
       - coverage/
 {% endif %}
 format:
+  entrypoint: [""]
 {% if project.allow_format_failure %}  allow_failure: true
 {% endif %}  image: gepetto/linters
   retry:
@@ -63,7 +64,5 @@ format:
     - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
     - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
   script:
-    - check-clang-format.sh
-    {% if project.has_python %}- flake8 .
-    - yapf -dr .
+    - entrypoint.sh {% if not project.has_python %}--no-python{% endif %}
 {% endif %}
