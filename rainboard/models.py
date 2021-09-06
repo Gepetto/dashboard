@@ -222,7 +222,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
-    ccache = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -962,7 +961,6 @@ class Image(models.Model):
             'ROBOTPKG': self.robotpkg,
             'CATEGORY': self.robotpkg.category,
             'REGISTRY': settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY,
-            'CCACHE': self.robotpkg.project.ccache,
         }
         if not self.robotpkg.project.public:
             ret['IMAGE'] = 'robotpkg-jrl'
@@ -1300,24 +1298,24 @@ def to_release_in_robotpkg():
 
 def ordered_projects():
     """ helper for gepetto/buildfarm/generate_all.py """
-    fields = 'category', 'name', 'project__main_namespace__slug', 'project__ccache'
+    fields = 'category', 'name', 'project__main_namespace__slug'
 
     projects = Project.objects.exclude(BAD_ONES)
     rpkgs = list(Robotpkg.objects.filter(project__in=projects).values_list(*fields))
 
     deps_cache = {}
 
-    def get_deps(cat, pkg, ns, rpkgs, ccache):
+    def get_deps(cat, pkg, ns, rpkgs):
         """Get the robotpkg dependencies for a given robotpkg."""
         with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
             cont = file_handle.read()
         deps = [d_pkg for d_cat, d_pkg, _, _ in rpkgs if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
-        if pkg.startswith('py-') and (cat, pkg[3:], ns, ccache) in rpkgs:
+        if pkg.startswith('py-') and (cat, pkg[3:], ns) in rpkgs:
             deps.append(pkg[3:])
         deps_cache[pkg] = sorted(set(deps))
         return deps_cache[pkg]
 
-    rpkgs = [[cat, pkg, ns, get_deps(cat, pkg, ns, rpkgs, ccache), ccache] for cat, pkg, ns, ccache in rpkgs]
+    rpkgs = [[cat, pkg, ns, get_deps(cat, pkg, ns, rpkgs)] for cat, pkg, ns in rpkgs]
 
     def get_rdeps(deps):
         """Recursively get robotpkg dependencies for a given robotpkg."""
@@ -1333,7 +1331,7 @@ def ordered_projects():
 
     def project_sort_key(prj):
         """Generate a key to sort projects: by number of recursive dependencies, then python bindings, then name."""
-        cat, pkg, ns, deps, ccache = prj
+        cat, pkg, ns, deps = prj
         return (len(get_rdeps(deps)), 1 if pkg.startswith('py-') else 0, pkg)
 
     return sorted(rpkgs, key=project_sort_key)

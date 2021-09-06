@@ -1,13 +1,5 @@
 # https://rainboard.laas.fr/project/{{ project.slug }}/.gitlab-ci.yml
 
-{% if project.ccache %}variables:
-  CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
-
-cache:
-  paths:
-    - ccache
-{% endif %}
-
 {% for robotpkg in project.ordered_robotpkg %}.robotpkg-{{ robotpkg }}: &robotpkg-{{ robotpkg }}
   retry:
     max: 2
@@ -15,9 +7,7 @@ cache:
   except:
     - gh-pages
   script:
-{% if project.ccache %}    - mkdir -p ccache
-    - echo "CCACHE_DIR=${CI_PROJECT_DIR}/ccache" >> /opt/openrobots/etc/robotpkg.conf
-{% endif %}
+    - sccache -s
     - cd /root/robotpkg/{{ robotpkg.category }}
     - git pull
 {% if robotpkg.without_py %}    - cd {{ robotpkg.without_py }}
@@ -28,6 +18,7 @@ cache:
     - make install
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.tests %}    - make test
+    - sccache -s
 {% endif %}
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
