@@ -18,7 +18,7 @@
     - make install
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.tests %}    - make test
-{% endif %}     - sccache -s
+{% endif %}    - sccache -s
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
@@ -44,10 +44,11 @@
       - coverage/
 {% endif %}
 format:
-  entrypoint: [""]
+  image:
+    name: gepetto/linters
+    entrypoint: [""]
 {% if project.allow_format_failure %}  allow_failure: true
-{% endif %}  image: gepetto/linters
-  retry:
+{% endif %}  retry:
     max: 2
     when: runner_system_failure
   before_script:
