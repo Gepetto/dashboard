@@ -25,7 +25,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.Target)
-class TargetAdmin(admin.modelAdmin):
+class TargetAdmin(admin.ModelAdmin):
     list_display = ('name', 'active', 'main', 'public')
 
 
