@@ -1,29 +1,34 @@
-from django.contrib.admin import ModelAdmin, TabularInline, site
+from django.contrib import admin
 
 from . import models
 
 
-class RobotpkgInline(TabularInline):
+class RobotpkgInline(admin.TabularInline):
     model = models.Robotpkg
 
 
-class ContributorAdmin(ModelAdmin):
+@admin.register(models.Contributor)
+class ContributorAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).gepettist().distinct()
 
 
-class DependencyAdmin(ModelAdmin):
+@admin.register(models.Dependency)
+class DependencyAdmin(admin.ModelAdmin):
     autocomplete_fields = ('project', 'library')
 
 
-class ProjectAdmin(ModelAdmin):
+@admin.register(models.Project)
+class ProjectAdmin(admin.ModelAdmin):
     search_fields = ('name', 'slug')
     inlines = [RobotpkgInline]
 
 
-site.register(models.Contributor, ContributorAdmin)
-site.register(models.Project, ProjectAdmin)
-site.register(models.Dependency, DependencyAdmin)
+@admin.register(models.Target)
+class TargetAdmin(admin.modelAdmin):
+    list_display = ('name', 'active', 'main', 'public')
+
+
 for model in [
         models.License,
         models.Forge,
@@ -33,9 +38,8 @@ for model in [
         models.Robotpkg,
         models.Image,
         models.Tag,
-        models.Target,
         models.ContributorName,
         models.ContributorMail,
         models.IssuePr,
 ]:
-    site.register(model)
+    admin.site.register(model)
