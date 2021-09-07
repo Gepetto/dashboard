@@ -18,8 +18,7 @@
     - make install
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.tests %}    - make test
-    - sccache -s
-{% endif %}
+{% endif %}     - sccache -s
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
@@ -56,4 +55,3 @@ format:
     - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
   script:
     - entrypoint.sh {% if not project.has_python %}--no-python{% endif %}
-{% endif %}
