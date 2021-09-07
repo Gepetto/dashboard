@@ -6,16 +6,6 @@ variables:
   GITLAB_WEBHOOK_KEY: "pipo"
   REGISTRY: "memmos.laas.fr:5000"
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
-  PYTHONWARNINGS: "always"
-
-format:
-  image: gepetto/linters
-  before_script:
-    - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
-    - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
-  script:
-    - flake8 .
-    - yapf -dr .
 
 build:
   image: docker
