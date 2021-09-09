@@ -14,8 +14,7 @@ format:
     - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
     - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
   script:
-    - flake8 .
-    - yapf -dr .
+    - entrypoint.sh --no-cpp
 
 build:
   image: docker
