@@ -12,8 +12,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-import git
 import httpx
+
+import git
 from autoslug import AutoSlugField
 from autoslug.utils import slugify
 from github import Github
@@ -221,11 +222,23 @@ class Project(Links, NamedModel, TimeStampedModel):
     suffix = models.CharField(max_length=50, default='', blank=True)
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
+    has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
+    clang_format = models.PositiveSmallIntegerField(default=12)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
         super().save(*args, **kwargs)
+
+    def linters(self):
+        ret = []
+        if not self.has_cpp:
+            ret.append("--no-cpp")
+        if not self.has_python:
+            ret.append("--no-python")
+        if self.clang_format == 6:
+            ret.append("--clang-6")
+        return " ".join(ret)
 
     def git_path(self):
         return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug.strip()  # workaround SafeText TypeError
