@@ -1322,7 +1322,7 @@ def ordered_projects():
         """Get the robotpkg dependencies for a given robotpkg."""
         with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
             cont = file_handle.read()
-        deps = [d_pkg for d_cat, d_pkg, _, _ in rpkgs if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
+        deps = [d_pkg for d_cat, d_pkg, _ in rpkgs if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
         if pkg.startswith('py-') and (cat, pkg[3:], ns) in rpkgs:
             deps.append(pkg[3:])
         deps_cache[pkg] = sorted(set(deps))
