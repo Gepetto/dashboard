@@ -17,7 +17,6 @@ services:
     restart: unless-stopped
   app:
     image: memmos.laas.fr:5000/gepetto/dashboard:master
-    build: .
     restart: unless-stopped
     volumes:
       - "srv:/srv"
