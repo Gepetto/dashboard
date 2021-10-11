@@ -13,6 +13,7 @@ RUN apt-get update -qq && apt-get install -qqy \
     git \
     gnupg2 \
     graphviz \
+    libffi-dev \
     libldap2-dev \
     libpq-dev \
     libsasl2-dev \
