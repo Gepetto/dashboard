@@ -35,8 +35,8 @@
 {% if project.docs %}    - make doc
     - mv doc/doxygen-html ${CI_PROJECT_DIR}
 {% endif %}{% if project.tests%}    - mkdir -p ${CI_PROJECT_DIR}/coverage/
-    - gcovr -e CMakeFiles -r .
-    - gcovr -e CMakeFiles -r . --html --html-details -o ${CI_PROJECT_DIR}/coverage/index.html
+    - gcovr -e CMakeFiles --exclude-directories _deps -r .
+    - gcovr -e CMakeFiles --exclude-directories _deps -r . --html --html-details -o ${CI_PROJECT_DIR}/coverage/index.html
 {% endif %}  artifacts:
     expire_in: 1 day
     paths:
