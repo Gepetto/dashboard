@@ -19,6 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import git
 import github
+from gitlab import GitlabDeleteError
 from autoslug.utils import slugify
 from dashboard.middleware import ip_laas
 from rainboard.models import Namespace, Project
@@ -109,8 +110,11 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
             git_repo.delete_head(branch, force=True)
             git_repo.delete_remote(gh_remote_name)
         gitlab = await sync_to_async(project.gitlab)()
-        await sync_to_async(gitlab.branches.delete)(branch)
-        logger.info(f'{namespace.slug}/{project.slug}: Deleted branch {branch}')
+        try:
+            await sync_to_async(gitlab.branches.delete)(branch)
+            logger.info(f'{namespace.slug}/{project.slug}: Deleted branch {branch}')
+        except GitlabDeleteError as e:
+            logger.info(f'{namespace.slug}/{project.slug}: branch {branch} not delete: {e}')
 
     return HttpResponse(rep)
 
