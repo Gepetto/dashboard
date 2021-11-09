@@ -21,7 +21,7 @@ router.register(r'dependency', views.DependencyViewSet)
 
 app_name = 'rainboard'
 urlpatterns = [
-    path('', views.BoardView.as_view(), name='home'),
+    path('', RedirectView.as_view(pattern_name='rainboard:gepetto'), name='home'),
     path('forges', views.ForgesView.as_view(), name='forges'),
     path('namespaces', views.NamespacesView.as_view(), name='namespaces'),
     path('contributors', views.ContributorsView.as_view(), name='contributors'),
