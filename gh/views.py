@@ -57,7 +57,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
                                                        slug_github=slugify(data['repository']['owner']['login']))
     project = await sync_to_async(get_object_or_404)(Project,
                                                      main_namespace=namespace,
-                                                     slug=slugify(data['repository']['name']))
+                                                     slug=slugify(data['repository']['name']).replace('_', '-'))
     git_repo = await sync_to_async(project.git)()
     logger.debug(f'{namespace.slug}/{project.slug}: Pull request on {branch}: {event}')
 
