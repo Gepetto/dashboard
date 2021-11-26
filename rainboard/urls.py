@@ -28,6 +28,7 @@ urlpatterns = [
     path('projects', views.ProjectsView.as_view(), name='projects'),
     path('projects/gepetto', views.GepettoProjectsView.as_view(), name='gepetto'),
     path('projects/ordered', views.ordered_projects, name='ordered'),
+    path('project/<str:slug>', RedirectView.as_view(pattern_name='rainboard:project'), name='project_redirect'),
     path('project/<str:slug>/robotpkg', views.ProjectView.as_view(), name='project'),
     path('project/<str:slug>/repos', views.ProjectReposView.as_view(), name='project-repos'),
     path('project/<str:slug>/branches', views.ProjectBranchesView.as_view(), name='project-branches'),
@@ -44,5 +45,5 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('favicon.ico', views.nope, name='nope'),
-    path('<str:slug>', RedirectView.as_view(pattern_name='rainboard:project'), name='project_redirect'),
+    path('<str:slug>', RedirectView.as_view(pattern_name='rainboard:project'), name='direct_redirect'),
 ]
