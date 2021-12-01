@@ -886,7 +886,7 @@ class Robotpkg(NamedModel):
 
     same_py = models.BooleanField(default=True)
 
-    extended_target = models.ManyToManyField(Target, blank=True, null=True)
+    extended_target = models.ManyToManyField(Target, blank=True)
 
     def main_page(self):
         if self.category != 'wip':
