@@ -225,6 +225,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
     clang_format = models.PositiveSmallIntegerField(default=12)
+    clang_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -238,6 +239,8 @@ class Project(Links, NamedModel, TimeStampedModel):
             ret.append("--no-python")
         if self.clang_format == 6:
             ret.append("--clang-6")
+        if self.clang_default:
+            ret.append("--clang-default")
         return " ".join(ret)
 
     def git_path(self):
