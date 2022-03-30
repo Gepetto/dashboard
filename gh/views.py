@@ -34,8 +34,9 @@ from . import models
 
 logger = logging.getLogger(__name__)
 
-PR_MASTER_MSG = """Hi ! This project doesn't usually accept pull requests on master. If this wasn't intentionnal, you
-can change the base branch of this pull request to devel (No need to close it for that). Best, a bot."""
+PR_MASTER_MSG = """Hi ! This project doesn't usually accept pull requests on master.
+If this wasn't intentionnal, you can change the base branch of this PR to devel
+(No need to close it for that). Best, a bot."""
 
 
 async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
@@ -119,7 +120,8 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
             git_repo.git.push(gl_remote_name, branch)
         except git.exc.GitCommandError:
             logger.warning(
-                f"{namespace.slug}/{project.slug}: Failed to push on {branch} on gitlab, force pushing ..."
+                f"{namespace.slug}/{project.slug}: "
+                f"Failed to push on {branch} on gitlab, force pushing ..."
             )
             git_repo.git.push(gl_remote_name, branch, force=True)
 
@@ -168,7 +170,8 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     gh_remote_name = f"github/{namespace.slug}"
     git_repo = await sync_to_async(project.git)()
     logger.debug(
-        f"{namespace.slug}/{slug}: Push detected on {source.name} {branch} (commit {commit})"
+        f"{namespace.slug}/{slug}: "
+        f"Push detected on {source.name} {branch} (commit {commit})"
     )
 
     if branch.startswith(
@@ -195,7 +198,8 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
         gh_remote = await sync_to_async(git_repo.create_remote)(gh_remote_name, url=url)
     gh_remote.fetch()
 
-    # The branch was deleted on one remote, delete the branch on the other remote as well
+    # The branch was deleted on one remote,
+    # delete the branch on the other remote as well
     if commit == "0000000000000000000000000000000000000000":
         if branch in git_repo.branches:
             git_repo.delete_head(branch, force=True)
@@ -269,7 +273,8 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
     gh_repo = await sync_to_async(project.github)()
     ci_web_url = f"{project.url_gitlab()}/pipelines/{pipeline_id}"
     logger.debug(
-        f"{namespace.slug}/{project.slug}: Pipeline #{pipeline_id} on commit {commit} for branch {branch}, "
+        f"{namespace.slug}/{project.slug}: "
+        f"Pipeline #{pipeline_id} on commit {commit} for branch {branch}, "
         f"status: {gl_status}"
     )
 
@@ -289,9 +294,11 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
                 )
             except github.GithubException as e:
                 if e.status == 404:
-                    # Happens when a new branch is created on gitlab and the pipeline event comes before the push event
+                    # Happens when a new branch is created on gitlab
+                    # and the pipeline event comes before the push event
                     logger.warning(
-                        f"Branch {branch} does not exist on github, unable to report the pipeline status."
+                        f"Branch {branch} does not exist on github, "
+                        "unable to report the pipeline status."
                     )
                 else:
                     raise
@@ -306,11 +313,13 @@ async def webhook(request: HttpRequest) -> HttpResponse:
     """
     Process request incoming from a github webhook.
 
-    thx https://simpleisbetterthancomplex.com/tutorial/2016/10/31/how-to-handle-github-webhooks-using-django.html
+    thx https://simpleisbetterthancomplex.com/tutorial/2016/10/31/
+    how-to-handle-github-webhooks-using-django.html
     """
     # validate ip source
     forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR").split(", ")[0]
-    # networks = httpx.get('https://api.github.com/meta').json()['hooks'] # Fails if API rate limit exceeded
+    # Fails if API rate limit exceeded
+    # networks = httpx.get('https://api.github.com/meta').json()['hooks']
     networks = ["185.199.108.0/22", "140.82.112.0/20"]
     if not any(ip_address(forwarded_for) in ip_network(net) for net in networks):
         logger.warning("not from github IP")

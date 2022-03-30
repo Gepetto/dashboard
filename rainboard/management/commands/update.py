@@ -20,8 +20,10 @@ from rainboard.models import (
 )
 from rainboard.utils import SOURCES, update_robotpkg
 
-MIN_DAYS_SINCE_UPDATED = 10  # Only show issues and pull requests older than this
-SKIP_LABEL = "skip dashboard"  # Issues and prs with this label will not be added to the dashboard
+# Only show issues and pull requests older than this
+MIN_DAYS_SINCE_UPDATED = 10
+# Issues and prs with this label will not be added to the dashboard
+SKIP_LABEL = "skip dashboard"
 
 
 def update_issues_pr():

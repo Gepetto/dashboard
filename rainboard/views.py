@@ -108,7 +108,8 @@ class IssuesPrView(SingleTableMixin, FilterView):
 
 
 def update_issues_pr(request):
-    # Update issues and pull requests in a subprocess because it takes a long time to run
+    # Update issues and pull requests in a subprocess
+    # because it takes a long time to run
     Popen(
         [
             "timeout",
@@ -116,7 +117,8 @@ def update_issues_pr(request):
             "./manage.py",
             "shell",
             "-c",
-            "from rainboard.management.commands.update import update_issues_pr; update_issues_pr()",
+            "from rainboard.management.commands.update import update_issues_pr; "
+            "update_issues_pr()",
         ]
     )
     return HttpResponseRedirect(reverse("rainboard:issues_pr"))
@@ -168,7 +170,8 @@ def graph_svg(request):
         print("digraph { rankdir=LR;", file=f)
         for project in models.Project.objects.exclude(models.BAD_ONES):
             print(
-                f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}',
+                f'{{I{project.pk} [label="{project}" '
+                f'URL="{project.get_absolute_url()}"];}}',
                 file=f,
             )
         for dep in models.Dependency.objects.filter(

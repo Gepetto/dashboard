@@ -584,7 +584,8 @@ class Project(Links, NamedModel, TimeStampedModel):
         return f"0 {hour} {day} * *"
 
     def pipeline_schedules(self):
-        """provides a link to gitlab's CI schedules page showing then cron rule to use with this project"""
+        """provides a link to gitlab's CI schedules page
+        showing then cron rule to use with this project"""
         repo = self.repo_set.filter(forge__source=SOURCES.gitlab, namespace__group=True)
         if repo.exists():
             link = repo.first().url + "/pipeline_schedules"
@@ -661,7 +662,8 @@ class Repo(TimeStampedModel):
             )
         except httpx.HTTPError:
             logger.error(
-                f"requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY"
+                f"requesting api {self.forge} {self.namespace} {self} {url}, "
+                f"page {page} - SECOND TRY"
             )
             return httpx.get(
                 self.api_url() + url,
@@ -741,7 +743,8 @@ class Repo(TimeStampedModel):
             git_repo.fetch()
         except git.exc.GitCommandError:
             logger.warning(
-                f"fetching {self.forge} / {self.namespace} / {self.project} - SECOND TRY"
+                f"fetching {self.forge} / {self.namespace} / {self.project} "
+                "- SECOND TRY"
             )
             try:
                 git_repo.fetch()
@@ -889,7 +892,8 @@ class Repo(TimeStampedModel):
             self.get_builds()
         else:
             logger.error(
-                f"fetching {self.forge} / {self.namespace} / {self.project} - NOT FOUND - DELETING"
+                f"fetching {self.forge} / {self.namespace} / {self.project} "
+                "- NOT FOUND - DELETING"
             )
             logger.error(str(self.delete()))
 
@@ -1163,12 +1167,14 @@ class Image(models.Model):
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f"{project.registry()}/{project.main_namespace.slug}/{project.slug}/{self}".lower()
+        base = f"{project.registry()}/{project.main_namespace.slug}"
+        return f"{base}/{project.slug}/{self}".lower()
 
     def get_image_url(self):
         project = self.robotpkg.project
         manifest = str(self).replace(":", "/manifests/")
-        return f"https://{project.registry()}/v2/{project.main_namespace.slug}/{project.slug}/{manifest}"
+        base = f"https://{project.registry()}/v2/{project.main_namespace.slug}"
+        return f"{base}/{project.slug}/{manifest}"
 
     def get_job_name(self):
         return f"robotpkg-{self}".replace(":", "-")
@@ -1229,9 +1235,11 @@ class CIBuild(models.Model):
 
     def url(self):
         if self.repo.forge.source == SOURCES.github:
-            return f"https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}/builds/{self.build_id}"
+            base = f"https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}"
+            return f"{base}/builds/{self.build_id}"
         if self.repo.forge.source == SOURCES.gitlab:
-            return f"{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}/pipelines/{self.build_id}"
+            base = f"{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}"
+            return f"{base}/pipelines/{self.build_id}"
 
 
 class CIJob(models.Model):
@@ -1329,7 +1337,7 @@ class Dependency(models.Model):
         unique_together = ("project", "library")
 
     def __str__(self):
-        return f"{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}"
+        return f"{self.project} dep on {self.library}: {self.robotpkg:d} {self.cmake:d}"
 
 
 def get_default_forge(project):
@@ -1565,7 +1573,8 @@ def ordered_projects():
         return rdeps
 
     def project_sort_key(prj):
-        """Generate a key to sort projects: by number of recursive dependencies, then python bindings, then name."""
+        """Generate a key to sort projects: by number of recursive dependencies,
+        then python bindings, then name."""
         cat, pkg, ns, deps = prj
         return (len(get_rdeps(deps)), 1 if pkg.startswith("py-") else 0, pkg)
 
