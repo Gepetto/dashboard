@@ -7,23 +7,39 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0046_namespace_slug_gitlab_github'),
+        ("rainboard", "0046_namespace_slug_gitlab_github"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='IssuePr',
+            name="IssuePr",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('number', models.PositiveSmallIntegerField()),
-                ('days_since_updated', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('url', models.URLField()),
-                ('is_issue', models.BooleanField(default=True)),
-                ('repo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Repo')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("number", models.PositiveSmallIntegerField()),
+                (
+                    "days_since_updated",
+                    models.PositiveSmallIntegerField(blank=True, null=True),
+                ),
+                ("url", models.URLField()),
+                ("is_issue", models.BooleanField(default=True)),
+                (
+                    "repo",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="rainboard.Repo"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('repo', 'number', 'is_issue')},
+                "unique_together": {("repo", "number", "is_issue")},
             },
         ),
     ]

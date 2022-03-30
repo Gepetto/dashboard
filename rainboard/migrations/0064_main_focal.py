@@ -4,15 +4,15 @@ from django.db import migrations
 
 
 def main_focal(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.filter(name='18.04').update(main=False)
-    Target.objects.filter(name='20.04').update(main=True)
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.filter(name="18.04").update(main=False)
+    Target.objects.filter(name="20.04").update(main=True)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0063_alter_project_clang_format'),
+        ("rainboard", "0063_alter_project_clang_format"),
     ]
 
     operations = [

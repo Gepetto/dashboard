@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gh', '0001_initial'),
+        ("gh", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='githubchecksuite',
-            name='id',
+            model_name="githubchecksuite",
+            name="id",
             field=models.PositiveBigIntegerField(primary_key=True, serialize=False),
         ),
     ]

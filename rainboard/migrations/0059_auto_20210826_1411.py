@@ -4,14 +4,14 @@ from django.db import migrations
 
 
 def simple_robotics(apps, schema_editor):
-    Namespace = apps.get_model('rainboard', 'Namespace')
-    Namespace.objects.create(name='Simple Robotics', group=True)
+    Namespace = apps.get_model("rainboard", "Namespace")
+    Namespace.objects.create(name="Simple Robotics", group=True)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0058_drop_py3_debug'),
+        ("rainboard", "0058_drop_py3_debug"),
     ]
 
     operations = [

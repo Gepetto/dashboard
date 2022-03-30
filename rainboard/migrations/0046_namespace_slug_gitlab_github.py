@@ -4,30 +4,30 @@ from django.db import migrations, models
 
 
 def update_namespaces(apps, schema_editor):
-    Namespace = apps.get_model('rainboard', 'Namespace')
+    Namespace = apps.get_model("rainboard", "Namespace")
     for namespace in Namespace.objects.all():
-        if namespace.slug_gitlab == '':
+        if namespace.slug_gitlab == "":
             namespace.slug_gitlab = namespace.slug
-        if namespace.slug_github == '':
+        if namespace.slug_github == "":
             namespace.slug_github = namespace.slug
         namespace.save()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('rainboard', '0045_project_accept_pr_to_master'),
+        ("rainboard", "0045_project_accept_pr_to_master"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='namespace',
-            name='slug_github',
-            field=models.CharField(default='', max_length=200),
+            model_name="namespace",
+            name="slug_github",
+            field=models.CharField(default="", max_length=200),
         ),
         migrations.AddField(
-            model_name='namespace',
-            name='slug_gitlab',
-            field=models.CharField(default='', max_length=200),
+            model_name="namespace",
+            name="slug_gitlab",
+            field=models.CharField(default="", max_length=200),
         ),
         migrations.RunPython(update_namespaces),
     ]

@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0017_project_from_gepetto'),
+        ("rainboard", "0017_project_from_gepetto"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='target',
-            name='python3',
+            model_name="target",
+            name="python3",
         ),
     ]

@@ -4,14 +4,14 @@ from django.db import migrations
 
 
 def add_targets(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.create(name='centos7')
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.create(name="centos7")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0051_target_py2_available'),
+        ("rainboard", "0051_target_py2_available"),
     ]
 
     operations = [

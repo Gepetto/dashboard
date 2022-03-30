@@ -6,9 +6,9 @@ from rainboard.utils import SOURCES
 
 
 def keep_doc(apps, schema_editor):
-    apps.get_model('rainboard', 'Branch').objects.filter(
-        Q(name__endswith='master') | Q(name__endswith='devel'),
-        repo__namespace=F('project__main_namespace'),
+    apps.get_model("rainboard", "Branch").objects.filter(
+        Q(name__endswith="master") | Q(name__endswith="devel"),
+        repo__namespace=F("project__main_namespace"),
         repo__forge__source=SOURCES.gitlab,
     ).update(keep_doc=True)
 
@@ -16,13 +16,13 @@ def keep_doc(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0008_remove_article'),
+        ("rainboard", "0008_remove_article"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='branch',
-            name='keep_doc',
+            model_name="branch",
+            name="keep_doc",
             field=models.BooleanField(default=False),
         ),
         migrations.RunPython(keep_doc),

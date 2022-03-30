@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0018_remove_target_python3'),
+        ("rainboard", "0018_remove_target_python3"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='target',
-            name='active',
+            model_name="target",
+            name="active",
             field=models.BooleanField(default=True),
         ),
     ]

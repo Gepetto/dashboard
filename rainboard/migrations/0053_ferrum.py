@@ -4,15 +4,15 @@ from django.db import migrations
 
 
 def erbium_to_ferrum(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.filter(name='erbium').update(active=False)
-    Target.objects.create(name='ferrum')
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.filter(name="erbium").update(active=False)
+    Target.objects.create(name="ferrum")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0052_centos7'),
+        ("rainboard", "0052_centos7"),
     ]
 
     operations = [

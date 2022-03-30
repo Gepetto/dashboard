@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0036_update_distros'),
+        ("rainboard", "0036_update_distros"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='has_python',
+            model_name="project",
+            name="has_python",
             field=models.BooleanField(default=True),
         ),
     ]

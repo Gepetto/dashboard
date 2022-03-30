@@ -6,10 +6,10 @@ import git
 from django.utils.safestring import mark_safe
 from django.db.models import IntegerChoices
 
-logger = logging.getLogger('rainboard.utils')
+logger = logging.getLogger("rainboard.utils")
 
-SOURCES = IntegerChoices('Sources', 'github gitlab redmine robotpkg travis')
-INVALID_MAILS = ('localhost', 'none', 'noreply', 'example')
+SOURCES = IntegerChoices("Sources", "github gitlab redmine robotpkg travis")
+INVALID_MAILS = ("localhost", "none", "noreply", "example")
 
 
 def slugify_with_dots(value):
@@ -19,20 +19,22 @@ def slugify_with_dots(value):
     >>> slugify_with_dots('C’est la fête :3. yay.')
     'cest-la-fete-3.-yay.'
     """
-    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s\.-]', '', value).strip().lower()
-    return mark_safe(re.sub(r'[-\s]+', '-', value))
+    value = (
+        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    )
+    value = re.sub(r"[^\w\s\.-]", "", value).strip().lower()
+    return mark_safe(re.sub(r"[-\s]+", "-", value))
 
 
 def api_next(source, req):
     if source == SOURCES.github:
-        if 'Link' in req.headers:
-            for link in req.headers['Link'].split(','):
-                if 'next' in link:
-                    return int(re.search(r'page=(\d+)', link).group(1))
+        if "Link" in req.headers:
+            for link in req.headers["Link"].split(","):
+                if "next" in link:
+                    return int(re.search(r"page=(\d+)", link).group(1))
     if source == SOURCES.gitlab:
-        if 'X-Next-Page' in req.headers and req.headers['X-Next-Page']:
-            return int(req.headers['X-Next-Page'])
+        if "X-Next-Page" in req.headers and req.headers["X-Next-Page"]:
+            return int(req.headers["X-Next-Page"])
 
 
 def domain(url):
@@ -45,9 +47,9 @@ def domain(url):
     >>> domain('gitlab.laas.fr/pipo')
     'gitlab.laas.fr'
     """
-    if '://' in url or url.startswith('//'):
-        url = url.split('//')[1]
-    return url.split('/')[0]
+    if "://" in url or url.startswith("//"):
+        url = url.split("//")[1]
+    return url.split("/")[0]
 
 
 def domain_link(url):
@@ -63,15 +65,15 @@ def domain_link(url):
 
 def update_robotpkg(path):
     try:
-        git.Repo(str(path / '.git')).remotes.origin.pull()
+        git.Repo(str(path / ".git")).remotes.origin.pull()
     except git.exc.GitCommandError:
-        logger.error('Network error, retrying…')
-        git.Repo(str(path / '.git')).remotes.origin.pull()
+        logger.error("Network error, retrying…")
+        git.Repo(str(path / ".git")).remotes.origin.pull()
     try:
-        git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()
+        git.Repo(str(path / "wip" / ".git")).remotes.origin.pull()
     except git.exc.GitCommandError:
-        logger.error('Network error, retrying…')
-        git.Repo(str(path / 'wip' / '.git')).remotes.origin.pull()
+        logger.error("Network error, retrying…")
+        git.Repo(str(path / "wip" / ".git")).remotes.origin.pull()
 
 
 def invalid_mail(mail):
@@ -85,9 +87,10 @@ def valid_name(name):
     >>> valid_name('TALOS_Metapkg-ros_control_sot')
     'talos metapkg ros control sot'
     """
-    return name.replace('_', ' ').replace('-', ' ').lower()
+    return name.replace("_", " ").replace("-", " ").lower()
 
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

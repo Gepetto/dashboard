@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0005_contributor_agreement_signed'),
+        ("rainboard", "0005_contributor_agreement_signed"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='branch',
-            name='deleted',
+            model_name="branch",
+            name="deleted",
             field=models.BooleanField(default=False),
         ),
     ]

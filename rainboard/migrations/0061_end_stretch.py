@@ -4,20 +4,20 @@ from django.db import migrations
 
 
 def end_stretch(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
+    Target = apps.get_model("rainboard", "Target")
 
     # Disable stretch
-    Target.objects.filter(name='stretch').update(active=False)
+    Target.objects.filter(name="stretch").update(active=False)
 
     # Remove old images
-    Image = apps.get_model('rainboard', 'Image')
+    Image = apps.get_model("rainboard", "Image")
     Image.objects.filter(target__active=False).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0060_remove_project_ccache'),
+        ("rainboard", "0060_remove_project_ccache"),
     ]
 
     operations = [migrations.RunPython(end_stretch)]

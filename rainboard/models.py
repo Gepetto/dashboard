@@ -24,46 +24,76 @@ from ndh.utils import query_sum
 
 from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_name
 
-logger = logging.getLogger('rainboard.models')
+logger = logging.getLogger("rainboard.models")
 
-MAIN_BRANCHES = ['master', 'devel']
-RPKG_URL = 'http://robotpkg.openrobots.org'
-DOC_URL = 'https://gepettoweb.laas.fr/doc'
+MAIN_BRANCHES = ["master", "devel"]
+RPKG_URL = "http://robotpkg.openrobots.org"
+DOC_URL = "https://gepettoweb.laas.fr/doc"
 RPKG_LICENSES = {
-    'gnu-lgpl-v3': 'LGPL-3.0',
-    'gnu-lgpl-v2': 'LGPL-2.0',
-    'gnu-lgpl-v2.1': 'LGPL-2.1',
-    'mit': 'MIT',
-    'gnu-gpl-v3': 'GPL-3.0',
-    '2-clause-bsd': 'BSD-2-Clause',
-    'eclipse': 'EPL-1.0',
-    'modified-bsd': 'BSD-3-Clause'
+    "gnu-lgpl-v3": "LGPL-3.0",
+    "gnu-lgpl-v2": "LGPL-2.0",
+    "gnu-lgpl-v2.1": "LGPL-2.1",
+    "mit": "MIT",
+    "gnu-gpl-v3": "GPL-3.0",
+    "2-clause-bsd": "BSD-2-Clause",
+    "eclipse": "EPL-1.0",
+    "modified-bsd": "BSD-3-Clause",
 }
-RPKG_FIELDS = ['PKGBASE', 'PKGVERSION', 'MASTER_SITES', 'MASTER_REPOSITORY', 'MAINTAINER', 'COMMENT', 'HOMEPAGE']
+RPKG_FIELDS = [
+    "PKGBASE",
+    "PKGVERSION",
+    "MASTER_SITES",
+    "MASTER_REPOSITORY",
+    "MAINTAINER",
+    "COMMENT",
+    "HOMEPAGE",
+]
 CMAKE_FIELDS = {
-    'NAME': 'cmake_name',
-    'DESCRIPTION': 'description',
-    'URL': 'homepage',
-    'VERSION': 'version',
-    'SUFFIX': 'suffix'
+    "NAME": "cmake_name",
+    "DESCRIPTION": "description",
+    "URL": "homepage",
+    "VERSION": "version",
+    "SUFFIX": "suffix",
 }
-TRAVIS_STATE = {'created': None, 'passed': True, 'started': None, 'failed': False, 'errored': False, 'canceled': False}
-GITLAB_STATUS = {'failed': False, 'success': True, 'pending': None, 'skipped': None, 'canceled': None, 'running': None}
-GEPETTO_SLUGS = ['gepetto', 'stack-of-tasks', 'humanoid-path-planner', 'loco-3d', 'simple-robotics']
+TRAVIS_STATE = {
+    "created": None,
+    "passed": True,
+    "started": None,
+    "failed": False,
+    "errored": False,
+    "canceled": False,
+}
+GITLAB_STATUS = {
+    "failed": False,
+    "success": True,
+    "pending": None,
+    "skipped": None,
+    "canceled": None,
+    "running": None,
+}
+GEPETTO_SLUGS = [
+    "gepetto",
+    "stack-of-tasks",
+    "humanoid-path-planner",
+    "loco-3d",
+    "simple-robotics",
+]
 
-BAD_ONES = Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
+BAD_ONES = (
+    Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
+)
 
 
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
     from_gepetto = models.BooleanField(default=False)
-    slug_gitlab = models.CharField(max_length=200, default='')
-    slug_github = models.CharField(max_length=200, default='')
+    slug_gitlab = models.CharField(max_length=200, default="")
+    slug_github = models.CharField(max_length=200, default="")
 
     def save(self, *args, **kwargs):
-        if self.slug_gitlab == '':
+        if self.slug_gitlab == "":
             self.slug_gitlab = self.slug
-        if self.slug_github == '':
+        if self.slug_github == "":
             self.slug_github = self.slug
         super(Namespace, self).save(*args, **kwargs)
 
@@ -86,19 +116,29 @@ class Forge(Links, NamedModel):
     def get_absolute_url(self):
         return self.url
 
-    def api_req(self, url='', name=None, page=1):
-        logger.debug(f'requesting api {self} {url}, page {page}')
+    def api_req(self, url="", name=None, page=1):
+        logger.debug(f"requesting api {self} {url}, page {page}")
         try:
-            return httpx.get(self.api_url() + url, params={'page': page}, verify=self.verify, headers=self.headers())
+            return httpx.get(
+                self.api_url() + url,
+                params={"page": page},
+                verify=self.verify,
+                headers=self.headers(),
+            )
         except httpx.HTTPError:
-            logger.error(f'requesting api {self} {url}, page {page} - SECOND TRY')
-            return httpx.get(self.api_url() + url, params={'page': page}, verify=self.verify, headers=self.headers())
+            logger.error(f"requesting api {self} {url}, page {page} - SECOND TRY")
+            return httpx.get(
+                self.api_url() + url,
+                params={"page": page},
+                verify=self.verify,
+                headers=self.headers(),
+            )
 
-    def api_data(self, url=''):
+    def api_data(self, url=""):
         req = self.api_req(url)
         return req.json() if req.status_code == 200 else []  # TODO
 
-    def api_list(self, url='', name=None, limit=None):
+    def api_list(self, url="", name=None, limit=None):
         page = 1
         while page:
             req = self.api_req(url, name, page)
@@ -115,58 +155,56 @@ class Forge(Links, NamedModel):
     def headers(self):
         return {
             SOURCES.github: {
-                'Authorization': f'token {self.token}',
-                'Accept': 'application/vnd.github.drax-preview+json'
+                "Authorization": f"token {self.token}",
+                "Accept": "application/vnd.github.drax-preview+json",
             },
-            SOURCES.gitlab: {
-                'Private-Token': self.token
-            },
-            SOURCES.redmine: {
-                'X-Redmine-API-Key': self.token
-            },
+            SOURCES.gitlab: {"Private-Token": self.token},
+            SOURCES.redmine: {"X-Redmine-API-Key": self.token},
             SOURCES.travis: {
-                'Authorization': f'token {self.token}',
-                'TRAVIS-API-Version': '3'
+                "Authorization": f"token {self.token}",
+                "TRAVIS-API-Version": "3",
             },
         }[self.source]
 
     def api_url(self):
         return {
-            SOURCES.github: 'https://api.github.com',
-            SOURCES.gitlab: f'{self.url}/api/v4',
+            SOURCES.github: "https://api.github.com",
+            SOURCES.gitlab: f"{self.url}/api/v4",
             SOURCES.redmine: self.url,
-            SOURCES.travis: 'https://api.travis-ci.org',
+            SOURCES.travis: "https://api.travis-ci.org",
         }[self.source]
 
     def get_namespaces_github(self):
         for namespace in Namespace.objects.filter(group=True):
-            for data in self.api_list(f'/orgs/{namespace.slug}/members'):
-                Namespace.objects.get_or_create(slug=data['login'].lower(),
-                                                defaults={
-                                                    'name': data['login'],
-                                                    'group': False
-                                                })
+            for data in self.api_list(f"/orgs/{namespace.slug}/members"):
+                Namespace.objects.get_or_create(
+                    slug=data["login"].lower(),
+                    defaults={"name": data["login"], "group": False},
+                )
 
     def get_namespaces_gitlab(self):
-        for data in self.api_list('/namespaces'):
-            if data['name'] == 'dockering':
+        for data in self.api_list("/namespaces"):
+            if data["name"] == "dockering":
                 continue
             try:
-                Namespace.objects.get_or_create(slug=slugify(data['path']),
-                                                defaults={
-                                                    'name': data['name'],
-                                                    'group': data['kind'] == 'group'
-                                                })
+                Namespace.objects.get_or_create(
+                    slug=slugify(data["path"]),
+                    defaults={"name": data["name"], "group": data["kind"] == "group"},
+                )
             except IntegrityError:
-                Namespace.objects.get_or_create(slug=slugify(data['path']),
-                                                defaults={
-                                                    'name': data['name'] + ' 2',
-                                                    'group': data['kind'] == 'group'
-                                                })
-        for data in self.api_list('/users'):
-            if data['name'] == 'dockering':
+                Namespace.objects.get_or_create(
+                    slug=slugify(data["path"]),
+                    defaults={
+                        "name": data["name"] + " 2",
+                        "group": data["kind"] == "group",
+                    },
+                )
+        for data in self.api_list("/users"):
+            if data["name"] == "dockering":
                 continue
-            Namespace.objects.get_or_create(slug=slugify(data['username']), defaults={'name': data['name']})
+            Namespace.objects.get_or_create(
+                slug=slugify(data["username"]), defaults={"name": data["name"]}
+            )
 
     def get_namespaces_redmine(self):
         pass
@@ -175,42 +213,52 @@ class Forge(Links, NamedModel):
         pass
 
     def get_projects(self):
-        getattr(self, f'get_namespaces_{self.get_source_display().lower()}')()
-        return getattr(self, f'get_projects_{self.get_source_display().lower()}')()
+        getattr(self, f"get_namespaces_{self.get_source_display().lower()}")()
+        return getattr(self, f"get_projects_{self.get_source_display().lower()}")()
 
     def get_projects_github(self):
         for org in Namespace.objects.filter(group=True):
-            for data in self.api_list(f'/orgs/{org.slug}/repos'):
+            for data in self.api_list(f"/orgs/{org.slug}/repos"):
                 update_github(self, org, data)
         for user in Namespace.objects.filter(group=False):
-            for data in self.api_list(f'/users/{user.slug}/repos'):
-                if Project.objects.filter(name=valid_name(data['name'])).exists():
+            for data in self.api_list(f"/users/{user.slug}/repos"):
+                if Project.objects.filter(name=valid_name(data["name"])).exists():
                     update_github(self, user, data)
 
     def get_projects_gitlab(self):
-        for data in self.api_list('/projects'):
+        for data in self.api_list("/projects"):
             update_gitlab(self, data)
 
-        for orphan in Project.objects.filter(main_namespace=None).exclude(name__endswith='release'):
+        for orphan in Project.objects.filter(main_namespace=None).exclude(
+            name__endswith="release"
+        ):
             repo = orphan.repo_set.filter(forge__source=SOURCES.gitlab).first()
             if repo:
-                update_gitlab(self, self.api_data(f'/projects/{repo.forked_from}'))
+                update_gitlab(self, self.api_data(f"/projects/{repo.forked_from}"))
 
     def get_projects_redmine(self):
         pass
 
     def get_projects_travis(self):
         for namespace in Namespace.objects.all():
-            for repository in self.api_list(f'/owner/{namespace.slug}/repos', 'repositories'):
-                if repository['active']:
+            for repository in self.api_list(
+                f"/owner/{namespace.slug}/repos", "repositories"
+            ):
+                if repository["active"]:
                     update_travis(namespace, repository)
 
 
 class Project(Links, NamedModel, TimeStampedModel):
     public = models.BooleanField(default=True)
-    main_namespace = models.ForeignKey(Namespace, on_delete=models.SET_NULL, null=True, blank=True)
-    main_forge = models.ForeignKey(Forge, on_delete=models.SET_NULL, null=True, blank=True)
-    license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
+    main_namespace = models.ForeignKey(
+        Namespace, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    main_forge = models.ForeignKey(
+        Forge, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    license = models.ForeignKey(
+        License, on_delete=models.SET_NULL, blank=True, null=True
+    )
     homepage = models.URLField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     version = models.CharField(max_length=20, blank=True, null=True)
@@ -219,7 +267,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     docs = models.BooleanField(default=True)
     cmake_name = models.CharField(max_length=200, blank=True, null=True)
     archived = models.BooleanField(default=False)
-    suffix = models.CharField(max_length=50, default='', blank=True)
+    suffix = models.CharField(max_length=50, default="", blank=True)
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
     has_cpp = models.BooleanField(default=True)
@@ -244,66 +292,72 @@ class Project(Links, NamedModel, TimeStampedModel):
         return " ".join(ret)
 
     def git_path(self):
-        return settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug.strip()  # workaround SafeText TypeError
+        return (
+            settings.RAINBOARD_GITS / self.main_namespace.slug / self.slug.strip()
+        )  # workaround SafeText TypeError
 
     def git(self):
         path = self.git_path()
         if not path.exists():
-            logger.info(f'Creating repo for {self.main_namespace.slug}/{self.slug}')
+            logger.info(f"Creating repo for {self.main_namespace.slug}/{self.slug}")
             return git.Repo.init(path)
-        return git.Repo(str(path / '.git'))
+        return git.Repo(str(path / ".git"))
 
     def github(self):
-        github_forge = Forge.objects.get(slug='github')
+        github_forge = Forge.objects.get(slug="github")
         gh = Github(github_forge.token)
-        return gh.get_repo(f'{self.main_namespace.slug_github}/{self.slug}')
+        return gh.get_repo(f"{self.main_namespace.slug_github}/{self.slug}")
 
     def gitlab(self):
-        gitlab_forge = Forge.objects.get(slug='gitlab')
+        gitlab_forge = Forge.objects.get(slug="gitlab")
         gl = Gitlab(gitlab_forge.url, private_token=gitlab_forge.token)
-        gl_repo = gl.projects.get(f'{self.main_namespace.slug_gitlab}/{self.slug}')
+        gl_repo = gl.projects.get(f"{self.main_namespace.slug_gitlab}/{self.slug}")
         return gl_repo
 
     def main_repo(self):
         forge = self.main_forge if self.main_forge else get_default_forge(self)
-        repo, created = Repo.objects.get_or_create(forge=forge,
-                                                   namespace=self.main_namespace,
-                                                   project=self,
-                                                   defaults={
-                                                       'name': self.name,
-                                                       'default_branch': 'master',
-                                                       'repo_id': 0
-                                                   })
+        repo, created = Repo.objects.get_or_create(
+            forge=forge,
+            namespace=self.main_namespace,
+            project=self,
+            defaults={"name": self.name, "default_branch": "master", "repo_id": 0},
+        )
         if created:
             repo.api_update()
         return repo
 
     def update_branches(self, main=True, pull=True):
-        branches = [b[2:] for b in self.git().git.branch('-a', '--no-color').split('\n')]
+        branches = [
+            b[2:] for b in self.git().git.branch("-a", "--no-color").split("\n")
+        ]
         if main:
-            branches = [b for b in branches if b.endswith('master') or b.endswith('devel')]
+            branches = [
+                b for b in branches if b.endswith("master") or b.endswith("devel")
+            ]
         for branch in branches:
-            logger.info(f'update branch {branch}')
-            if branch.startswith('remotes/'):
+            logger.info(f"update branch {branch}")
+            if branch.startswith("remotes/"):
                 branch = branch[8:]
-            if branch.count('/') < 2:
-                if branch != 'master':
+            if branch.count("/") < 2:
+                if branch != "master":
                     logger.error(f'wrong branch "{branch}" in {self.git_path()}')
                 continue
-            forge, namespace, name = branch.split('/', maxsplit=2)
-            namespace, _ = Namespace.objects.get_or_create(slug=slugify(namespace), defaults={'name': namespace})
+            forge, namespace, name = branch.split("/", maxsplit=2)
+            namespace, _ = Namespace.objects.get_or_create(
+                slug=slugify(namespace), defaults={"name": namespace}
+            )
             forge = Forge.objects.get(slug=forge)
-            repo, created = Repo.objects.get_or_create(forge=forge,
-                                                       namespace=namespace,
-                                                       project=self,
-                                                       defaults={
-                                                           'name': self.name,
-                                                           'default_branch': 'master',
-                                                           'repo_id': 0
-                                                       })
+            repo, created = Repo.objects.get_or_create(
+                forge=forge,
+                namespace=namespace,
+                project=self,
+                defaults={"name": self.name, "default_branch": "master", "repo_id": 0},
+            )
             if created:
                 repo.api_update()
-            instance, bcreated = Branch.objects.get_or_create(name=branch, project=self, repo=repo)
+            instance, bcreated = Branch.objects.get_or_create(
+                name=branch, project=self, repo=repo
+            )
             if bcreated:
                 instance.update(pull=pull)
 
@@ -314,43 +368,53 @@ class Project(Links, NamedModel, TimeStampedModel):
         return self.main_repo().main_branch()
 
     def cmake(self):
-        filename = self.git_path() / 'CMakeLists.txt'
+        filename = self.git_path() / "CMakeLists.txt"
         if not filename.exists():
             return
         with filename.open() as f:
             content = f.read()
         for key, value in CMAKE_FIELDS.items():
-            search = re.search(r'set\s*\(\s*project_%s\s+([^)]+)*\)' % key, content, re.I)
+            search = re.search(
+                r"set\s*\(\s*project_%s\s+([^)]+)*\)" % key, content, re.I
+            )
             if search:
                 try:
                     old = getattr(self, value)
-                    new = search.groups()[0].strip(''' \r\n\t'"''').replace('_', '-')
+                    new = search.groups()[0].strip(''' \r\n\t'"''').replace("_", "-")
                     if old != new:
                         setattr(self, value, new)
                         self.save()
                 except DataError:
                     setattr(self, value, old)
-        for dependency in re.findall(r'ADD_[A-Z]+_DEPENDENCY\s*\(["\']?([^ "\')]+).*["\']?\)', content, re.I):
+        for dependency in re.findall(
+            r'ADD_[A-Z]+_DEPENDENCY\s*\(["\']?([^ "\')]+).*["\']?\)', content, re.I
+        ):
             project = Project.objects.filter(name=valid_name(dependency))
             if project.exists():
-                dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
+                dependency, _ = Dependency.objects.get_or_create(
+                    project=self, library=project.first()
+                )
                 if not dependency.cmake:
                     dependency.cmake = True
                     dependency.save()
 
     def ros(self):
         try:
-            filename = self.git_path() / 'package.xml'
+            filename = self.git_path() / "package.xml"
         except TypeError:
             return
         if not filename.exists():
             return
         with filename.open() as f:
             content = f.read()
-        for dependency in re.findall(r'<run_depend>(\w+).*</run_depend>', content, re.I):
+        for dependency in re.findall(
+            r"<run_depend>(\w+).*</run_depend>", content, re.I
+        ):
             project = Project.objects.filter(name=valid_name(dependency))
             if project.exists():
-                dependency, _ = Dependency.objects.get_or_create(project=self, library=project.first())
+                dependency, _ = Dependency.objects.get_or_create(
+                    project=self, library=project.first()
+                )
                 if not dependency.ros:
                     dependency.ros = True
                     dependency.save()
@@ -366,11 +430,15 @@ class Project(Links, NamedModel, TimeStampedModel):
             Tag.objects.get_or_create(name=str(tag), project=self)
 
     def update_repo(self):
-        branch = str(self.main_branch()).split('/', maxsplit=2)[2]
-        self.git().head.commit = self.git().remotes[self.main_repo().git_remote()].refs[branch].commit
+        branch = str(self.main_branch()).split("/", maxsplit=2)[2]
+        self.git().head.commit = (
+            self.git().remotes[self.main_repo().git_remote()].refs[branch].commit
+        )
 
     def main_gitlab_repo(self):
-        return self.repo_set.get(forge__source=SOURCES.gitlab, namespace=self.main_namespace)
+        return self.repo_set.get(
+            forge__source=SOURCES.gitlab, namespace=self.main_namespace
+        )
 
     def ci_jobs(self):
         r = self.main_gitlab_repo()
@@ -383,19 +451,21 @@ class Project(Links, NamedModel, TimeStampedModel):
         self.update_branches(main=only_main_branches)
         self.update_tags()
         self.update_repo()
-        tags = self.tag_set.filter(name__startswith='v')  # TODO: implement SQL ordering for semver
+        tags = self.tag_set.filter(
+            name__startswith="v"
+        )  # TODO: implement SQL ordering for semver
         if tags.exists():
             releases = []
             for tag in tags:
                 try:
-                    release = tuple(int(v) for v in tag.name[1:].split('.'))
+                    release = tuple(int(v) for v in tag.name[1:].split("."))
                     releases.append(release)
                 except ValueError:
                     pass
             if releases:
-                self.version = '%i.%i.%i' % sorted(releases)[-1]
-        robotpkg = self.robotpkg_set.order_by('-updated').first()
-        branch = self.branch_set.order_by('-updated').first()
+                self.version = "%i.%i.%i" % sorted(releases)[-1]
+        robotpkg = self.robotpkg_set.order_by("-updated").first()
+        branch = self.branch_set.order_by("-updated").first()
         branch_updated = branch is not None and branch.updated is not None
         robotpkg_updated = robotpkg is not None and robotpkg.updated is not None
         if branch_updated or robotpkg_updated:
@@ -413,24 +483,24 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def commits_since(self):
         try:
-            commits = self.git().git.rev_list(f'v{self.version}..{self.main_branch()}')
-            return len(commits.split('\n')) if commits else 0
+            commits = self.git().git.rev_list(f"v{self.version}..{self.main_branch()}")
+            return len(commits.split("\n")) if commits else 0
         except git.exc.GitCommandError:
             pass
 
     def open_issues(self):
-        return query_sum(self.repo_set, 'open_issues')
+        return query_sum(self.repo_set, "open_issues")
 
     def open_pr(self):
-        return query_sum(self.repo_set, 'open_pr')
+        return query_sum(self.repo_set, "open_pr")
 
     def gitlabciyml(self):
-        return get_template('rainboard/gitlab-ci.yml').render({'project': self})
+        return get_template("rainboard/gitlab-ci.yml").render({"project": self})
 
     def contributors(self, update=False):
         if update:
-            for guy in self.git().git.shortlog('-nse').split('\n'):
-                name, mail = guy[7:-1].split(' <')
+            for guy in self.git().git.shortlog("-nse").split("\n"):
+                name, mail = guy[7:-1].split(" <")
                 contributor = get_contributor(name, mail)
                 contributor.projects.add(self)
                 contributor.save()
@@ -444,61 +514,80 @@ class Project(Links, NamedModel, TimeStampedModel):
         if images.count() == 1:
             return images.first()
         if images.count() == 2:
-            return next(image for image in images if image.robotpkg.name.startswith('py-'))
+            return next(
+                image for image in images if image.robotpkg.name.startswith("py-")
+            )
 
     def print_deps(self):
-        return mark_safe(', '.join(d.library.get_link() for d in self.dependencies.all()))
+        return mark_safe(
+            ", ".join(d.library.get_link() for d in self.dependencies.all())
+        )
 
     def print_rdeps(self):
-        return mark_safe(', '.join(d.project.get_link() for d in self.rdeps.all()))
+        return mark_safe(", ".join(d.project.get_link() for d in self.rdeps.all()))
 
     def ordered_robotpkg(self):
-        return self.robotpkg_set.order_by('name')
+        return self.robotpkg_set.order_by("name")
 
     def url_travis(self):
-        return f'https://travis-ci.org/{self.main_namespace.slug}/{self.slug}'
+        return f"https://travis-ci.org/{self.main_namespace.slug}/{self.slug}"
 
     def url_gitlab(self):
-        return f'https://gitlab.laas.fr/{self.main_namespace.slug_gitlab}/{self.slug}'
+        return f"https://gitlab.laas.fr/{self.main_namespace.slug_gitlab}/{self.slug}"
 
     def remote_url_gitlab(self):
         gitlab_forge = Forge.objects.get(source=SOURCES.gitlab)
-        return self.url_gitlab().replace('://', f'://gitlab-ci-token:{gitlab_forge.token}@')
+        return self.url_gitlab().replace(
+            "://", f"://gitlab-ci-token:{gitlab_forge.token}@"
+        )
 
     def url_github(self):
-        return f'https://github.com/{self.main_namespace.slug_github}/{self.slug}'
+        return f"https://github.com/{self.main_namespace.slug_github}/{self.slug}"
 
     def remote_url_github(self):
         github_forge = Forge.objects.get(source=SOURCES.github)
-        return self.url_github().replace('://', f'://{settings.GITHUB_USER}:{github_forge.token}@')
+        return self.url_github().replace(
+            "://", f"://{settings.GITHUB_USER}:{github_forge.token}@"
+        )
 
     def badge(self, link, img, alt):
         return mark_safe(f'<a href="{link}"><img src="{img}" alt="{alt}" /></a> ')
 
     def badge_travis(self):
-        return self.badge(self.url_travis(), f'{self.url_travis()}.svg?branch=master', 'Building Status')
+        return self.badge(
+            self.url_travis(),
+            f"{self.url_travis()}.svg?branch=master",
+            "Building Status",
+        )
 
     def badge_gitlab(self):
-        return self.badge(self.url_gitlab(), f'{self.url_gitlab()}/badges/master/pipeline.svg', 'Pipeline Status')
+        return self.badge(
+            self.url_gitlab(),
+            f"{self.url_gitlab()}/badges/master/pipeline.svg",
+            "Pipeline Status",
+        )
 
     def badge_coverage(self):
-        return self.badge(f'{DOC_URL}/{self.main_namespace.slug}/{self.slug}/master/coverage',
-                          f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"', 'Coverage Report')
+        return self.badge(
+            f"{DOC_URL}/{self.main_namespace.slug}/{self.slug}/master/coverage",
+            f'{self.url_gitlab()}/badges/master/coverage.svg?job=doc-coverage"',
+            "Coverage Report",
+        )
 
     def badges(self):
         # travis = self.badge_travis() if self.public else mark_safe('')
         return self.badge_gitlab() + self.badge_coverage()
 
     def cron(self):
-        """ generate a cron-style interval description to run CI monthly on master """
+        """generate a cron-style interval description to run CI monthly on master"""
         hour, day = (self.pk // 30) % 24, self.pk % 30 + 1
-        return f'0 {hour} {day} * *'
+        return f"0 {hour} {day} * *"
 
     def pipeline_schedules(self):
-        """ provides a link to gitlab's CI schedules page showing then cron rule to use with this project """
+        """provides a link to gitlab's CI schedules page showing then cron rule to use with this project"""
         repo = self.repo_set.filter(forge__source=SOURCES.gitlab, namespace__group=True)
         if repo.exists():
-            link = repo.first().url + '/pipeline_schedules'
+            link = repo.first().url + "/pipeline_schedules"
             return mark_safe(f'<a href="{link}">{self.cron()}</a>')
 
     def pipeline_result(self, branch):
@@ -507,33 +596,35 @@ class Project(Links, NamedModel, TimeStampedModel):
         return None if build is None else build.passed
 
     def master_result(self):
-        master = self.pipeline_result('master')
-        return self.pipeline_result('main') if master is None else master
+        master = self.pipeline_result("master")
+        return self.pipeline_result("main") if master is None else master
 
     def devel_result(self):
-        return self.pipeline_result('devel')
+        return self.pipeline_result("devel")
 
     def pipeline_results(self):
-        """ Show state and link to latest master & devel gitlab pipelines """
+        """Show state and link to latest master & devel gitlab pipelines"""
         repo = self.main_gitlab_repo()
         ret = []
-        for branch in ['master', 'main', 'devel']:
+        for branch in ["master", "main", "devel"]:
             build = repo.cibuild_set.filter(branch__name__endswith=branch).first()
             if build is not None:
-                link = repo.url + f'/-/pipelines/{build.build_id}'
-                sym = '✓' if build.passed else '✘'
+                link = repo.url + f"/-/pipelines/{build.build_id}"
+                sym = "✓" if build.passed else "✘"
                 ret.append(f'<a href="{link}">{branch}: {sym}</a>')
 
-        return mark_safe('<br>'.join(ret))
+        return mark_safe("<br>".join(ret))
 
 
 class Repo(TimeStampedModel):
     name = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
+    slug = AutoSlugField(populate_from="name", slugify=slugify_with_dots)
     forge = models.ForeignKey(Forge, on_delete=models.CASCADE)
     namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
+    license = models.ForeignKey(
+        License, on_delete=models.SET_NULL, blank=True, null=True
+    )
     homepage = models.URLField(max_length=200, blank=True, null=True)
     url = models.URLField(max_length=200, blank=True, null=True)
     default_branch = models.CharField(max_length=50)
@@ -552,30 +643,38 @@ class Repo(TimeStampedModel):
     def api_url(self):
         api_url = self.forge.api_url()
         return {
-            SOURCES.github: f'{api_url}/repos/{self.namespace.slug}/{self.slug}',
-            SOURCES.redmine: f'{api_url}/projects/{self.repo_id}.json',
-            SOURCES.gitlab: f'{api_url}/projects/{self.repo_id}',
+            SOURCES.github: f"{api_url}/repos/{self.namespace.slug}/{self.slug}",
+            SOURCES.redmine: f"{api_url}/projects/{self.repo_id}.json",
+            SOURCES.gitlab: f"{api_url}/projects/{self.repo_id}",
         }[self.forge.source]
 
-    def api_req(self, url='', name=None, page=1):
-        logger.debug(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page}')
+    def api_req(self, url="", name=None, page=1):
+        logger.debug(
+            f"requesting api {self.forge} {self.namespace} {self} {url}, page {page}"
+        )
         try:
-            return httpx.get(self.api_url() + url,
-                             params={'page': page},
-                             verify=self.forge.verify,
-                             headers=self.forge.headers())
+            return httpx.get(
+                self.api_url() + url,
+                params={"page": page},
+                verify=self.forge.verify,
+                headers=self.forge.headers(),
+            )
         except httpx.HTTPError:
-            logger.error(f'requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY')
-            return httpx.get(self.api_url() + url,
-                             params={'page': page},
-                             verify=self.forge.verify,
-                             headers=self.forge.headers())
+            logger.error(
+                f"requesting api {self.forge} {self.namespace} {self} {url}, page {page} - SECOND TRY"
+            )
+            return httpx.get(
+                self.api_url() + url,
+                params={"page": page},
+                verify=self.forge.verify,
+                headers=self.forge.headers(),
+            )
 
-    def api_data(self, url=''):
+    def api_data(self, url=""):
         req = self.api_req(url)
         return req.json() if req.status_code == 200 else []  # TODO
 
-    def api_list(self, url='', name=None, limit=None):
+    def api_list(self, url="", name=None, limit=None):
         page = 1
         while page:
             req = self.api_req(url, name, page)
@@ -595,14 +694,16 @@ class Repo(TimeStampedModel):
     def api_update(self):
         data = self.api_data()
         if data:
-            if data['archived']:
+            if data["archived"]:
                 if self.project.main_repo() == self:
                     self.project.archived = True
                     self.project.save()
                 self.archived = True
                 self.save()
             else:
-                return getattr(self, f'api_update_{self.forge.get_source_display().lower()}')(data)
+                return getattr(
+                    self, f"api_update_{self.forge.get_source_display().lower()}"
+                )(data)
 
     def api_update_gitlab(self, data):
         update_gitlab(self.forge, data)
@@ -612,13 +713,17 @@ class Repo(TimeStampedModel):
 
     def get_clone_url(self):
         if self.forge.source == SOURCES.gitlab:
-            return self.clone_url.replace('://', f'://gitlab-ci-token:{self.forge.token}@')
+            return self.clone_url.replace(
+                "://", f"://gitlab-ci-token:{self.forge.token}@"
+            )
         if self.forge.source == SOURCES.github:
-            return self.clone_url.replace('://', f'://{settings.GITHUB_USER}:{self.forge.token}@')
+            return self.clone_url.replace(
+                "://", f"://{settings.GITHUB_USER}:{self.forge.token}@"
+            )
         return self.clone_url
 
     def git_remote(self):
-        return f'{self.forge.slug}/{self.namespace.slug}'
+        return f"{self.forge.slug}/{self.namespace.slug}"
 
     def git(self):
         git_repo = self.project.git()
@@ -626,16 +731,18 @@ class Repo(TimeStampedModel):
         try:
             return git_repo.remote(remote)
         except ValueError:
-            logger.info(f'Creating remote {remote}')
+            logger.info(f"Creating remote {remote}")
             return git_repo.create_remote(remote, self.get_clone_url())
 
     def fetch(self):
         git_repo = self.git()
-        logger.debug(f'fetching {self.forge} / {self.namespace} / {self.project}')
+        logger.debug(f"fetching {self.forge} / {self.namespace} / {self.project}")
         try:
             git_repo.fetch()
         except git.exc.GitCommandError:
-            logger.warning(f'fetching {self.forge} / {self.namespace} / {self.project} - SECOND TRY')
+            logger.warning(
+                f"fetching {self.forge} / {self.namespace} / {self.project} - SECOND TRY"
+            )
             try:
                 git_repo.fetch()
             except git.exc.GitCommandError:
@@ -643,7 +750,9 @@ class Repo(TimeStampedModel):
         return True
 
     def main_branch(self):
-        return self.project.branch_set.get(name=f'{self.git_remote()}/{self.default_branch}')
+        return self.project.branch_set.get(
+            name=f"{self.git_remote()}/{self.default_branch}"
+        )
 
     def ahead(self):
         main_branch = self.main_branch()
@@ -654,83 +763,119 @@ class Repo(TimeStampedModel):
         return main_branch.behind if main_branch is not None else 0
 
     def get_builds(self):
-        return getattr(self, f'get_builds_{self.forge.get_source_display().lower()}')()
+        return getattr(self, f"get_builds_{self.forge.get_source_display().lower()}")()
 
     def get_builds_gitlab(self):
-        for pipeline in self.api_list('/pipelines', limit=2):
-            pid, ref = pipeline['id'], pipeline['ref']
+        for pipeline in self.api_list("/pipelines", limit=2):
+            pid, ref = pipeline["id"], pipeline["ref"]
             if self.project.tag_set.filter(name=ref).exists():
                 continue
-            data = self.api_data(f'/pipelines/{pid}')
-            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{ref}'
-            branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+            data = self.api_data(f"/pipelines/{pid}")
+            branch_name = f"{self.forge.slug}/{self.namespace.slug}/{ref}"
+            branch, created = Branch.objects.get_or_create(
+                name=branch_name, project=self.project, repo=self
+            )
             if created:
                 branch.update()
-            ci_build, created = CIBuild.objects.get_or_create(repo=self,
-                                                              build_id=pid,
-                                                              defaults={
-                                                                  'passed': GITLAB_STATUS[pipeline['status']],
-                                                                  'started': parse_datetime(data['created_at']),
-                                                                  'branch': branch,
-                                                              })
-            if not created and ci_build.passed != GITLAB_STATUS[pipeline['status']]:
-                ci_build.passed = GITLAB_STATUS[pipeline['status']]
+            ci_build, created = CIBuild.objects.get_or_create(
+                repo=self,
+                build_id=pid,
+                defaults={
+                    "passed": GITLAB_STATUS[pipeline["status"]],
+                    "started": parse_datetime(data["created_at"]),
+                    "branch": branch,
+                },
+            )
+            if not created and ci_build.passed != GITLAB_STATUS[pipeline["status"]]:
+                ci_build.passed = GITLAB_STATUS[pipeline["status"]]
                 ci_build.save()
 
     def get_jobs_gitlab(self):
-        for data in self.api_list('/jobs', limit=4):
+        for data in self.api_list("/jobs", limit=4):
             branch_name = f'{self.forge.slug}/{self.namespace.slug}/{data["ref"]}'
-            branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+            branch, created = Branch.objects.get_or_create(
+                name=branch_name, project=self.project, repo=self
+            )
             if created:
                 branch.update()
-            ci_job, created = CIJob.objects.get_or_create(repo=self,
-                                                          job_id=data['id'],
-                                                          defaults={
-                                                              'passed': GITLAB_STATUS[data['status']],
-                                                              'started': parse_datetime(data['created_at']),
-                                                              'branch': branch,
-                                                          })
-            if not created and ci_job.passed != GITLAB_STATUS[data['status']]:
-                ci_job.passed = GITLAB_STATUS[data['status']]
+            ci_job, created = CIJob.objects.get_or_create(
+                repo=self,
+                job_id=data["id"],
+                defaults={
+                    "passed": GITLAB_STATUS[data["status"]],
+                    "started": parse_datetime(data["created_at"]),
+                    "branch": branch,
+                },
+            )
+            if not created and ci_job.passed != GITLAB_STATUS[data["status"]]:
+                ci_job.passed = GITLAB_STATUS[data["status"]]
                 ci_job.save()
             if self == self.project.main_repo():
-                if data['name'] == 'format':
-                    if self.project.allow_format_failure and GITLAB_STATUS[data['status']]:
+                if data["name"] == "format":
+                    if (
+                        self.project.allow_format_failure
+                        and GITLAB_STATUS[data["status"]]
+                    ):
                         self.project.allow_format_failure = False
                         self.project.save()
-                        print(' format success', data['web_url'])
-                elif data['name'].startswith('robotpkg-'):
-                    py3 = '-py3' in data['name']
-                    debug = '-debug' in data['name']
-                    target = next(target for target in Target.objects.all() if target.name in data['name']).name
-                    robotpkg = data['name'][9:-(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))]  # shame.
-                    images = Image.objects.filter(robotpkg__name=robotpkg, target__name=target)
+                        print(" format success", data["web_url"])
+                elif data["name"].startswith("robotpkg-"):
+                    py3 = "-py3" in data["name"]
+                    debug = "-debug" in data["name"]
+                    target = next(
+                        target
+                        for target in Target.objects.all()
+                        if target.name in data["name"]
+                    ).name
+                    robotpkg = data["name"][
+                        9 : -(3 + len(target) + (5 if debug else 7) + (3 if py3 else 0))
+                    ]  # shame.
+                    images = Image.objects.filter(
+                        robotpkg__name=robotpkg, target__name=target
+                    )
                     if not images.exists():
                         continue
                     image = images.first()
-                    if image.allow_failure and GITLAB_STATUS[data['status']]:
+                    if image.allow_failure and GITLAB_STATUS[data["status"]]:
                         image.allow_failure = False
                         image.save()
-                        print('  success', data['web_url'])
+                        print("  success", data["web_url"])
 
     def get_builds_github(self):
         if self.travis_id is not None:
             travis = Forge.objects.get(source=SOURCES.travis)
-            for build in travis.api_list(f'/repo/{self.travis_id}/builds', name='builds'):
-                if build['branch'] is None or self.project.tag_set.filter(name=build['branch']['name']).exists():
+            for build in travis.api_list(
+                f"/repo/{self.travis_id}/builds", name="builds"
+            ):
+                if (
+                    build["branch"] is None
+                    or self.project.tag_set.filter(
+                        name=build["branch"]["name"]
+                    ).exists()
+                ):
                     continue
-                branch_name = f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
-                branch, created = Branch.objects.get_or_create(name=branch_name, project=self.project, repo=self)
+                branch_name = (
+                    f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
+                )
+                branch, created = Branch.objects.get_or_create(
+                    name=branch_name, project=self.project, repo=self
+                )
                 if created:
                     branch.update()
-                started = build['started_at'] if build['started_at'] is not None else build['finished_at']
-                CIBuild.objects.get_or_create(repo=self,
-                                              build_id=build['id'],
-                                              defaults={
-                                                  'passed': TRAVIS_STATE[build['state']],
-                                                  'started': parse_datetime(started),
-                                                  'branch': branch,
-                                              })
+                started = (
+                    build["started_at"]
+                    if build["started_at"] is not None
+                    else build["finished_at"]
+                )
+                CIBuild.objects.get_or_create(
+                    repo=self,
+                    build_id=build["id"],
+                    defaults={
+                        "passed": TRAVIS_STATE[build["state"]],
+                        "started": parse_datetime(started),
+                        "branch": branch,
+                    },
+                )
 
     def update(self, pull=True):
         ok = True
@@ -743,7 +888,9 @@ class Repo(TimeStampedModel):
             self.api_update()
             self.get_builds()
         else:
-            logger.error(f'fetching {self.forge} / {self.namespace} / {self.project} - NOT FOUND - DELETING')
+            logger.error(
+                f"fetching {self.forge} / {self.namespace} / {self.project} - NOT FOUND - DELETING"
+            )
             logger.error(str(self.delete()))
 
 
@@ -756,13 +903,21 @@ class IssuePr(models.Model):
     is_issue = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('repo', 'number', 'is_issue')
+        unique_together = ("repo", "number", "is_issue")
 
     def update(self, skip_label):
         gh = self.repo.project.github()
-        issue_pr = gh.get_issue(number=self.number) if self.is_issue else gh.get_pull(number=self.number)
-        self.days_since_updated = (timezone.now() - timezone.make_aware(issue_pr.updated_at)).days
-        if issue_pr.state == 'closed' or skip_label in [label.name for label in issue_pr.get_labels()]:
+        issue_pr = (
+            gh.get_issue(number=self.number)
+            if self.is_issue
+            else gh.get_pull(number=self.number)
+        )
+        self.days_since_updated = (
+            timezone.now() - timezone.make_aware(issue_pr.updated_at)
+        ).days
+        if issue_pr.state == "closed" or skip_label in [
+            label.name for label in issue_pr.get_labels()
+        ]:
             self.delete()
         else:
             self.save()
@@ -772,7 +927,7 @@ class Commit(NamedModel, TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('project', 'name')
+        unique_together = ("project", "name")
 
 
 class Branch(TimeStampedModel):
@@ -789,22 +944,24 @@ class Branch(TimeStampedModel):
         return self.name
 
     class Meta:
-        unique_together = ('project', 'name', 'repo')
+        unique_together = ("project", "name", "repo")
 
-    def get_ahead(self, branch='master'):
-        commits = self.project.git().git.rev_list(f'{branch}..{self}')
-        return len(commits.split('\n')) if commits else 0
+    def get_ahead(self, branch="master"):
+        commits = self.project.git().git.rev_list(f"{branch}..{self}")
+        return len(commits.split("\n")) if commits else 0
 
-    def get_behind(self, branch='master'):
-        commits = self.project.git().git.rev_list(f'{self}..{branch}')
-        return len(commits.split('\n')) if commits else 0
+    def get_behind(self, branch="master"):
+        commits = self.project.git().git.rev_list(f"{self}..{branch}")
+        return len(commits.split("\n")) if commits else 0
 
     def git(self):
         git_repo = self.project.git()
         if self.name not in git_repo.branches:
             remote = self.repo.git()
-            _, _, branch = self.name.split('/', maxsplit=2)
-            git_repo.create_head(self.name, remote.refs[branch]).set_tracking_branch(remote.refs[branch])
+            _, _, branch = self.name.split("/", maxsplit=2)
+            git_repo.create_head(self.name, remote.refs[branch]).set_tracking_branch(
+                remote.refs[branch]
+            )
         return git_repo.branches[self.name]
 
     def update(self, pull=True):
@@ -829,8 +986,8 @@ class Branch(TimeStampedModel):
     def ci(self):
         build = self.cibuild_set.last()
         if build is None:
-            return ''
-        status = {True: '✓', False: '✗', None: '?'}[build.passed]
+            return ""
+        status = {True: "✓", False: "✗", None: "?"}[build.passed]
         return mark_safe(f'<a href="{build.url()}">{status}</a>')
 
     def forge(self):
@@ -874,15 +1031,17 @@ class Robotpkg(NamedModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     category = models.CharField(max_length=50)
 
-    pkgbase = models.CharField(max_length=50, default='')
-    pkgversion = models.CharField(max_length=50, default='')
-    master_sites = models.CharField(max_length=200, default='')
-    master_repository = models.CharField(max_length=200, default='')
-    maintainer = models.CharField(max_length=200, default='')
+    pkgbase = models.CharField(max_length=50, default="")
+    pkgversion = models.CharField(max_length=50, default="")
+    master_sites = models.CharField(max_length=200, default="")
+    master_repository = models.CharField(max_length=200, default="")
+    maintainer = models.CharField(max_length=200, default="")
     comment = models.TextField()
     homepage = models.URLField(max_length=200, blank=True, null=True)
 
-    license = models.ForeignKey(License, on_delete=models.SET_NULL, blank=True, null=True)
+    license = models.ForeignKey(
+        License, on_delete=models.SET_NULL, blank=True, null=True
+    )
     public = models.BooleanField(default=True)
     description = models.TextField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
@@ -892,12 +1051,12 @@ class Robotpkg(NamedModel):
     extended_target = models.ManyToManyField(Target, blank=True)
 
     def main_page(self):
-        if self.category != 'wip':
-            return f'{RPKG_URL}/robotpkg/{self.category}/{self.name}'
+        if self.category != "wip":
+            return f"{RPKG_URL}/robotpkg/{self.category}/{self.name}"
 
     def build_page(self):
-        path = '-wip/wip' if self.category == 'wip' else f'/{self.category}'
-        return f'{RPKG_URL}/rbulk/robotpkg{path}/{self.name}'
+        path = "-wip/wip" if self.category == "wip" else f"/{self.category}"
+        return f"{RPKG_URL}/rbulk/robotpkg{path}/{self.name}"
 
     def update_images(self):
         for target in list(Target.objects.active()) + list(self.extended_target.all()):
@@ -905,40 +1064,56 @@ class Robotpkg(NamedModel):
 
     def update(self, pull=True):
         path = settings.RAINBOARD_RPKG
-        repo = git.Repo(str(path / 'wip' / '.git' if self.category == 'wip' else path / '.git'))
+        repo = git.Repo(
+            str(path / "wip" / ".git" if self.category == "wip" else path / ".git")
+        )
         if pull:
             repo.remotes.origin.pull()
 
         cwd = path / self.category / self.name
         if not cwd.is_dir():
-            logger.warning(f'deleted {self}: {self.delete()}')
+            logger.warning(f"deleted {self}: {self.delete()}")
             return
         for field in RPKG_FIELDS:
-            cmd = ['make', 'show-var', f'VARNAME={field}']
+            cmd = ["make", "show-var", f"VARNAME={field}"]
             self.__dict__[field.lower()] = check_output(cmd, cwd=cwd).decode().strip()
 
-        repo_path = self.name if self.category == 'wip' else f'{self.category}/{self.name}'
+        repo_path = (
+            self.name if self.category == "wip" else f"{self.category}/{self.name}"
+        )
         last_commit = next(repo.iter_commits(paths=repo_path, max_count=1))
         self.updated = last_commit.authored_datetime
 
-        license = check_output(['make', 'show-var', 'VARNAME=LICENSE'], cwd=cwd).decode().strip()
+        license = (
+            check_output(["make", "show-var", "VARNAME=LICENSE"], cwd=cwd)
+            .decode()
+            .strip()
+        )
         if license in RPKG_LICENSES:
             self.license = License.objects.get(spdx_id=RPKG_LICENSES[license])
         else:
-            logger.warning(f'Unknown robotpkg license: {license}')
-        self.public = not bool(check_output(['make', 'show-var', 'VARNAME=RESTRICTED'], cwd=cwd).decode().strip())
-        with (cwd / 'DESCR').open() as f:
+            logger.warning(f"Unknown robotpkg license: {license}")
+        self.public = not bool(
+            check_output(["make", "show-var", "VARNAME=RESTRICTED"], cwd=cwd)
+            .decode()
+            .strip()
+        )
+        with (cwd / "DESCR").open() as f:
             self.description = f.read().strip()
 
         self.update_images()
         self.save()
 
     def valid_images(self):
-        return self.image_set.active().filter(created__isnull=False).order_by('target__name')
+        return (
+            self.image_set.active()
+            .filter(created__isnull=False)
+            .order_by("target__name")
+        )
 
     def without_py(self):
-        if 'py-' in self.name and self.same_py:
-            return Robotpkg.objects.filter(name=self.name.replace('py-', '')).first()
+        if "py-" in self.name and self.same_py:
+            return Robotpkg.objects.filter(name=self.name.replace("py-", "")).first()
 
 
 # class RobotpkgBuild(TimeStampedModel):
@@ -949,7 +1124,9 @@ class Robotpkg(NamedModel):
 
 class ImageQuerySet(models.QuerySet):
     def active(self):
-        return self.filter(Q(target__active=True) | Q(target=F('robotpkg__extended_target')))
+        return self.filter(
+            Q(target__active=True) | Q(target=F("robotpkg__extended_target"))
+        )
 
 
 class Image(models.Model):
@@ -962,10 +1139,10 @@ class Image(models.Model):
     objects = ImageQuerySet.as_manager()
 
     class Meta:
-        unique_together = ('robotpkg', 'target')
+        unique_together = ("robotpkg", "target")
 
     def __str__(self):
-        return f'{self.robotpkg}:{self.target}'
+        return f"{self.robotpkg}:{self.target}"
 
     @property
     def public(self):
@@ -973,57 +1150,69 @@ class Image(models.Model):
 
     def get_build_args(self):
         ret = {
-            'TARGET': self.target,
-            'ROBOTPKG': self.robotpkg,
-            'CATEGORY': self.robotpkg.category,
-            'REGISTRY': settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY,
+            "TARGET": self.target,
+            "ROBOTPKG": self.robotpkg,
+            "CATEGORY": self.robotpkg.category,
+            "REGISTRY": settings.PUBLIC_REGISTRY
+            if self.public
+            else settings.PRIVATE_REGISTRY,
         }
         if not self.robotpkg.project.public:
-            ret['IMAGE'] = 'robotpkg-jrl'
+            ret["IMAGE"] = "robotpkg-jrl"
         return ret
 
     def get_image_name(self):
         project = self.robotpkg.project
-        return f'{project.registry()}/{project.main_namespace.slug}/{project.slug}/{self}'.lower()
+        return f"{project.registry()}/{project.main_namespace.slug}/{project.slug}/{self}".lower()
 
     def get_image_url(self):
         project = self.robotpkg.project
-        manifest = str(self).replace(':', '/manifests/')
-        return f'https://{project.registry()}/v2/{project.main_namespace.slug}/{project.slug}/{manifest}'
+        manifest = str(self).replace(":", "/manifests/")
+        return f"https://{project.registry()}/v2/{project.main_namespace.slug}/{project.slug}/{manifest}"
 
     def get_job_name(self):
-        return f'robotpkg-{self}'.replace(':', '-')
+        return f"robotpkg-{self}".replace(":", "-")
 
     def build(self):
         args = self.get_build_args()
-        build_args = sum((['--build-arg', f'{key}={value}'] for key, value in args.items()), list())
-        return ['docker', 'build', '-t', self.get_image_name()] + build_args + ['.']
+        build_args = sum(
+            (["--build-arg", f"{key}={value}"] for key, value in args.items()), list()
+        )
+        return ["docker", "build", "-t", self.get_image_name()] + build_args + ["."]
 
     def pull(self):
-        return ['docker', 'pull', self.get_image_name()]
+        return ["docker", "pull", self.get_image_name()]
 
     def push(self):
-        return ['docker', 'push', self.get_image_name()]
+        return ["docker", "push", self.get_image_name()]
 
     def update(self, pull=False):
         headers = {}
         if not self.robotpkg.project.public:
-            image_name = self.get_image_name().split('/', maxsplit=1)[1].split(':')[0]
-            token = httpx.get(f'{self.robotpkg.project.main_forge.url}/jwt/auth',
-                              params={
-                                  'client_id': 'docker',
-                                  'offline_token': True,
-                                  'service': 'container_registry',
-                                  'scope': f'repository:{image_name}:push,pull'
-                              },
-                              auth=('gsaurel', self.robotpkg.project.main_forge.token)).json()['token']
-            headers['Authorization'] = f'Bearer {token}'
+            image_name = self.get_image_name().split("/", maxsplit=1)[1].split(":")[0]
+            token = httpx.get(
+                f"{self.robotpkg.project.main_forge.url}/jwt/auth",
+                params={
+                    "client_id": "docker",
+                    "offline_token": True,
+                    "service": "container_registry",
+                    "scope": f"repository:{image_name}:push,pull",
+                },
+                auth=("gsaurel", self.robotpkg.project.main_forge.token),
+            ).json()["token"]
+            headers["Authorization"] = f"Bearer {token}"
         r = httpx.get(self.get_image_url(), headers=headers)
         if r.status_code == 200:
-            self.image = r.json()['fsLayers'][0]['blobSum'].split(':')[1][:12]
-            self.created = parse_datetime(json.loads(r.json()['history'][0]['v1Compatibility'])['created'])
+            self.image = r.json()["fsLayers"][0]["blobSum"].split(":")[1][:12]
+            self.created = parse_datetime(
+                json.loads(r.json()["history"][0]["v1Compatibility"])["created"]
+            )
             self.save()
-        if not self.allow_failure and self.created and (timezone.now() - self.created).days > 7:
+        if (
+            not self.allow_failure
+            and self.created
+            and (timezone.now() - self.created).days > 7
+        ):
             self.allow_failure = True
             self.save()
 
@@ -1036,13 +1225,13 @@ class CIBuild(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('-started', )
+        ordering = ("-started",)
 
     def url(self):
         if self.repo.forge.source == SOURCES.github:
-            return f'https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}/builds/{self.build_id}'
+            return f"https://travis-ci.org/{self.repo.namespace.slug}/{self.repo.slug}/builds/{self.build_id}"
         if self.repo.forge.source == SOURCES.gitlab:
-            return f'{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}/pipelines/{self.build_id}'
+            return f"{self.repo.forge.url}/{self.repo.namespace.slug}/{self.repo.slug}/pipelines/{self.build_id}"
 
 
 class CIJob(models.Model):
@@ -1053,25 +1242,27 @@ class CIJob(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('-started', )
+        ordering = ("-started",)
 
 
 class Tag(models.Model):
     name = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='name', slugify=slugify_with_dots)
+    slug = AutoSlugField(populate_from="name", slugify=slugify_with_dots)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('name', )
-        unique_together = ('name', 'project')
+        ordering = ("name",)
+        unique_together = ("name", "project")
 
     def __str__(self):
-        return f'{self.project} {self.name}'
+        return f"{self.project} {self.name}"
 
 
 class GepettistQuerySet(models.QuerySet):
     def gepettist(self):
-        return self.filter(projects__main_namespace__from_gepetto=True, projects__archived=False)
+        return self.filter(
+            projects__main_namespace__from_gepetto=True, projects__archived=False
+        )
 
 
 class Contributor(models.Model):
@@ -1083,21 +1274,29 @@ class Contributor(models.Model):
     def __str__(self):
         name = self.contributorname_set.first()
         mail = self.contributormail_set.first()
-        return f'{name} <{mail}>'
+        return f"{name} <{mail}>"
 
     def names(self):
-        return ', '.join(str(name) for name in self.contributorname_set.all())
+        return ", ".join(str(name) for name in self.contributorname_set.all())
 
     def mails(self):
-        return ', '.join(str(mail) for mail in self.contributormail_set.filter(invalid=False))
+        return ", ".join(
+            str(mail) for mail in self.contributormail_set.filter(invalid=False)
+        )
 
     def contributed(self):
-        return ', '.join(
-            str(project) for project in self.projects.filter(main_namespace__from_gepetto=True, archived=False))
+        return ", ".join(
+            str(project)
+            for project in self.projects.filter(
+                main_namespace__from_gepetto=True, archived=False
+            )
+        )
 
 
 class ContributorName(models.Model):
-    contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE, blank=True, null=True)
+    contributor = models.ForeignKey(
+        Contributor, on_delete=models.CASCADE, blank=True, null=True
+    )
     name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
@@ -1105,7 +1304,9 @@ class ContributorName(models.Model):
 
 
 class ContributorMail(models.Model):
-    contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE, blank=True, null=True)
+    contributor = models.ForeignKey(
+        Contributor, on_delete=models.CASCADE, blank=True, null=True
+    )
     mail = models.EmailField(unique=True)
     invalid = models.BooleanField(default=False)
 
@@ -1114,68 +1315,72 @@ class ContributorMail(models.Model):
 
 
 class Dependency(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='dependencies')
-    library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='rdeps')
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="dependencies"
+    )
+    library = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="rdeps")
     robotpkg = models.BooleanField(default=False)
     cmake = models.BooleanField(default=False)
     ros = models.BooleanField(default=False)
     mandatory = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name_plural = 'dependencies'
-        unique_together = ('project', 'library')
+        verbose_name_plural = "dependencies"
+        unique_together = ("project", "library")
 
     def __str__(self):
-        return f'{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}'
+        return f"{self.project} depends on {self.library}: {self.robotpkg:d} {self.cmake:d}"
 
 
 def get_default_forge(project):
-    for forge in Forge.objects.order_by('source'):
+    for forge in Forge.objects.order_by("source"):
         if project.repo_set.filter(forge=forge).exists():
-            logger.info(f'default forge for {project} set to {forge}')
+            logger.info(f"default forge for {project} set to {forge}")
             project.main_forge = forge
             project.save()
             return forge
     else:
-        logger.error(f'NO DEFAULT FORGE for {project}')
+        logger.error(f"NO DEFAULT FORGE for {project}")
 
 
 def update_gitlab(forge, data):
-    if data['archived']:
+    if data["archived"]:
         return
-    if 'default_branch' not in data or data['default_branch'] is None:
+    if "default_branch" not in data or data["default_branch"] is None:
         return
     logger.info(f'update {data["name"]} from {forge}')
-    public = data['visibility'] not in ['private', 'internal']
-    project, created = Project.objects.get_or_create(name=valid_name(data['name']),
-                                                     defaults={
-                                                         'main_forge': forge,
-                                                         'public': public
-                                                     })
-    namespace, _ = Namespace.objects.get_or_create(slug__iexact=data['namespace']['path'],
-                                                   defaults={'name': data['namespace']['name']})
-    repo, _ = Repo.objects.get_or_create(forge=forge,
-                                         namespace=namespace,
-                                         project=project,
-                                         defaults={
-                                             'repo_id': data['id'],
-                                             'name': data['name'],
-                                             'url': data['web_url'],
-                                             'default_branch': data['default_branch'],
-                                             'clone_url': data['http_url_to_repo']
-                                         })
-    repo.name = data['name']
-    repo.slug = data['path']
-    repo.url = data['web_url']
-    repo.repo_id = data['id']
-    repo.clone_url = data['http_url_to_repo']
-    if 'open_issues_count' in data:
-        repo.open_issues = data['open_issues_count']
-    repo.default_branch = data['default_branch']
-    repo.description = data['description']
+    public = data["visibility"] not in ["private", "internal"]
+    project, created = Project.objects.get_or_create(
+        name=valid_name(data["name"]), defaults={"main_forge": forge, "public": public}
+    )
+    namespace, _ = Namespace.objects.get_or_create(
+        slug__iexact=data["namespace"]["path"],
+        defaults={"name": data["namespace"]["name"]},
+    )
+    repo, _ = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={
+            "repo_id": data["id"],
+            "name": data["name"],
+            "url": data["web_url"],
+            "default_branch": data["default_branch"],
+            "clone_url": data["http_url_to_repo"],
+        },
+    )
+    repo.name = data["name"]
+    repo.slug = data["path"]
+    repo.url = data["web_url"]
+    repo.repo_id = data["id"]
+    repo.clone_url = data["http_url_to_repo"]
+    if "open_issues_count" in data:
+        repo.open_issues = data["open_issues_count"]
+    repo.default_branch = data["default_branch"]
+    repo.description = data["description"]
     # TODO license (https://gitlab.com/gitlab-org/gitlab-ce/issues/28267), open_pr
-    if 'forked_from_project' in data and data['forked_from_project'] is not None:
-        repo.forked_from = data['forked_from_project']['id']
+    if "forked_from_project" in data and data["forked_from_project"] is not None:
+        repo.forked_from = data["forked_from_project"]["id"]
     elif created or project.main_namespace is None:
         project.main_namespace = namespace
         project.save()
@@ -1183,73 +1388,79 @@ def update_gitlab(forge, data):
 
 
 def update_github(forge, namespace, data):
-    if data['archived']:
+    if data["archived"]:
         return
     logger.info(f'update {data["name"]} from {forge}')
-    project, _ = Project.objects.get_or_create(name=valid_name(data['name']),
-                                               defaults={
-                                                   'homepage': data['homepage'],
-                                                   'main_namespace': namespace,
-                                                   'main_forge': forge
-                                               })
-    repo, _ = Repo.objects.get_or_create(forge=forge,
-                                         namespace=namespace,
-                                         project=project,
-                                         defaults={
-                                             'repo_id': data['id'],
-                                             'name': data['name'],
-                                             'clone_url': data['clone_url']
-                                         })
-    repo.homepage = data['homepage']
-    repo.url = data['html_url']
-    repo.repo_id = data['id']
-    repo.default_branch = data['default_branch']
-    repo.open_issues = data['open_issues']
-    repo.description = data['description']
+    project, _ = Project.objects.get_or_create(
+        name=valid_name(data["name"]),
+        defaults={
+            "homepage": data["homepage"],
+            "main_namespace": namespace,
+            "main_forge": forge,
+        },
+    )
+    repo, _ = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={
+            "repo_id": data["id"],
+            "name": data["name"],
+            "clone_url": data["clone_url"],
+        },
+    )
+    repo.homepage = data["homepage"]
+    repo.url = data["html_url"]
+    repo.repo_id = data["id"]
+    repo.default_branch = data["default_branch"]
+    repo.open_issues = data["open_issues"]
+    repo.description = data["description"]
 
     repo_data = repo.api_data()
-    if repo_data and 'license' in repo_data and repo_data['license']:
-        if 'spdx_id' in repo_data['license'] and repo_data['license']['spdx_id']:
-            if repo_data['license']['spdx_id'] != 'NOASSERTION':
+    if repo_data and "license" in repo_data and repo_data["license"]:
+        if "spdx_id" in repo_data["license"] and repo_data["license"]["spdx_id"]:
+            if repo_data["license"]["spdx_id"] != "NOASSERTION":
                 try:
-                    license = License.objects.get(spdx_id=repo_data['license']['spdx_id'])
+                    license = License.objects.get(
+                        spdx_id=repo_data["license"]["spdx_id"]
+                    )
                 except License.DoesNotExist:
-                    raise ValueError('No License with spdx_id=' + repo_data['license']['spdx_id'])
+                    raise ValueError(
+                        "No License with spdx_id=" + repo_data["license"]["spdx_id"]
+                    )
                 repo.license = license
                 if not project.license:
                     project.license = license
-        if 'source' in repo_data:
-            repo.forked_from = repo_data['source']['id']
+        if "source" in repo_data:
+            repo.forked_from = repo_data["source"]["id"]
     if repo_data:
-        repo.open_issues = repo_data['open_issues_count']
-    repo.clone_url = data['clone_url']
-    repo.open_pr = len(list(repo.api_list('/pulls')))
+        repo.open_issues = repo_data["open_issues_count"]
+    repo.clone_url = data["clone_url"]
+    repo.open_pr = len(list(repo.api_list("/pulls")))
     repo.save()
     project.save()
 
 
 def update_travis(namespace, data):
-    project = Project.objects.filter(name=valid_name(data['name'])).first()
+    project = Project.objects.filter(name=valid_name(data["name"])).first()
     if project is None:
         return
     forge = Forge.objects.get(source=SOURCES.github)
-    repo, created = Repo.objects.get_or_create(forge=forge,
-                                               namespace=namespace,
-                                               project=project,
-                                               defaults={
-                                                   'name': data['name'],
-                                                   'repo_id': 0,
-                                                   'travis_id': data['id']
-                                               })
+    repo, created = Repo.objects.get_or_create(
+        forge=forge,
+        namespace=namespace,
+        project=project,
+        defaults={"name": data["name"], "repo_id": 0, "travis_id": data["id"]},
+    )
     if created:
         repo.api_update()
     else:
-        repo.travis_id = data['id']
+        repo.travis_id = data["id"]
         repo.save()
 
 
 def merge_contributors(*contributors):
-    logger.warning(f'merging {contributors}')
+    logger.warning(f"merging {contributors}")
     ids = [contributor.id for contributor in contributors]
     main = min(ids)
     for model in (ContributorName, ContributorMail):
@@ -1262,7 +1473,9 @@ def merge_contributors(*contributors):
 
 def get_contributor(name, mail):
     cname, name_created = ContributorName.objects.get_or_create(name=name)
-    cmail, mail_created = ContributorMail.objects.get_or_create(mail=mail, defaults={'invalid': invalid_mail(mail)})
+    cmail, mail_created = ContributorMail.objects.get_or_create(
+        mail=mail, defaults={"invalid": invalid_mail(mail)}
+    )
     if name_created or mail_created:
         if name_created and mail_created:
             contributor = Contributor.objects.create()
@@ -1294,12 +1507,14 @@ def get_contributor(name, mail):
 
 
 def unvalid_projects():
-    return Project.objects.filter(Q(name__contains='_') | Q(name__contains='-') | Q(slug__endswith='-2'))
+    return Project.objects.filter(
+        Q(name__contains="_") | Q(name__contains="-") | Q(slug__endswith="-2")
+    )
 
 
 def fix_unvalid_projects():
     for prj in unvalid_projects():
-        if prj.slug.endswith('-2'):
+        if prj.slug.endswith("-2"):
             prj.slug = prj.slug[:-2]
         prj.name = valid_name(prj.name)
         prj.save()
@@ -1307,14 +1522,14 @@ def fix_unvalid_projects():
 
 def to_release_in_robotpkg():
     for robotpkg in Robotpkg.objects.all():
-        if robotpkg.pkgversion.split('r')[0] != robotpkg.project.version:
-            if 'alpha' not in str(robotpkg.project.version):
+        if robotpkg.pkgversion.split("r")[0] != robotpkg.project.version:
+            if "alpha" not in str(robotpkg.project.version):
                 print(robotpkg, robotpkg.pkgversion, robotpkg.project.version)
 
 
 def ordered_projects():
-    """ helper for gepetto/buildfarm/generate_all.py """
-    fields = 'category', 'name', 'project__main_namespace__slug'
+    """helper for gepetto/buildfarm/generate_all.py"""
+    fields = "category", "name", "project__main_namespace__slug"
 
     projects = Project.objects.exclude(BAD_ONES)
     rpkgs = list(Robotpkg.objects.filter(project__in=projects).values_list(*fields))
@@ -1323,10 +1538,14 @@ def ordered_projects():
 
     def get_deps(cat, pkg, ns, rpkgs):
         """Get the robotpkg dependencies for a given robotpkg."""
-        with (settings.RAINBOARD_RPKG / cat / pkg / 'Makefile').open() as file_handle:
+        with (settings.RAINBOARD_RPKG / cat / pkg / "Makefile").open() as file_handle:
             cont = file_handle.read()
-        deps = [d_pkg for d_cat, d_pkg, _ in rpkgs if f'\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n' in cont]
-        if pkg.startswith('py-') and (cat, pkg[3:], ns) in rpkgs:
+        deps = [
+            d_pkg
+            for d_cat, d_pkg, _ in rpkgs
+            if f"\ninclude ../../{d_cat}/{d_pkg}/depend.mk\n" in cont
+        ]
+        if pkg.startswith("py-") and (cat, pkg[3:], ns) in rpkgs:
             deps.append(pkg[3:])
         deps_cache[pkg] = sorted(set(deps))
         return deps_cache[pkg]
@@ -1348,6 +1567,6 @@ def ordered_projects():
     def project_sort_key(prj):
         """Generate a key to sort projects: by number of recursive dependencies, then python bindings, then name."""
         cat, pkg, ns, deps = prj
-        return (len(get_rdeps(deps)), 1 if pkg.startswith('py-') else 0, pkg)
+        return (len(get_rdeps(deps)), 1 if pkg.startswith("py-") else 0, pkg)
 
     return sorted(rpkgs, key=project_sort_key)

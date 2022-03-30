@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0042_gepgitlab_to_gitlab'),
+        ("rainboard", "0042_gepgitlab_to_gitlab"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='from_gepetto',
+            model_name="project",
+            name="from_gepetto",
             field=models.BooleanField(default=False),
         ),
     ]

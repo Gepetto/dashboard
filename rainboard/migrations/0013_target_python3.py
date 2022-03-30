@@ -3,29 +3,28 @@
 from django.db import migrations, models
 
 DIST_PYTHON3 = {
-    '3.4': ['14.04', 'dubnium', 'jessie'],
-    '3.5': ['16.04'],
-    '3.6': ['17.10', '18.04'],
+    "3.4": ["14.04", "dubnium", "jessie"],
+    "3.5": ["16.04"],
+    "3.6": ["17.10", "18.04"],
 }
 
 
 def add_python3(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
+    Target = apps.get_model("rainboard", "Target")
     for python3, names in DIST_PYTHON3.items():
         Target.objects.filter(name__in=names).update(python3=python3)
-
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0012_target'),
+        ("rainboard", "0012_target"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='target',
-            name='python3',
+            model_name="target",
+            name="python3",
             field=models.CharField(blank=True, max_length=3, null=True),
         ),
         migrations.RunPython(add_python3),

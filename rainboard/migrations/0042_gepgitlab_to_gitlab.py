@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 def gepgitlab_to_gitlab(apps, schema_editor):
-    Forge = apps.get_model('rainboard', 'Forge')
-    Forge.objects.filter(url='https://gepgitlab.laas.fr').update(url='https://gitlab.laas.fr')
+    Forge = apps.get_model("rainboard", "Forge")
+    Forge.objects.filter(url="https://gepgitlab.laas.fr").update(
+        url="https://gitlab.laas.fr"
+    )
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0041_target_main'),
+        ("rainboard", "0041_target_main"),
     ]
 
     operations = [migrations.RunPython(gepgitlab_to_gitlab)]

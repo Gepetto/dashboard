@@ -18,248 +18,572 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Article',
+            name="Article",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('year', models.PositiveSmallIntegerField()),
-                ('url', models.URLField()),
-                ('pdf', models.URLField()),
-                ('authors', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                ("year", models.PositiveSmallIntegerField()),
+                ("url", models.URLField()),
+                ("pdf", models.URLField()),
+                ("authors", models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Branch',
+            name="Branch",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('name', models.CharField(max_length=200)),
-                ('ahead', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('behind', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('updated', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("name", models.CharField(max_length=200)),
+                ("ahead", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("behind", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("updated", models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='CIBuild',
+            name="CIBuild",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('passed', models.NullBooleanField()),
-                ('build_id', models.PositiveIntegerField()),
-                ('started', models.DateTimeField()),
-                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Branch')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("passed", models.NullBooleanField()),
+                ("build_id", models.PositiveIntegerField()),
+                ("started", models.DateTimeField()),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Branch",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('started',),
+                "ordering": ("started",),
             },
         ),
         migrations.CreateModel(
-            name='Commit',
+            name="Commit",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Forge',
+            name="Forge",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('source', models.PositiveSmallIntegerField(choices=[(1, 'github'), (2, 'gitlab'), (3, 'redmine'), (4, 'robotpkg'), (5, 'travis')])),
-                ('url', models.URLField()),
-                ('token', models.CharField(blank=True, max_length=50, null=True)),
-                ('verify', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                (
+                    "source",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "github"),
+                            (2, "gitlab"),
+                            (3, "redmine"),
+                            (4, "robotpkg"),
+                            (5, "travis"),
+                        ]
+                    ),
+                ),
+                ("url", models.URLField()),
+                ("token", models.CharField(blank=True, max_length=50, null=True)),
+                ("verify", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(ndh.models.Links, models.Model),
         ),
         migrations.CreateModel(
-            name='License',
+            name="License",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('spdx_id', models.CharField(max_length=50, unique=True)),
-                ('url', models.URLField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("spdx_id", models.CharField(max_length=50, unique=True)),
+                ("url", models.URLField()),
             ],
         ),
         migrations.CreateModel(
-            name='Namespace',
+            name="Namespace",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('group', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                ("group", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('public', models.BooleanField(default=True)),
-                ('homepage', models.URLField(blank=True, null=True)),
-                ('description', models.TextField()),
-                ('version', models.CharField(blank=True, max_length=20, null=True)),
-                ('updated', models.DateTimeField(blank=True, null=True)),
-                ('articles', models.ManyToManyField(to='rainboard.Article')),
-                ('license', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.License')),
-                ('main_forge', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.Forge')),
-                ('main_namespace', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.Namespace')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                ("public", models.BooleanField(default=True)),
+                ("homepage", models.URLField(blank=True, null=True)),
+                ("description", models.TextField()),
+                ("version", models.CharField(blank=True, max_length=20, null=True)),
+                ("updated", models.DateTimeField(blank=True, null=True)),
+                ("articles", models.ManyToManyField(to="rainboard.Article")),
+                (
+                    "license",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="rainboard.License",
+                    ),
+                ),
+                (
+                    "main_forge",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="rainboard.Forge",
+                    ),
+                ),
+                (
+                    "main_namespace",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="rainboard.Namespace",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(ndh.models.Links, models.Model),
         ),
         migrations.CreateModel(
-            name='Repo',
+            name="Repo",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=200)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', slugify=rainboard.utils.slugify_with_dots)),
-                ('homepage', models.URLField(blank=True, null=True)),
-                ('url', models.URLField(blank=True, null=True)),
-                ('default_branch', models.CharField(max_length=50)),
-                ('open_issues', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('open_pr', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('repo_id', models.PositiveIntegerField()),
-                ('forked_from', models.PositiveIntegerField(blank=True, null=True)),
-                ('clone_url', models.URLField()),
-                ('travis_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('forge', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Forge')),
-                ('license', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.License')),
-                ('namespace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Namespace')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=200)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False,
+                        populate_from="name",
+                        slugify=rainboard.utils.slugify_with_dots,
+                    ),
+                ),
+                ("homepage", models.URLField(blank=True, null=True)),
+                ("url", models.URLField(blank=True, null=True)),
+                ("default_branch", models.CharField(max_length=50)),
+                (
+                    "open_issues",
+                    models.PositiveSmallIntegerField(blank=True, null=True),
+                ),
+                ("open_pr", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("repo_id", models.PositiveIntegerField()),
+                ("forked_from", models.PositiveIntegerField(blank=True, null=True)),
+                ("clone_url", models.URLField()),
+                ("travis_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "forge",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Forge",
+                    ),
+                ),
+                (
+                    "license",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="rainboard.License",
+                    ),
+                ),
+                (
+                    "namespace",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Namespace",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Robotpkg',
+            name="Robotpkg",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('category', models.CharField(max_length=50)),
-                ('pkgbase', models.CharField(default='', max_length=50)),
-                ('pkgversion', models.CharField(default='', max_length=20)),
-                ('master_sites', models.CharField(default='', max_length=200)),
-                ('master_repository', models.CharField(default='', max_length=200)),
-                ('maintainer', models.CharField(default='', max_length=200)),
-                ('comment', models.TextField()),
-                ('homepage', models.URLField(default='')),
-                ('public', models.BooleanField(default=True)),
-                ('description', models.TextField()),
-                ('updated', models.DateTimeField(blank=True, null=True)),
-                ('license', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='rainboard.License')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                ("category", models.CharField(max_length=50)),
+                ("pkgbase", models.CharField(default="", max_length=50)),
+                ("pkgversion", models.CharField(default="", max_length=20)),
+                ("master_sites", models.CharField(default="", max_length=200)),
+                ("master_repository", models.CharField(default="", max_length=200)),
+                ("maintainer", models.CharField(default="", max_length=200)),
+                ("comment", models.TextField()),
+                ("homepage", models.URLField(default="")),
+                ("public", models.BooleanField(default=True)),
+                ("description", models.TextField()),
+                ("updated", models.DateTimeField(blank=True, null=True)),
+                (
+                    "license",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="rainboard.License",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RobotpkgBuild',
+            name="RobotpkgBuild",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('target', models.PositiveSmallIntegerField(choices=[(1, '14.04'), (2, '16.04'), (3, '17.10'), (4, '18.04'), (5, 'dubnium')])),
-                ('passed', models.BooleanField(default=False)),
-                ('robotpkg', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Robotpkg')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                (
+                    "target",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "14.04"),
+                            (2, "16.04"),
+                            (3, "17.10"),
+                            (4, "18.04"),
+                            (5, "dubnium"),
+                        ]
+                    ),
+                ),
+                ("passed", models.BooleanField(default=False)),
+                (
+                    "robotpkg",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Robotpkg",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='SystemDependency',
+            name="SystemDependency",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
-                ('target', models.PositiveSmallIntegerField(choices=[(1, '14.04'), (2, '16.04'), (3, '17.10'), (4, '18.04'), (5, 'dubnium')])),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
+                (
+                    "target",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "14.04"),
+                            (2, "16.04"),
+                            (3, "17.10"),
+                            (4, "18.04"),
+                            (5, "dubnium"),
+                        ]
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', slugify=rainboard.utils.slugify_with_dots)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False,
+                        populate_from="name",
+                        slugify=rainboard.utils.slugify_with_dots,
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('name',),
+                "ordering": ("name",),
             },
         ),
         migrations.CreateModel(
-            name='Test',
+            name="Test",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('target', models.PositiveSmallIntegerField(choices=[(1, '14.04'), (2, '16.04'), (3, '17.10'), (4, '18.04'), (5, 'dubnium')])),
-                ('passed', models.BooleanField(default=False)),
-                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Branch')),
-                ('commit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Commit')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True)),
+                ("updated", models.DateTimeField(auto_now=True)),
+                (
+                    "target",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "14.04"),
+                            (2, "16.04"),
+                            (3, "17.10"),
+                            (4, "18.04"),
+                            (5, "dubnium"),
+                        ]
+                    ),
+                ),
+                ("passed", models.BooleanField(default=False)),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Branch",
+                    ),
+                ),
+                (
+                    "commit",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Commit",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='commit',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project'),
+            model_name="commit",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="rainboard.Project"
+            ),
         ),
         migrations.AddField(
-            model_name='cibuild',
-            name='repo',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Repo'),
+            model_name="cibuild",
+            name="repo",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="rainboard.Repo"
+            ),
         ),
         migrations.AddField(
-            model_name='branch',
-            name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Project'),
+            model_name="branch",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="rainboard.Project"
+            ),
         ),
         migrations.AddField(
-            model_name='branch',
-            name='repo',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='rainboard.Repo'),
+            model_name="branch",
+            name="repo",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="rainboard.Repo",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='tag',
-            unique_together={('name', 'project')},
+            name="tag",
+            unique_together={("name", "project")},
         ),
         migrations.AlterUniqueTogether(
-            name='commit',
-            unique_together={('project', 'name')},
+            name="commit",
+            unique_together={("project", "name")},
         ),
         migrations.AlterUniqueTogether(
-            name='branch',
-            unique_together={('project', 'name')},
+            name="branch",
+            unique_together={("project", "name")},
         ),
     ]

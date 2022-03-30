@@ -7,25 +7,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0020_erbium'),
+        ("rainboard", "0020_erbium"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Dependency',
+            name="Dependency",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('robotpkg', models.BooleanField(default=False)),
-                ('cmake', models.BooleanField(default=False)),
-                ('library', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rdeps', to='rainboard.Project')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='dependencies', to='rainboard.Project')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("robotpkg", models.BooleanField(default=False)),
+                ("cmake", models.BooleanField(default=False)),
+                (
+                    "library",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="rdeps",
+                        to="rainboard.Project",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="dependencies",
+                        to="rainboard.Project",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'dependencies',
+                "verbose_name_plural": "dependencies",
             },
         ),
         migrations.AlterUniqueTogether(
-            name='dependency',
-            unique_together={('project', 'library')},
+            name="dependency",
+            unique_together={("project", "library")},
         ),
     ]

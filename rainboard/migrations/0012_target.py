@@ -5,21 +5,21 @@ from enum import IntEnum
 import autoslug.fields
 from django.db import migrations, models
 
-TARGETS = IntEnum('Targets', '14.04 16.04 17.10 18.04 dubnium jessie')
+TARGETS = IntEnum("Targets", "14.04 16.04 17.10 18.04 dubnium jessie")
 
 
 def add_targets(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.create(name='14.04')
-    Target.objects.create(name='16.04')
-    Target.objects.create(name='17.10')
-    Target.objects.create(name='18.04')
-    Target.objects.create(name='dubnium')
-    Target.objects.create(name='jessie')
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.create(name="14.04")
+    Target.objects.create(name="16.04")
+    Target.objects.create(name="17.10")
+    Target.objects.create(name="18.04")
+    Target.objects.create(name="dubnium")
+    Target.objects.create(name="jessie")
 
 
 def update_targets(apps, schema_editor):
-    Image, Target = [apps.get_model('rainboard', model) for model in [Image, Target]]
+    Image, Target = [apps.get_model("rainboard", model) for model in [Image, Target]]
     images = {Target.objects.get(name=target.name): Image.objects.filter(target=target)}
     for target, qs in images.items():
         qs.update(target=target)
@@ -28,66 +28,81 @@ def update_targets(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0011_null_true'),
+        ("rainboard", "0011_null_true"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Target',
+            name="Target",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True)),
-                ('slug', autoslug.fields.AutoSlugField(editable=False, populate_from='name', unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, unique=True)),
+                (
+                    "slug",
+                    autoslug.fields.AutoSlugField(
+                        editable=False, populate_from="name", unique=True
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.RunPython(add_targets),
         migrations.AlterField(
-            model_name='image',
-            name='target',
-            field=models.ForeignKey(on_delete=models.deletion.CASCADE, to='rainboard.Target'),
+            model_name="image",
+            name="target",
+            field=models.ForeignKey(
+                on_delete=models.deletion.CASCADE, to="rainboard.Target"
+            ),
         ),
         migrations.RemoveField(
-            model_name='robotpkgbuild',
-            name='robotpkg',
+            model_name="robotpkgbuild",
+            name="robotpkg",
         ),
         migrations.RemoveField(
-            model_name='robotpkgbuild',
-            name='target',
+            model_name="robotpkgbuild",
+            name="target",
         ),
         migrations.RemoveField(
-            model_name='systemdependency',
-            name='project',
+            model_name="systemdependency",
+            name="project",
         ),
         migrations.RemoveField(
-            model_name='systemdependency',
-            name='target',
+            model_name="systemdependency",
+            name="target",
         ),
         migrations.RemoveField(
-            model_name='test',
-            name='branch',
+            model_name="test",
+            name="branch",
         ),
         migrations.RemoveField(
-            model_name='test',
-            name='commit',
+            model_name="test",
+            name="commit",
         ),
         migrations.RemoveField(
-            model_name='test',
-            name='project',
+            model_name="test",
+            name="project",
         ),
         migrations.RemoveField(
-            model_name='test',
-            name='target',
+            model_name="test",
+            name="target",
         ),
         migrations.DeleteModel(
-            name='RobotpkgBuild',
+            name="RobotpkgBuild",
         ),
         migrations.DeleteModel(
-            name='SystemDependency',
+            name="SystemDependency",
         ),
         migrations.DeleteModel(
-            name='Test',
+            name="Test",
         ),
     ]

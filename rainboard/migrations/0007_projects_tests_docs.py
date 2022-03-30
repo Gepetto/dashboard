@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0006_branch_deleted'),
+        ("rainboard", "0006_branch_deleted"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='docs',
+            model_name="project",
+            name="docs",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='project',
-            name='tests',
+            model_name="project",
+            name="tests",
             field=models.BooleanField(default=True),
         ),
     ]

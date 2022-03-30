@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0021_dependency'),
+        ("rainboard", "0021_dependency"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dependency',
-            name='ros',
+            model_name="dependency",
+            name="ros",
             field=models.BooleanField(default=False),
         ),
     ]

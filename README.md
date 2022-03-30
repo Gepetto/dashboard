@@ -1,5 +1,7 @@
 # Gepetto Softwares Dashboard
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## Reverse Proxy
 
 This website needs a reverse proxy, like [proxyta.net](https://framagit.org/nim65s/proxyta.net)

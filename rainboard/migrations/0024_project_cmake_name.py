@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0023_branch_repo'),
+        ("rainboard", "0023_branch_repo"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='cmake_name',
+            model_name="project",
+            name="cmake_name",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
     ]

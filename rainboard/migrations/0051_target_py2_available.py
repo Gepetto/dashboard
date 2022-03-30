@@ -2,9 +2,10 @@
 
 from django.db import migrations, models
 
+
 def fix_py2(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    focal = Target.objects.get(name='20.04')
+    Target = apps.get_model("rainboard", "Target")
+    focal = Target.objects.get(name="20.04")
     focal.py2_available = False
     focal.save()
     focal.image_set.filter(py3=False).delete()
@@ -13,13 +14,13 @@ def fix_py2(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0050_buster'),
+        ("rainboard", "0050_buster"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='target',
-            name='py2_available',
+            model_name="target",
+            name="py2_available",
             field=models.BooleanField(default=True),
         ),
         migrations.RunPython(fix_py2),

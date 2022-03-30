@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0030_remove_project_debug'),
+        ("rainboard", "0030_remove_project_debug"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='cibuild',
-            options={'ordering': ('-started',)},
+            name="cibuild",
+            options={"ordering": ("-started",)},
         ),
     ]

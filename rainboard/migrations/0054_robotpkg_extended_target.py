@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0053_ferrum'),
+        ("rainboard", "0053_ferrum"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='robotpkg',
-            name='extended_target',
-            field=models.ManyToManyField(to='rainboard.Target'),
+            model_name="robotpkg",
+            name="extended_target",
+            field=models.ManyToManyField(to="rainboard.Target"),
         ),
     ]

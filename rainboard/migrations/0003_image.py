@@ -7,22 +7,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0002_forges_groups'),
+        ("rainboard", "0002_forges_groups"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Image',
+            name="Image",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('target', models.PositiveSmallIntegerField(choices=[(1, '14.04'), (2, '16.04'), (3, '17.10'), (4, '18.04'), (5, 'dubnium')])),
-                ('created', models.DateTimeField(blank=True, null=True)),
-                ('image', models.CharField(blank=True, max_length=12, null=True)),
-                ('robotpkg', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Robotpkg')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "target",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "14.04"),
+                            (2, "16.04"),
+                            (3, "17.10"),
+                            (4, "18.04"),
+                            (5, "dubnium"),
+                        ]
+                    ),
+                ),
+                ("created", models.DateTimeField(blank=True, null=True)),
+                ("image", models.CharField(blank=True, max_length=12, null=True)),
+                (
+                    "robotpkg",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Robotpkg",
+                    ),
+                ),
             ],
         ),
         migrations.AlterUniqueTogether(
-            name='image',
-            unique_together={('robotpkg', 'target')},
+            name="image",
+            unique_together={("robotpkg", "target")},
         ),
     ]

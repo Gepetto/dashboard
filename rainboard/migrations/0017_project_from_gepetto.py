@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0016_blank_robotpkg_homepage'),
+        ("rainboard", "0016_blank_robotpkg_homepage"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='from_gepetto',
+            model_name="project",
+            name="from_gepetto",
             field=models.BooleanField(default=True),
         ),
     ]

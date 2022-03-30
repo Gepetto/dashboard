@@ -4,14 +4,14 @@ from django.db import migrations
 
 
 def add_targets(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.create(name='buster')
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.create(name="buster")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0049_project_ccache'),
+        ("rainboard", "0049_project_ccache"),
     ]
 
     operations = [

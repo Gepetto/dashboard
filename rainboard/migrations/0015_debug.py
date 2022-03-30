@@ -6,22 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0014_py3'),
+        ("rainboard", "0014_py3"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='image',
-            name='debug',
+            model_name="image",
+            name="debug",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='project',
-            name='debug',
+            model_name="project",
+            name="debug",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterUniqueTogether(
-            name='image',
-            unique_together={('robotpkg', 'target', 'py3', 'debug')},
+            name="image",
+            unique_together={("robotpkg", "target", "py3", "debug")},
         ),
     ]

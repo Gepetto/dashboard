@@ -3,7 +3,7 @@ from rainboard.models import Project
 
 
 class Command(BaseCommand):
-    help = 'Get informations from CMakeLists.txt on all projects'
+    help = "Get informations from CMakeLists.txt on all projects"
 
     def handle(self, *args, **options):
         for project in Project.objects.all():

@@ -4,19 +4,21 @@ from django.db import migrations
 
 
 def disable_trusty(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    trusty = Target.objects.get(name='16.04')
+    Target = apps.get_model("rainboard", "Target")
+    trusty = Target.objects.get(name="16.04")
     trusty.active = False
     trusty.save()
-    Robotpkg = apps.get_model('rainboard', 'Robotpkg')
-    for rpkg in Robotpkg.objects.filter(project__slug__in=['eigenpy', 'hpp-fcl', 'pinocchio', 'tsid', 'crocoddyl']):
+    Robotpkg = apps.get_model("rainboard", "Robotpkg")
+    for rpkg in Robotpkg.objects.filter(
+        project__slug__in=["eigenpy", "hpp-fcl", "pinocchio", "tsid", "crocoddyl"]
+    ):
         rpkg.extended_target.add(trusty)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0055_nullbooleanfield'),
+        ("rainboard", "0055_nullbooleanfield"),
     ]
 
     operations = [

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0024_project_cmake_name'),
+        ("rainboard", "0024_project_cmake_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='robotpkg',
-            name='pkgversion',
-            field=models.CharField(default='', max_length=50),
+            model_name="robotpkg",
+            name="pkgversion",
+            field=models.CharField(default="", max_length=50),
         ),
     ]

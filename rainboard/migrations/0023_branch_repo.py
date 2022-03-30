@@ -5,23 +5,25 @@ from django.db import migrations, models
 
 
 def branch_unique_repo(apps, schema_editor):
-    apps.get_model('rainboard', 'Branch').objects.filter(repo=None).delete()
+    apps.get_model("rainboard", "Branch").objects.filter(repo=None).delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('rainboard', '0022_dependency_ros'),
+        ("rainboard", "0022_dependency_ros"),
     ]
 
     operations = [
         migrations.RunPython(branch_unique_repo),
         migrations.AlterField(
-            model_name='branch',
-            name='repo',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Repo'),
+            model_name="branch",
+            name="repo",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="rainboard.Repo"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='branch',
-            unique_together={('project', 'name', 'repo')},
+            name="branch",
+            unique_together={("project", "name", "repo")},
         ),
     ]

@@ -4,15 +4,15 @@ from django.db import migrations
 
 
 def dubnium_to_erbium(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
-    Target.objects.filter(name='dubnium').update(active=False)
-    Target.objects.create(name='erbium')
+    Target = apps.get_model("rainboard", "Target")
+    Target.objects.filter(name="dubnium").update(active=False)
+    Target.objects.create(name="erbium")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0019_target_active'),
+        ("rainboard", "0019_target_active"),
     ]
 
     operations = [

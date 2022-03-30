@@ -15,31 +15,31 @@ class ContributorAdmin(admin.ModelAdmin):
 
 @admin.register(models.Dependency)
 class DependencyAdmin(admin.ModelAdmin):
-    autocomplete_fields = ('project', 'library')
+    autocomplete_fields = ("project", "library")
 
 
 @admin.register(models.Project)
 class ProjectAdmin(admin.ModelAdmin):
-    search_fields = ('name', 'slug')
+    search_fields = ("name", "slug")
     inlines = [RobotpkgInline]
 
 
 @admin.register(models.Target)
 class TargetAdmin(admin.ModelAdmin):
-    list_display = ('name', 'active', 'main', 'public')
+    list_display = ("name", "active", "main", "public")
 
 
 for model in [
-        models.License,
-        models.Forge,
-        models.Namespace,
-        models.Repo,
-        models.Branch,
-        models.Robotpkg,
-        models.Image,
-        models.Tag,
-        models.ContributorName,
-        models.ContributorMail,
-        models.IssuePr,
+    models.License,
+    models.Forge,
+    models.Namespace,
+    models.Repo,
+    models.Branch,
+    models.Robotpkg,
+    models.Image,
+    models.Tag,
+    models.ContributorName,
+    models.ContributorMail,
+    models.IssuePr,
 ]:
     admin.site.register(model)

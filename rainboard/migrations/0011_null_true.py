@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0010_blank_true'),
+        ("rainboard", "0010_blank_true"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='description',
+            model_name="project",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='repo',
-            name='description',
+            model_name="repo",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='robotpkg',
-            name='description',
+            model_name="robotpkg",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
     ]

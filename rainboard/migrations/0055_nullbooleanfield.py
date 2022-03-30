@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0054_robotpkg_extended_target'),
+        ("rainboard", "0054_robotpkg_extended_target"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cibuild',
-            name='passed',
+            model_name="cibuild",
+            name="passed",
             field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
-            model_name='cijob',
-            name='passed',
+            model_name="cijob",
+            name="passed",
             field=models.BooleanField(null=True),
         ),
     ]

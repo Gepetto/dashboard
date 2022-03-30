@@ -6,25 +6,25 @@ from django.db import migrations
 
 
 def add_targets(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
+    Target = apps.get_model("rainboard", "Target")
 
     # Add stretch
-    Target.objects.create(name='stretch', active=True)
+    Target.objects.create(name="stretch", active=True)
 
     # Disable dubnium, jessie & erbium
-    Target.objects.filter(name='dubnium').update(active=False)
-    Target.objects.filter(name='jessie').update(active=False)
-    Target.objects.filter(name='erbium').update(active=False)
+    Target.objects.filter(name="dubnium").update(active=False)
+    Target.objects.filter(name="jessie").update(active=False)
+    Target.objects.filter(name="erbium").update(active=False)
 
     # Remove old images
-    Image = apps.get_model('rainboard', 'Image')
+    Image = apps.get_model("rainboard", "Image")
     Image.objects.filter(target__active=False).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0035_oops'),
+        ("rainboard", "0035_oops"),
     ]
 
     operations = [

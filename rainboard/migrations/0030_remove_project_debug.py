@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0029_blank_suffix'),
+        ("rainboard", "0029_blank_suffix"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='project',
-            name='debug',
+            model_name="project",
+            name="debug",
         ),
     ]

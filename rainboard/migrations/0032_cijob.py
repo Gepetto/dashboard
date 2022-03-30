@@ -7,22 +7,41 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0031_started'),
+        ("rainboard", "0031_started"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CIJob',
+            name="CIJob",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('passed', models.NullBooleanField()),
-                ('job_id', models.PositiveIntegerField()),
-                ('started', models.DateTimeField()),
-                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Branch')),
-                ('repo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rainboard.Repo')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("passed", models.NullBooleanField()),
+                ("job_id", models.PositiveIntegerField()),
+                ("started", models.DateTimeField()),
+                (
+                    "branch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="rainboard.Branch",
+                    ),
+                ),
+                (
+                    "repo",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="rainboard.Repo"
+                    ),
+                ),
             ],
             options={
-                'ordering': ('-started',),
+                "ordering": ("-started",),
             },
         ),
     ]

@@ -2,21 +2,22 @@
 
 from django.db import migrations
 
+
 def end_trusty(apps, schema_editor):
-    Target = apps.get_model('rainboard', 'Target')
+    Target = apps.get_model("rainboard", "Target")
 
     # Disable Trusty
-    Target.objects.filter(name='14.04').update(active=False)
+    Target.objects.filter(name="14.04").update(active=False)
 
     # Remove old images
-    Image = apps.get_model('rainboard', 'Image')
+    Image = apps.get_model("rainboard", "Image")
     Image.objects.filter(target__active=False).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0038_end_trusty'),
+        ("rainboard", "0038_end_trusty"),
     ]
 
     operations = [

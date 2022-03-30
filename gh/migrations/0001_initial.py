@@ -7,14 +7,13 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='GithubCheckSuite',
+            name="GithubCheckSuite",
             fields=[
-                ('id', models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ("id", models.PositiveIntegerField(primary_key=True, serialize=False)),
             ],
         ),
     ]

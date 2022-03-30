@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0061_end_stretch'),
+        ("rainboard", "0061_end_stretch"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='clang_format',
+            model_name="project",
+            name="clang_format",
             field=models.PositiveSmallIntegerField(default=6),
         ),
         migrations.AddField(
-            model_name='project',
-            name='has_cpp',
+            model_name="project",
+            name="has_cpp",
             field=models.BooleanField(default=True),
         ),
     ]

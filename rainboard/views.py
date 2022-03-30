@@ -14,7 +14,7 @@ from . import filters, models, serializers, tables
 
 
 def nope(request):
-    raise Http404('not found')
+    raise Http404("not found")
 
 
 class ForgesView(SingleTableView):
@@ -63,7 +63,7 @@ class ProjectReposView(ProjectTableView):
 
 class ProjectBranchesView(ProjectTableView):
     table_class = tables.BranchTable
-    order_by = '-updated'
+    order_by = "-updated"
 
     def get_object_list(self):
         return self.object.branch_set.all()
@@ -71,7 +71,7 @@ class ProjectBranchesView(ProjectTableView):
 
 class ProjectImagesView(ProjectTableView):
     table_class = tables.ImageTable
-    order_by = 'target'
+    order_by = "target"
 
     def get_object_list(self):
         return models.Image.objects.active().filter(robotpkg__project=self.object)
@@ -85,8 +85,8 @@ class ProjectContributorsView(ProjectTableView):
 
 
 class ProjectGitlabView(ProjectView):
-    template_name = 'rainboard/gitlab-ci.yml'
-    content_type = 'application/x-yaml'
+    template_name = "rainboard/gitlab-ci.yml"
+    content_type = "application/x-yaml"
 
 
 class DistinctMixin(object):
@@ -109,78 +109,104 @@ class IssuesPrView(SingleTableMixin, FilterView):
 
 def update_issues_pr(request):
     # Update issues and pull requests in a subprocess because it takes a long time to run
-    Popen([
-        'timeout', '600', './manage.py', 'shell', '-c',
-        'from rainboard.management.commands.update import update_issues_pr; update_issues_pr()'
-    ])
-    return HttpResponseRedirect(reverse('rainboard:issues_pr'))
+    Popen(
+        [
+            "timeout",
+            "600",
+            "./manage.py",
+            "shell",
+            "-c",
+            "from rainboard.management.commands.update import update_issues_pr; update_issues_pr()",
+        ]
+    )
+    return HttpResponseRedirect(reverse("rainboard:issues_pr"))
 
 
 def json_doc(request):
     """
     Get the list of project / namespace / branch of which we want to keep the doc
     """
-    return JsonResponse({
-        'ret': [(b.project.slug, b.repo.namespace.slug, b.name.split('/', maxsplit=2)[2])
-                for b in models.Branch.objects.filter(keep_doc=True)]
-    })
+    return JsonResponse(
+        {
+            "ret": [
+                (
+                    b.project.slug,
+                    b.repo.namespace.slug,
+                    b.name.split("/", maxsplit=2)[2],
+                )
+                for b in models.Branch.objects.filter(keep_doc=True)
+            ]
+        }
+    )
 
 
 def images_list(request):
     """
     get the list of docker images
     """
-    return HttpResponse('\n'.join(sorted(set(img.get_image_name() for img in models.Image.objects.all()))))
+    return HttpResponse(
+        "\n".join(
+            sorted(set(img.get_image_name() for img in models.Image.objects.all()))
+        )
+    )
 
 
 def docker(request):
-    cmd = 'build'
+    cmd = "build"
     filters = request.GET.dict()
-    if 'cmd' in filters and filters['cmd'] in ['push', 'pull', 'build']:
-        cmd = filters.pop('cmd')
+    if "cmd" in filters and filters["cmd"] in ["push", "pull", "build"]:
+        cmd = filters.pop("cmd")
     images = models.Image.objects.active().filter(**filters)
-    return HttpResponse('\n'.join([' '.join(getattr(image, cmd)()) for image in images]), content_type="text/plain")
+    return HttpResponse(
+        "\n".join([" ".join(getattr(image, cmd)()) for image in images]),
+        content_type="text/plain",
+    )
 
 
 def graph_svg(request):
-    with open('/tmp/graph', 'w') as f:
-        print('digraph { rankdir=LR;', file=f)
+    with open("/tmp/graph", "w") as f:
+        print("digraph { rankdir=LR;", file=f)
         for project in models.Project.objects.exclude(models.BAD_ONES):
-            print(f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}', file=f)
-        for dep in models.Dependency.objects.filter(project__main_namespace__from_gepetto=True,
-                                                    library__main_namespace__from_gepetto=True,
-                                                    project__archived=False,
-                                                    library__archived=False):
-            print(f'I{dep.library.pk} -> I{dep.project.pk};', file=f)
-        print('}', file=f)
-    svg = run(['dot', '/tmp/graph', '-Tsvg'], stdout=PIPE).stdout.decode()
-    return HttpResponse(svg, content_type='image/svg+xml')
+            print(
+                f'{{I{project.pk} [label="{project}" URL="{project.get_absolute_url()}"];}}',
+                file=f,
+            )
+        for dep in models.Dependency.objects.filter(
+            project__main_namespace__from_gepetto=True,
+            library__main_namespace__from_gepetto=True,
+            project__archived=False,
+            library__archived=False,
+        ):
+            print(f"I{dep.library.pk} -> I{dep.project.pk};", file=f)
+        print("}", file=f)
+    svg = run(["dot", "/tmp/graph", "-Tsvg"], stdout=PIPE).stdout.decode()
+    return HttpResponse(svg, content_type="image/svg+xml")
 
 
 def ordered_projects(request):
-    return JsonResponse({'ret': models.ordered_projects()})
+    return JsonResponse({"ret": models.ordered_projects()})
 
 
 class AuthenticatedOrReadOnlyModelViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class NamespaceViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Namespace.objects.all()
     serializer_class = serializers.NamespaceSerializer
-    filterset_fields = ('name', 'slug')
+    filterset_fields = ("name", "slug")
 
 
 class LicenseViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.License.objects.all()
     serializer_class = serializers.LicenseSerializer
-    filterset_fields = ('name', 'spdx_id')
+    filterset_fields = ("name", "spdx_id")
 
 
 class ForgeViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Forge.objects.all()
     serializer_class = serializers.ForgeSerializer
-    filterset_fields = ('name', 'slug')
+    filterset_fields = ("name", "slug")
 
 
 class ProjectViewSet(AuthenticatedOrReadOnlyModelViewSet):
@@ -192,7 +218,7 @@ class ProjectViewSet(AuthenticatedOrReadOnlyModelViewSet):
 class RepoViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Repo.objects.all()
     serializer_class = serializers.RepoSerializer
-    filterset_fields = ('name', 'slug')
+    filterset_fields = ("name", "slug")
 
 
 class BranchViewSet(AuthenticatedOrReadOnlyModelViewSet):
@@ -203,13 +229,13 @@ class BranchViewSet(AuthenticatedOrReadOnlyModelViewSet):
 class TargetViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Target.objects.active()
     serializer_class = serializers.TargetSerializer
-    filterset_fields = ('name', 'slug')
+    filterset_fields = ("name", "slug")
 
 
 class RobotpkgViewSet(AuthenticatedOrReadOnlyModelViewSet):
     queryset = models.Robotpkg.objects.all()
     serializer_class = serializers.RobotpkgSerializer
-    filterset_fields = ('name', 'slug')
+    filterset_fields = ("name", "slug")
 
 
 class ImageViewSet(AuthenticatedOrReadOnlyModelViewSet):
@@ -239,7 +265,7 @@ class DependencyViewSet(AuthenticatedOrReadOnlyModelViewSet):
 
 
 class BoardView(TemplateView):
-    template_name = 'rainboard/board.html'
+    template_name = "rainboard/board.html"
 
     def get_context_data(self, **kwargs):
-        return {'projects': models.Project.objects.exclude(models.BAD_ONES)}
+        return {"projects": models.Project.objects.exclude(models.BAD_ONES)}
