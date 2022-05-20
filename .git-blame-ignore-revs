@@ -1,0 +1,35 @@
+# format (Guilhem Saurel, 2022-05-20)
+22e46562169a20456a916c5b969caacdd91918b1
+
+# pre-commit (Guilhem Saurel, 2022-04-24)
+b1578e83c302fa6b5cd7d79433cd5a48b1e714af
+
+# yapf → black (Guilhem Saurel, 2022-03-30)
+498df3bfa44e29156e7b9a85c6b7aa60bcf26f21
+
+# fix format (Guilhem Saurel, 2021-09-07)
+96628e5dea364278c2e6afb08d77362f33121fd5
+
+# fix format (Guilhem Saurel, 2021-09-07)
+a890440bc01d4256268c687a75912879dcca2bd5
+
+# format (Guilhem Saurel, 2021-04-30)
+dbe4842ca87ae9d69ee6e769ded44bcdd3abc3e9
+
+# yapf (Guilhem Saurel, 2019-04-28)
+406247ff731c557eb258c4626f53a6e3c3d13d98
+
+# yapf . (Guilhem Saurel, 2019-03-21)
+c659887d9a9be87c158ec82e25f4842558214bd6
+
+# yapf (Guilhem Saurel, 2019-03-21)
+3771788f9c889c7df3f38e9cd4ab4cbccf515281
+
+# format: clang, flake8, yapf (Guilhem Saurel, 2019-03-21)
+8d6bcaa4470f3316fe11b4008860e12b3aae6d0a
+
+# format enforcement (Guilhem Saurel, 2019-03-21)
+e7daede87a1d1edf51cc4de216aa142a39373a14
+
+# yapf (Guilhem Saurel, 2018-10-02)
+ebc3549fe5a39ffb9b7d30cdfc5f7751e24cc10d
