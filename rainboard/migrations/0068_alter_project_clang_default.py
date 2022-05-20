@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rainboard', '0067_project_clang_default'),
+        ("rainboard", "0067_project_clang_default"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='clang_default',
+            model_name="project",
+            name="clang_default",
             field=models.BooleanField(default=True),
         ),
     ]
