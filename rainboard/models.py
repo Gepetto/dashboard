@@ -273,7 +273,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
     clang_format = models.PositiveSmallIntegerField(default=12)
-    clang_default = models.BooleanField(default=False)
+    clang_default = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
