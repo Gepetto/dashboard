@@ -26,7 +26,7 @@ from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_nam
 
 logger = logging.getLogger("rainboard.models")
 
-MAIN_BRANCHES = ["master", "devel"]
+MAIN_BRANCHES = ["master", "main", "devel"]
 RPKG_URL = "http://robotpkg.openrobots.org"
 DOC_URL = "https://gepettoweb.laas.fr/doc"
 RPKG_LICENSES = {
@@ -332,14 +332,14 @@ class Project(Links, NamedModel, TimeStampedModel):
         ]
         if main:
             branches = [
-                b for b in branches if b.endswith("master") or b.endswith("devel")
+                b for b in branches if any(b.endswith(main) for main in MAIN_BRANCHES)
             ]
         for branch in branches:
             logger.info(f"update branch {branch}")
             if branch.startswith("remotes/"):
                 branch = branch[8:]
             if branch.count("/") < 2:
-                if branch != "master":
+                if branch not in ["main", "master"]:
                     logger.error(f'wrong branch "{branch}" in {self.git_path()}')
                 continue
             forge, namespace, name = branch.split("/", maxsplit=2)
