@@ -439,7 +439,7 @@ class GhTests(TestCase):
     async def test_pr(self):
         """Test github's pull requests."""
         await self.sync()
-        not_accepted_string = "doesn't usually accept pull requests on master"
+        not_accepted_string = "doesn't usually accept pull requests on the main branch."
 
         # Test pr on master
         last_commit = self.github.get_branch("devel").commit.sha

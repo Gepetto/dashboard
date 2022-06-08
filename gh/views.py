@@ -34,8 +34,8 @@ from . import models
 
 logger = logging.getLogger(__name__)
 
-PR_MASTER_MSG = """Hi ! This project doesn't usually accept pull requests on master.
-If this wasn't intentionnal, you can change the base branch of this PR to devel
+PR_MASTER_MSG = """Hi ! This project doesn't usually accept pull requests on the main
+branch. If this wasn't intentionnal, you can change the base branch of this PR to devel
 (No need to close it for that). Best, a bot."""
 
 
@@ -78,7 +78,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
         branches = [b.name for b in await sync_to_async(gh.get_branches)()]
         if (
             not project.accept_pr_to_master
-            and pr_branch == "master"
+            and pr_branch in ["master", "main"]
             and "devel" in branches
             and login != namespace.slug_github
         ):
