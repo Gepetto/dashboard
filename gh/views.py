@@ -182,6 +182,9 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     if branch.startswith("release/"):  # Don't sync release/X.Y.Z branches at all
         return HttpResponse(rep)
 
+    if branch == "pre-commit-ci-update-config":  # Don't sync neither
+        return HttpResponse(rep)
+
     # Fetch the latest commit from gitlab
     if gl_remote_name in git_repo.remotes:
         gl_remote = await sync_to_async(git_repo.remote)(gl_remote_name)
