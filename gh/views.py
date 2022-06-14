@@ -34,9 +34,11 @@ from . import models
 
 logger = logging.getLogger(__name__)
 
-PR_MASTER_MSG = """Hi ! This project doesn't usually accept pull requests on the main
-branch. If this wasn't intentionnal, you can change the base branch of this PR to devel
-(No need to close it for that). Best, a bot."""
+PR_MASTER_MSG = (
+    "Hi ! This project doesn't usually accept pull requests on the main branch.\n"
+    "If this wasn't intentionnal, you can change the base branch of this PR to devel\n"
+    "(No need to close it for that). Best, a bot."
+)
 
 
 async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
