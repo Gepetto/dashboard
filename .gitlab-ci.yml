@@ -5,7 +5,7 @@ variables:
   GITHUB_WEBHOOK_KEY: "pipo"
   GITLAB_WEBHOOK_KEY: "pipo"
   REGISTRY: "memmos.laas.fr:5000"
-  DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}:${CI_COMMIT_REF_NAME}"
+  DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}"
   PYTHONWARNINGS: "always"
 
 format:
