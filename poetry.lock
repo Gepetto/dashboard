@@ -351,11 +351,11 @@ traitlets = "*"
 
 [[package]]
 name = "ndh"
-version = "4.0.0"
+version = "5.5.4"
 description = "Nim's Django Helpers"
 category = "main"
 optional = false
-python-versions = ">=3.6.1,<4.0.0"
+python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
 django-autoslug = ">=1.9.8,<2.0.0"
@@ -654,7 +654,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2a68167b27a5d6eedc9f02e856f1123e1bffd3850d0235f09cbfe355b69c83ea"
+content-hash = "45b942eb9ecbcc96c5c17881d221f199db71a0559cdd72e7363b8e0ee5df4483"
 
 [metadata.files]
 anyio = [
@@ -846,8 +846,8 @@ matplotlib-inline = [
     {file = "matplotlib_inline-0.1.3-py3-none-any.whl", hash = "sha256:aed605ba3b72462d64d475a21a9296f400a19c4f74a31b59103d2a99ffd5aa5c"},
 ]
 ndh = [
-    {file = "ndh-4.0.0-py3-none-any.whl", hash = "sha256:2dbd3b404bf4a88cb2d60cd24fb202df3f6b5448b5ffa01f6c52d3eb881b840a"},
-    {file = "ndh-4.0.0.tar.gz", hash = "sha256:ab899b26e9a414d6bffe8eaa0c8ee27113005944ca82f95a2ad71b0073ac2904"},
+    {file = "ndh-5.5.4-py3-none-any.whl", hash = "sha256:9924f67987556cf59d6806415af21b9b95a27f9990fb84586145d463689a0d73"},
+    {file = "ndh-5.5.4.tar.gz", hash = "sha256:c305e9fe0ca81f95e2041c79a232a30d229e010f29ac0087c738d70b4c89c7bd"},
 ]
 parso = [
     {file = "parso-0.8.3-py2.py3-none-any.whl", hash = "sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75"},
