@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_tables2",
     "django_filters",
-    "bootstrap4",
+    "django_bootstrap5",
     "ndh",
     "rainboard",
     "gh",
