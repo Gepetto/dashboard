@@ -16,7 +16,7 @@ djangorestframework = "^3.12.4"
 django-auth-ldap = "^3.0.0"
 python-gitlab = "^3.0.0"
 PyGithub = "^1.55"
-ipython = "^7.22.0"
+ipython = "^8.0.0"
 
 [tool.poetry.dev-dependencies]
 
