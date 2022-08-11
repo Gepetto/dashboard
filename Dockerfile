@@ -1,4 +1,4 @@
-FROM python:slim-buster
+FROM python:slim-bullseye
 
 EXPOSE 8000
 
@@ -20,7 +20,7 @@ RUN apt-get update -qq && apt-get install -qqy \
     netcat-openbsd \
     msmtp \
  && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
- && echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" >> /etc/apt/sources.list \
+ && echo "deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable" >> /etc/apt/sources.list \
  && apt-get update -qq && apt-get install -qqy docker-ce \
  && git config --global user.email "rainboard@laas.fr" \
  && git config --global user.name "rainboard.laas.fr"
