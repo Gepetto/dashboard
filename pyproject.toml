@@ -8,6 +8,7 @@ license = "BSD-2-Clause"
 [tool.poetry.dependencies]
 python = "^3.8"
 ndh = "^5.0.0"
+django = "^4.1"
 django-filter = "^21.1"
 django-tables2 = "^2.4.0"
 httpx = "^0.23.0"
