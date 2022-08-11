@@ -42,12 +42,13 @@ class Command(BaseCommand):
                 if slugify(data["name"]) == slug:
                     logger.warning("found on github / %s", org)
                     update_github(github, org, data)
+                    break
             for user in Namespace.objects.filter(group=False):
                 for data in github.api_list(f"/users/{user.slug}/repos"):
                     if slugify(data["name"]) == slug:
                         logger.warning("found on github / %s", user)
                         update_github(github, user, data)
-
+                        break
             gitlab = Forge.objects.get(slug="gitlab")
             for data in gitlab.api_list("/projects"):
                 if slugify(data["name"]) == slug:
