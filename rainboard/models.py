@@ -1013,6 +1013,8 @@ class Target(NamedModel):
     active = models.BooleanField(default=True)
     main = models.BooleanField(default=False)
     public = models.BooleanField(default=True)
+    python_major = models.SmallIntegerField(default=3)
+    python_minor = models.SmallIntegerField(default=8)
 
     objects = TargetQuerySet.as_manager()
 
