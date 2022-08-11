@@ -148,7 +148,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-auth-ldap"
-version = "2.4.0"
+version = "3.0.0"
 description = "Django LDAP authentication backend."
 category = "main"
 optional = false
@@ -658,7 +658,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "b02f349abe6c224a871b3d5464e4dbc8a74d30e64fdd301278a0f54f9cffdb4a"
+content-hash = "5f9bf62b3dfc2b44d9c5531a6d30c72963532711983c163399fa8e0751b8790d"
 
 [metadata.files]
 anyio = [
@@ -790,8 +790,8 @@ django = [
     {file = "Django-4.1.tar.gz", hash = "sha256:032f8a6fc7cf05ccd1214e4a2e21dfcd6a23b9d575c6573cacc8c67828dbe642"},
 ]
 django-auth-ldap = [
-    {file = "django-auth-ldap-2.4.0.tar.gz", hash = "sha256:60fcbfc3141c99c3c49d3ccd7311a3992a231c319d94b6d2c143968f63676676"},
-    {file = "django_auth_ldap-2.4.0-py3-none-any.whl", hash = "sha256:2d869955da8a0c9a4448671bd9826b9f87458f6a9fc20278e84de8a81200a2be"},
+    {file = "django-auth-ldap-3.0.0.tar.gz", hash = "sha256:1f2d5c562d9ba9a5e9a64099ae9798e1a63840a11afe4d1c4a9c74121f066eaa"},
+    {file = "django_auth_ldap-3.0.0-py3-none-any.whl", hash = "sha256:19ee19034f344d9efd07ed88d3187e256ec33ae39d6a47222083b89f7d35c5f6"},
 ]
 django-autoslug = [
     {file = "django-autoslug-1.9.8.tar.gz", hash = "sha256:bae66c27d35615f472865b99c4d107f3b3add3d22ee337e84960fc07694abd45"},
