@@ -270,6 +270,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     suffix = models.CharField(max_length=50, default="", blank=True)
     allow_format_failure = models.BooleanField(default=True)
     has_python = models.BooleanField(default=True)
+    min_python_major = models.SmallIntegerField(default=2)
     has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
     clang_format = models.PositiveSmallIntegerField(default=12)
@@ -1132,7 +1133,7 @@ class ImageQuerySet(models.QuerySet):
     def active(self):
         return self.filter(
             Q(target__active=True) | Q(target=F("robotpkg__extended_target"))
-        )
+        ).filter(target__python_major__gte=F("robotpkg__project__min_python_major"))
 
 
 class Image(models.Model):
