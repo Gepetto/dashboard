@@ -29,8 +29,7 @@ RUN pip3 install --no-cache-dir \
     gunicorn \
     ipython \
     poetry \
-    psycopg2-binary \
-    python-memcached
+    psycopg2-binary
 
 ADD pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false --local \

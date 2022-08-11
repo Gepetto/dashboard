@@ -137,11 +137,11 @@ MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
 STATIC_ROOT = "/srv/static/"
 
-if os.environ.get("MEMCACHED", "False").lower() == "true":  # pragma: no cover
+if os.environ.get("REDIS", "False").lower() == "true":  # pragma: no cover
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
-            "LOCATION": "memcached:11211",
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://redis:6379",
         }
     }
 
