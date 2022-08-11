@@ -49,9 +49,7 @@ async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     if "ros-release" in slug:  # Don't run check suites on ros-release repositories
         return HttpResponse(rep)
 
-    await sync_to_async(models.GithubCheckSuite.objects.get_or_create)(
-        id=data["check_suite"]["id"]
-    )
+    await models.GithubCheckSuite.objects.aget_or_create(id=data["check_suite"]["id"])
     return HttpResponse(rep)
 
 
