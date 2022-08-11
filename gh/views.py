@@ -7,7 +7,7 @@ from hashlib import sha1
 from ipaddress import ip_address, ip_network
 from json import loads
 
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.http import HttpRequest
@@ -309,7 +309,9 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
     return HttpResponse(rep)
 
 
+@sync_to_async
 @csrf_exempt
+@async_to_sync
 async def webhook(request: HttpRequest) -> HttpResponse:
     """
     Process request incoming from a github webhook.
@@ -359,7 +361,9 @@ async def webhook(request: HttpRequest) -> HttpResponse:
     return HttpResponseForbidden("event not found")
 
 
+@sync_to_async
 @csrf_exempt
+@async_to_sync
 async def gl_webhook(request: HttpRequest) -> HttpResponse:
     """Process request incoming from a gitlab webhook."""
 
