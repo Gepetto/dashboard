@@ -35,6 +35,7 @@ EMAIL_BACKEND = "django.core.mail.backends.%s" % (
 )
 EMAIL_SUBJECT_PREFIX = f"[{PROJECT_VERBOSE}] "
 EMAIL_FILE_PATH = "email/"
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 ADMINS = (
     (
