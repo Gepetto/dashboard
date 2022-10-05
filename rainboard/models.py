@@ -286,10 +286,10 @@ class Project(Links, NamedModel, TimeStampedModel):
             ret.append("--no-cpp")
         if not self.has_python:
             ret.append("--no-python")
-        if self.clang_format == 6:
-            ret.append("--clang-6")
         if self.clang_default:
             ret.append("--clang-default")
+        elif self.clang_format == 6:
+            ret.append("--clang-6")
         return " ".join(ret)
 
     def git_path(self):
