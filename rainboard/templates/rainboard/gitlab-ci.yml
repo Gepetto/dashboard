@@ -37,6 +37,7 @@
 {% endif %}{% if project.tests%}    - mkdir -p ${CI_PROJECT_DIR}/coverage/
     - gcovr -e CMakeFiles -e _deps -r .
     - gcovr -e CMakeFiles -e _deps -r . --html --html-details -o ${CI_PROJECT_DIR}/coverage/index.html
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
 {% endif %}  artifacts:
     expire_in: 1 day
     paths:
