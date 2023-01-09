@@ -17,7 +17,7 @@
     - make checkout MASTER_REPOSITORY="git ${CI_PROJECT_DIR}/.git"
     - make install
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
-{% if project.tests %}    - make test
+{% if project.tests %}    - touch CMakeLists.txt && make && make test
 {% endif %}    - sccache -s
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
