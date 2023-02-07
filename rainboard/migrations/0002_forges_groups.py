@@ -57,7 +57,6 @@ def groups(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0001_initial"),
     ]

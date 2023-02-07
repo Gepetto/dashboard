@@ -12,7 +12,6 @@ def fix_py2(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0050_buster"),
     ]

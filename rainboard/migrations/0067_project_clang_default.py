@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0066_alter_robotpkg_extended_target"),
     ]

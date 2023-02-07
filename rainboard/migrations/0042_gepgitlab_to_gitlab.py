@@ -11,7 +11,6 @@ def gepgitlab_to_gitlab(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0041_target_main"),
     ]

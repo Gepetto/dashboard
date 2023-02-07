@@ -16,7 +16,6 @@ def disable_trusty(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0055_nullbooleanfield"),
     ]

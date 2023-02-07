@@ -10,7 +10,6 @@ def main_focal(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0063_alter_project_clang_format"),
     ]

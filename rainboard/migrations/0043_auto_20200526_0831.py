@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0042_gepgitlab_to_gitlab"),
     ]

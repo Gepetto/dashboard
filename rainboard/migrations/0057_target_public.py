@@ -9,7 +9,6 @@ def pal_private(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0056_disable_1604"),
     ]

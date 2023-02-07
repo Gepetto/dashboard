@@ -16,7 +16,6 @@ def add_python3(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0012_target"),
     ]

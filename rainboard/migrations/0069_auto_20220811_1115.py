@@ -21,7 +21,6 @@ def python_version(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0068_alter_project_clang_default"),
     ]

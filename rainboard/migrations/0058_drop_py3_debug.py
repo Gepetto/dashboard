@@ -16,7 +16,6 @@ def create_all_images(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0057_target_public"),
     ]

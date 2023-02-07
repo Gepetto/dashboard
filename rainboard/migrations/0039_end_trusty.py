@@ -15,7 +15,6 @@ def end_trusty(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0038_end_trusty"),
     ]

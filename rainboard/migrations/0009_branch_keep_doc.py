@@ -14,7 +14,6 @@ def keep_doc(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0008_remove_article"),
     ]

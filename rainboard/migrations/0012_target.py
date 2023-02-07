@@ -26,7 +26,6 @@ def update_targets(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0011_null_true"),
     ]
