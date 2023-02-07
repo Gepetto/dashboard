@@ -9,7 +9,6 @@ def add_targets(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0043_auto_20200526_0831"),
     ]

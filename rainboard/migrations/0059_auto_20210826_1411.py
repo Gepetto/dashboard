@@ -9,7 +9,6 @@ def simple_robotics(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0058_drop_py3_debug"),
     ]

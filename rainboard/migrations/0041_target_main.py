@@ -9,7 +9,6 @@ def main_bionic(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0040_robotpkg_same_py"),
     ]

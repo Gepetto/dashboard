@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0046_namespace_slug_gitlab_github"),
     ]

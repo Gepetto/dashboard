@@ -22,7 +22,6 @@ def add_targets(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0035_oops"),
     ]

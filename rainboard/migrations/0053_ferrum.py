@@ -10,7 +10,6 @@ def erbium_to_ferrum(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0052_centos7"),
     ]

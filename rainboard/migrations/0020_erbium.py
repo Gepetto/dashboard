@@ -10,7 +10,6 @@ def dubnium_to_erbium(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("rainboard", "0019_target_active"),
     ]
