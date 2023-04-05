@@ -374,6 +374,7 @@ class GhTests(TestCase):
             last_commit_github,
             target_branch_name,
         )
+        print(f"{response.content=}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
 
