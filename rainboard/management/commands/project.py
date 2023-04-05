@@ -8,22 +8,22 @@ from autoslug.utils import slugify
 
 from rainboard.models import (
     Forge,
+    Namespace,
     Project,
     Robotpkg,
-    Namespace,
     update_github,
     update_gitlab,
 )
 
 
 class Command(BaseCommand):
-    help = "run project creation stuff"
+    help = "run project creation stuff"  # noqa: A003
 
     def add_arguments(self, parser):
         parser.add_argument("org")
         parser.add_argument("project")
 
-    def handle(self, org, project, *args, **options):
+    def handle(self, org, project, *args, **options):  # noqa: C901
         path = settings.RAINBOARD_RPKG
         logger = logging.getLogger("rainboard.management.project")
 
@@ -63,7 +63,9 @@ class Command(BaseCommand):
                 path.glob(f"*/py-{slug}{project.suffix}"),
             ):
                 obj, created = Robotpkg.objects.get_or_create(
-                    name=pkg.name, category=pkg.parent.name, project=project
+                    name=pkg.name,
+                    category=pkg.parent.name,
+                    project=project,
                 )
                 if created:
                     logger.warning("found on robotpkg %s", obj)

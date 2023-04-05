@@ -9,7 +9,8 @@ DOMAIN_NAME = os.environ.get("DOMAIN_NAME", "local")
 ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOST", f"{PROJECT_SLUG}.{DOMAIN_NAME}")]
 ALLOWED_HOSTS += [f"www.{host}" for host in ALLOWED_HOSTS]
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = Path(__file__).parent
+BASE_DIR = PROJECT_DIR.parent
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
@@ -17,15 +18,20 @@ DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "True").lower() == "true"
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() == "true"
 if EMAIL_USE_SSL and EMAIL_USE_TLS:  # pragma: no cover
-    raise ValueError("you must not set both EMAIL_USE_{TLS,SSL}")
+    oops = "you must not set both EMAIL_USE_{TLS,SSL}"
+    raise ValueError(oops)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", f"smtp.{DOMAIN_NAME}")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USER = os.environ.get("EMAIL_USER", "")
 EMAIL_PORT = int(
-    os.environ.get("EMAIL_PORT", 465 if EMAIL_USE_SSL else 587 if EMAIL_USE_TLS else 25)
+    os.environ.get(
+        "EMAIL_PORT",
+        465 if EMAIL_USE_SSL else 587 if EMAIL_USE_TLS else 25,
+    ),
 )
 EMAIL_FQDN = os.environ.get(
-    "EMAIL_FQDN", ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME
+    "EMAIL_FQDN",
+    ALLOWED_HOSTS[0] if SELF_MAIL else DOMAIN_NAME,
 )
 EMAIL_HOST_USER = f"{EMAIL_USER}@{EMAIL_FQDN}"
 SERVER_EMAIL = f"{EMAIL_USER}+{PROJECT}@{EMAIL_FQDN}"
@@ -45,13 +51,15 @@ ADMINS = (
 )
 
 INSTALLED_APPS = [
+    PROJECT,
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.humanize",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "django.contrib.sites",
+    "django.contrib.staticfiles",
     "rest_framework",
     "django_tables2",
     "django_filters",
@@ -62,13 +70,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     f"{PROJECT}.middleware.laas_perms_middleware",
 ]
 
@@ -97,8 +106,8 @@ DB = os.environ.get("DB", "db.sqlite3")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, DB),
-    }
+        "NAME": BASE_DIR / "default.db.sqlite3",
+    },
 }
 if DB == "postgres":  # pragma: no cover
     DATABASES["default"].update(
@@ -128,7 +137,6 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "fr")
 TIME_ZONE = os.environ.get("TIME_ZONE", "Europe/Paris")
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 SITE_ID = int(os.environ.get("SITE_ID", 1))
@@ -143,7 +151,7 @@ if os.environ.get("REDIS", "False").lower() == "true":  # pragma: no cover
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
             "LOCATION": "redis://redis:6379",
-        }
+        },
     }
 
 LOGGING = {

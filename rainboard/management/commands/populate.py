@@ -1,8 +1,9 @@
 import logging
 
-import httpx
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+
+import httpx
 
 from rainboard.models import Forge, License, Repo
 
@@ -13,7 +14,7 @@ logger = logging.getLogger("rainboard.management.populate")
 
 
 class Command(BaseCommand):
-    help = "populates licenses, projets, namespaces and repos from forges"
+    help = "populates licenses, projets, namespaces and repos from forges"  # noqa: A003
 
     def handle(self, *args, **options):
         logger.info("updating licenses")
@@ -25,12 +26,12 @@ class Command(BaseCommand):
 
         logger.info("updating forges")
         for forge in Forge.objects.order_by("source"):
-            logger.info(f" updating {forge}")
+            logger.info(" updating %s", forge)
             forge.get_projects()
 
         logger.info("updating repos")
         for repo in Repo.objects.all():
-            logger.info(f" updating {repo}")
+            logger.info(" updating %s", repo)
             repo.api_update()
 
         call_command("delete_perso")

@@ -1,3 +1,4 @@
+from pathlib import Path
 from subprocess import PIPE, Popen, run
 
 from django.db.models import Q
@@ -15,7 +16,8 @@ from . import filters, models, serializers, tables
 
 
 def nope(request):
-    raise Http404("not found")
+    not_found = "not found"
+    raise Http404(not_found)
 
 
 class ForgesView(SingleTableView):
@@ -90,7 +92,7 @@ class ProjectGitlabView(ProjectView):
     content_type = "application/x-yaml"
 
 
-class DistinctMixin(object):
+class DistinctMixin:
     def get_queryset(self):
         return super().get_queryset().distinct()
 
@@ -120,7 +122,7 @@ def update_issues_pr(request):
             "-c",
             "from rainboard.management.commands.update import update_issues_pr; "
             "update_issues_pr()",
-        ]
+        ],
     )
     return HttpResponseRedirect(reverse("rainboard:issues_pr"))
 
@@ -141,10 +143,10 @@ def json_doc(request):
                     Q(keep_doc=False)
                     | Q(project__main_namespace__from_gepetto=False)
                     | Q(project__robotpkg__isnull=True)
-                    | Q(project__archived=True)
+                    | Q(project__archived=True),
                 )
-            ]
-        }
+            ],
+        },
     )
 
 
@@ -154,8 +156,8 @@ def images_list(request):
     """
     return HttpResponse(
         "\n".join(
-            sorted(set(img.get_image_name() for img in models.Image.objects.all()))
-        )
+            sorted({img.get_image_name() for img in models.Image.objects.all()}),
+        ),
     )
 
 
@@ -172,7 +174,7 @@ def docker(request):
 
 
 def graph_svg(request):
-    with open("/tmp/graph", "w") as f:
+    with Path("/tmp/graph").open("w") as f:
         print("digraph { rankdir=LR;", file=f)
         for project in models.Project.objects.exclude(models.BAD_ONES):
             print(

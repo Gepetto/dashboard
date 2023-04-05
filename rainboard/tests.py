@@ -3,7 +3,6 @@ import doctest
 from django.test import TestCase
 from django.urls import reverse
 
-from dashboard import settings
 from . import models, utils
 from .models import IssuePr, Repo
 
@@ -36,10 +35,12 @@ class RainboardTests(TestCase):
         self.assertEqual(project.slug, "rainboard-tests-2")
         self.assertEqual(project.registry(), "memmos.laas.fr:5000")
         self.assertEqual(
-            project.url_travis(), "https://travis-ci.org/gepetto/rainboard-tests-2"
+            project.url_travis(),
+            "https://travis-ci.org/gepetto/rainboard-tests-2",
         )
         self.assertEqual(
-            project.url_gitlab(), "https://gitlab.laas.fr/gepetto/rainboard-tests-2"
+            project.url_gitlab(),
+            "https://gitlab.laas.fr/gepetto/rainboard-tests-2",
         )
         badges = project.badges()
         for chunk in ['<img src="https://gitlab.laas', 'href="https://gepettoweb.laas']:
@@ -48,12 +49,12 @@ class RainboardTests(TestCase):
         # Test Middleware
         response = self.client.get(
             reverse("rainboard:project", kwargs={"slug": project.slug}),
-            HTTP_X_FORWARDED_FOR="9.9.9.9",
+            headers={"x-forwarded-for": "9.9.9.9"},
         )
         self.assertEqual(response.status_code, 302)
         response = self.client.get(
             reverse("rainboard:project", kwargs={"slug": project.slug}),
-            HTTP_X_FORWARDED_FOR="140.93.5.4",
+            headers={"x-forwarded-for": "140.93.5.4"},
         )
         self.assertEqual(response.status_code, 200)
 
@@ -87,7 +88,8 @@ class RainboardTests(TestCase):
         )
 
         response = self.client.get(
-            reverse("rainboard:issues_pr"), HTTP_X_FORWARDED_FOR="140.93.5.4"
+            reverse("rainboard:issues_pr"),
+            headers={"x-forwarded-for": "140.93.5.4"},
         )
         self.assertEqual(response.status_code, 200)
 

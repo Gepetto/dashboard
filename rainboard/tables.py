@@ -104,10 +104,12 @@ class BranchTable(StrippedTable):
     def render_forge(self, value):
         if value:
             return value.get_link()
+        return None
 
     def render_namespace(self, record, value):
         if value:
             return mark_safe(f'<a href="{record.repo.url}">{value}</a>')
+        return None
 
     def render_keep_doc(self, record, value):
         url = reverse("admin:rainboard_branch_change", args=[record.id])
@@ -129,6 +131,7 @@ class ImageTable(StrippedTable):
     def render_name(self, record, value):
         if value:
             return mark_safe(f'<a href="{record.get_image_url()}">{value}</a>')
+        return None
 
     def render_allow_failure(self, record, value):
         url = reverse("admin:rainboard_image_change", args=[record.id])

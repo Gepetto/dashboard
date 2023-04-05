@@ -8,6 +8,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 import github
+
 from rainboard.models import (
     BAD_ONES,
     Branch,
@@ -32,7 +33,8 @@ def update_issues_pr():
         try:
             gh = project.github()
             main_repo = project.repo_set.filter(
-                namespace=project.main_namespace, forge__source=SOURCES.github
+                namespace=project.main_namespace,
+                forge__source=SOURCES.github,
             ).first()
 
             # Create new issues and pull requests
@@ -70,7 +72,7 @@ def update_issues_pr():
 
 
 class Command(BaseCommand):
-    help = "Update the DB"
+    help = "Update the DB"  # noqa: A003
 
     def handle(self, *args, **options):
         def log(message):
@@ -78,14 +80,16 @@ class Command(BaseCommand):
 
         log("\nUpdating all repos\n")
         for repo in Repo.objects.filter(
-            project__archived=False, project__main_namespace__from_gepetto=True
+            project__archived=False,
+            project__main_namespace__from_gepetto=True,
         ):
             log(f" {repo}")
             repo.update()
 
         log("\nUpdating all branches\n")
         for branch in Branch.objects.filter(
-            project__archived=False, project__main_namespace__from_gepetto=True
+            project__archived=False,
+            project__main_namespace__from_gepetto=True,
         ):
             log(f" {branch.project} - {branch}")
             branch.update(pull=False)
@@ -100,7 +104,8 @@ class Command(BaseCommand):
 
         log("\nUpdating Robotpkg\n")
         for robotpkg in Robotpkg.objects.filter(
-            project__archived=False, project__main_namespace__from_gepetto=True
+            project__archived=False,
+            project__main_namespace__from_gepetto=True,
         ):
             log(f" {robotpkg}")
             robotpkg.update(pull=False)
@@ -120,7 +125,7 @@ class Command(BaseCommand):
 
         log("\nLook for missing images\n")
         for img in Image.objects.active().filter(
-            created__lt=timezone.now() - timedelta(days=7)
+            created__lt=timezone.now() - timedelta(days=7),
         ):
             log(f" {img}")
 

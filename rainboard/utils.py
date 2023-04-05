@@ -2,9 +2,10 @@ import logging
 import re
 import unicodedata
 
-import git
-from django.utils.safestring import mark_safe
 from django.db.models import IntegerChoices
+from django.utils.safestring import mark_safe
+
+import git
 
 logger = logging.getLogger("rainboard.utils")
 
@@ -16,7 +17,7 @@ def slugify_with_dots(value):
     """
     slugify a name but keep dots
 
-    >>> slugify_with_dots('C’est la fête :3. yay.')
+    >>> slugify_with_dots('C`est la fête :3. yay.')
     'cest-la-fete-3.-yay.'
     """
     value = (
@@ -35,6 +36,8 @@ def api_next(source, req):
     if source == SOURCES.gitlab:
         if "X-Next-Page" in req.headers and req.headers["X-Next-Page"]:
             return int(req.headers["X-Next-Page"])
+        return None
+    return None
 
 
 def domain(url):

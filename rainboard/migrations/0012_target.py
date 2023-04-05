@@ -2,8 +2,9 @@
 
 from enum import IntEnum
 
-import autoslug.fields
 from django.db import migrations, models
+
+import autoslug.fields
 
 TARGETS = IntEnum("Targets", "14.04 16.04 17.10 18.04 dubnium jessie")
 

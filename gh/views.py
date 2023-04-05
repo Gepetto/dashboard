@@ -7,7 +7,6 @@ from hashlib import sha1
 from ipaddress import ip_address, ip_network
 from json import loads
 
-from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.http import HttpRequest
@@ -24,8 +23,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 import git
 import github
-from gitlab import GitlabDeleteError
+from asgiref.sync import async_to_sync, sync_to_async
 from autoslug.utils import slugify
+from gitlab import GitlabDeleteError
+
 from dashboard.middleware import ip_laas
 from rainboard.models import Namespace, Project
 from rainboard.utils import SOURCES
@@ -53,7 +54,7 @@ async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     return HttpResponse(rep)
 
 
-async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
+async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa: C901
     """Manage Github's Pull Requests."""
     logger.info("process gh pr")
     data = loads(request.body.decode())
@@ -62,13 +63,22 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
     login = slugify(data["pull_request"]["head"]["repo"]["owner"]["login"])
 
     namespace = await sync_to_async(get_object_or_404)(
-        Namespace, slug_github=slugify(data["repository"]["owner"]["login"])
+        Namespace,
+        slug_github=slugify(data["repository"]["owner"]["login"]),
     )
     project = await sync_to_async(get_object_or_404)(
-        Project, main_namespace=namespace, slug=slugify(data["repository"]["name"])
+        Project,
+        main_namespace=namespace,
+        slug=slugify(data["repository"]["name"]),
     )
     git_repo = await sync_to_async(project.git)()
-    logger.debug(f"{namespace.slug}/{project.slug}: Pull request on {branch}: {event}")
+    logger.debug(
+        "%s/%s: Pull request on %s: %s",
+        namespace.slug,
+        project.slug,
+        branch,
+        event,
+    )
 
     # Prevent pull requests on master when necessary
     if event in ["opened", "reopened"]:
@@ -83,14 +93,18 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
             and login != namespace.slug_github
         ):
             logger.info(
-                f"{namespace.slug}/{project.slug}: New pr {data['number']} to master"
+                "%s/%s: New pr %s to master",
+                namespace.slug,
+                project.slug,
+                data["number"],
             )
             await sync_to_async(pr.create_issue_comment)(PR_MASTER_MSG)
 
     gh_remote_name = f"github/{login}"
     if gh_remote_name not in git_repo.remotes:
         remote = await sync_to_async(git_repo.create_remote)(
-            gh_remote_name, data["pull_request"]["head"]["repo"]["clone_url"]
+            gh_remote_name,
+            data["pull_request"]["head"]["repo"]["clone_url"],
         )
     else:
         remote = await sync_to_async(git_repo.remote)(gh_remote_name)
@@ -114,14 +128,20 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
 
         # Push the changes to gitlab
         logger.info(
-            f"{namespace.slug}/{project.slug}: Pushing {commit} on {branch} on gitlab"
+            "%s/%s: Pushing %s on %s on gitlab",
+            namespace.slug,
+            project.slug,
+            commit,
+            branch,
         )
         try:
             git_repo.git.push(gl_remote_name, branch)
         except git.exc.GitCommandError:
             logger.warning(
-                f"{namespace.slug}/{project.slug}: "
-                f"Failed to push on {branch} on gitlab, force pushing ..."
+                "%s/%s: Failed to push on %s on gitlab, force pushing ...",
+                namespace.slug,
+                project.slug,
+                branch,
             )
             git_repo.git.push(gl_remote_name, branch, force=True)
 
@@ -133,16 +153,29 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
         gitlab = await sync_to_async(project.gitlab)()
         try:
             await sync_to_async(gitlab.branches.delete)(branch)
-            logger.info(f"{namespace.slug}/{project.slug}: Deleted branch {branch}")
+            logger.info(
+                "%s/%s: Deleted branch %s",
+                namespace.slug,
+                project.slug,
+                branch,
+            )
         except GitlabDeleteError as e:
             logger.info(
-                f"{namespace.slug}/{project.slug}: branch {branch} not delete: {e}"
+                "%s/%s: branch %s not delete: %s",
+                namespace.slug,
+                project.slug,
+                branch,
+                e,
             )
 
     return HttpResponse(rep)
 
 
-async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
+async def push(  # noqa: C901
+    request: HttpRequest,
+    source: SOURCES,
+    rep: str,
+) -> HttpResponse:
     """Someone pushed on github or gitlab. Synchronise local & remote repos."""
     data = loads(request.body.decode())
     slug = slugify(data["repository"]["name"])
@@ -157,11 +190,14 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
         )
     else:
         namespace = await sync_to_async(get_object_or_404)(
-            Namespace, slug_github=slugify(data["repository"]["owner"]["login"])
+            Namespace,
+            slug_github=slugify(data["repository"]["owner"]["login"]),
         )
 
     project = await sync_to_async(get_object_or_404)(
-        Project, main_namespace=namespace, slug=slug
+        Project,
+        main_namespace=namespace,
+        slug=slug,
     )
 
     branch = data["ref"][11:]  # strip 'refs/heads/'
@@ -170,12 +206,16 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
     gh_remote_name = f"github/{namespace.slug}"
     git_repo = await sync_to_async(project.git)()
     logger.debug(
-        f"{namespace.slug}/{slug}: "
-        f"Push detected on {source.name} {branch} (commit {commit})"
+        "%s/%s: Push detected on %s {branch} (commit %s)",
+        namespace.slug,
+        slug,
+        source.name,
+        branch,
+        commit,
     )
 
     if branch.startswith(
-        "pr/"
+        "pr/",
     ):  # Don't sync pr/XX branches here, they are already handled by pull_request()
         return HttpResponse(rep)
 
@@ -212,14 +252,14 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
             else:
                 gitlab = await sync_to_async(project.gitlab)()
                 gitlab.branches.delete(branch)
-            logger.info(f"{namespace.slug}/{slug}: Deleted branch {branch}")
+            logger.info("%s/%s: Deleted branch %s", namespace.slug, slug, branch)
         return HttpResponse(rep)
 
     # Make sure we fetched the latest commit
     ref = gl_remote.refs[branch] if source == SOURCES.gitlab else gh_remote.refs[branch]
     if str(ref.commit) != commit:
         fail = f"Push: wrong commit: {ref.commit} vs {commit}"
-        logger.error(f"{namespace.slug}/{slug}: " + fail)
+        logger.error("%s/%s: %s", namespace.slug, slug, fail)
         return HttpResponseBadRequest(fail)
 
     # Update the branch to the latest commit
@@ -234,27 +274,38 @@ async def push(request: HttpRequest, source: SOURCES, rep: str) -> HttpResponse:
             branch not in gh_remote.refs or str(gh_remote.refs[branch].commit) != commit
         ):
             logger.info(
-                f"{namespace.slug}/{slug}: Pushing {commit} on {branch} on github"
+                "%s/%s: Pushing %s on %s on github",
+                namespace.slug,
+                slug,
+                commit,
+                branch,
             )
             await sync_to_async(git_repo.git.push)(gh_remote_name, branch)
         elif (
             branch not in gl_remote.refs or str(gl_remote.refs[branch].commit) != commit
         ):
             logger.info(
-                f"{namespace.slug}/{slug}: Pushing {commit} on {branch} on gitlab"
+                "%s/%s: Pushing %s on %s on gitlab",
+                namespace.slug,
+                slug,
+                commit,
+                branch,
             )
             await sync_to_async(git_repo.git.push)(gl_remote_name, branch)
         else:
             return HttpResponse("already synced")
     except git.exc.GitCommandError:
         # Probably failed because of a force push
-        logger.exception(f"{namespace.slug}/{slug}: Forge sync failed")
+        logger.exception("%s/%s: Forge sync failed", namespace.slug, slug)
         message = traceback.format_exc()
         message = re.sub(
-            r"://.*@", "://[REDACTED]@", message
+            r"://.*@",
+            "://[REDACTED]@",
+            message,
         )  # Hide access tokens in the mail
         await sync_to_async(mail_admins)(
-            f"Forge sync failed for {namespace.slug}/{slug}", message
+            f"Forge sync failed for {namespace.slug}/{slug}",
+            message,
         )
 
     return HttpResponse(rep)
@@ -271,14 +322,20 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
         slug_gitlab=slugify(data["project"]["path_with_namespace"].split("/")[0]),
     )
     project = await sync_to_async(get_object_or_404)(
-        Project, main_namespace=namespace, slug=slugify(data["project"]["name"])
+        Project,
+        main_namespace=namespace,
+        slug=slugify(data["project"]["name"]),
     )
     gh_repo = await sync_to_async(project.github)()
     ci_web_url = f"{project.url_gitlab()}/pipelines/{pipeline_id}"
     logger.debug(
-        f"{namespace.slug}/{project.slug}: "
-        f"Pipeline #{pipeline_id} on commit {commit} for branch {branch}, "
-        f"status: {gl_status}"
+        "%s/%s: Pipeline #%s on commit %s for branch %s, status: %s",
+        namespace.slug,
+        project.slug,
+        pipeline_id,
+        commit,
+        branch,
+        gl_status,
     )
 
     # Report the status to Github
@@ -287,21 +344,26 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
         if branch.startswith("pr/"):
             sha = await sync_to_async(gh_repo.get_commit)(sha=commit)
             await sync_to_async(sha.create_status)(
-                state=gh_status, target_url=ci_web_url, context="gitlab-ci"
+                state=gh_status,
+                target_url=ci_web_url,
+                context="gitlab-ci",
             )
         else:
             try:
                 sha = await sync_to_async(gh_repo.get_branch)(branch)
                 await sync_to_async(sha.commit.create_status)(
-                    state=gh_status, target_url=ci_web_url, context="gitlab-ci"
+                    state=gh_status,
+                    target_url=ci_web_url,
+                    context="gitlab-ci",
                 )
             except github.GithubException as e:
                 if e.status == 404:
                     # Happens when a new branch is created on gitlab
                     # and the pipeline event comes before the push event
                     logger.warning(
-                        f"Branch {branch} does not exist on github, "
-                        "unable to report the pipeline status."
+                        "Branch %s does not exist on github, "
+                        "unable to report the pipeline status.",
+                        branch,
                     )
                 else:
                     raise
@@ -320,7 +382,7 @@ async def webhook(request: HttpRequest) -> HttpResponse:
     how-to-handle-github-webhooks-using-django.html
     """
     # validate ip source
-    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR").split(", ")[0]
+    forwarded_for = request.headers.get("x-forwarded-for").split(", ")[0]
     # Fails if API rate limit exceeded
     # networks = httpx.get('https://api.github.com/meta').json()['hooks']
     networks = ["185.199.108.0/22", "140.82.112.0/20"]
@@ -329,7 +391,7 @@ async def webhook(request: HttpRequest) -> HttpResponse:
         return HttpResponseRedirect(reverse("login"))
 
     # validate signature
-    signature = request.META.get("HTTP_X_HUB_SIGNATURE")
+    signature = request.headers.get("x-hub-signature")
     if signature is None:
         logger.warning("no signature")
         return HttpResponseRedirect(reverse("login"))
@@ -348,7 +410,7 @@ async def webhook(request: HttpRequest) -> HttpResponse:
         return HttpResponseForbidden("wrong signature.")
 
     # process event
-    event = request.META.get("HTTP_X_GITHUB_EVENT", "ping")
+    event = request.headers.get("x-github-event", "ping")
     if event == "ping":
         return HttpResponse("pong")
     if event == "push":
@@ -373,7 +435,7 @@ async def gl_webhook(request: HttpRequest) -> HttpResponse:
         return HttpResponseRedirect(reverse("login"))
 
     # validate token
-    token = request.META.get("HTTP_X_GITLAB_TOKEN")
+    token = request.headers.get("x-gitlab-token")
     if token is None:
         logger.warning("no token")
         return HttpResponseRedirect(reverse("login"))
@@ -381,12 +443,12 @@ async def gl_webhook(request: HttpRequest) -> HttpResponse:
         logger.warning("wrong token")
         return HttpResponseForbidden("wrong token.")
 
-    event = request.META.get("HTTP_X_GITLAB_EVENT")
+    event = request.headers.get("x-gitlab-event")
     if event == "ping":
         return HttpResponse("pong")
-    elif event == "Pipeline Hook":
+    if event == "Pipeline Hook":
         return await pipeline(request, "pipeline event detected")
-    elif event == "Push Hook":
+    if event == "Push Hook":
         return await push(request, SOURCES.gitlab, "push event detected")
 
     return HttpResponseForbidden("event not found")

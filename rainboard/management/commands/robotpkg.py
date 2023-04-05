@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
 from rainboard.models import Project, Robotpkg
 from rainboard.utils import update_robotpkg
 
@@ -10,7 +11,7 @@ logger = logging.getLogger("rainboard.robotpkg")
 
 
 class Command(BaseCommand):
-    help = "Populate database with Robotpkg data"
+    help = "Populate database with Robotpkg data"  # noqa: A003
 
     def handle(self, *args, **options):
         path = settings.RAINBOARD_RPKG
@@ -25,8 +26,10 @@ class Command(BaseCommand):
                     path.glob(f"*/py-{slug}{project.suffix}"),
                 ):
                     obj, created = Robotpkg.objects.get_or_create(
-                        name=pkg.name, category=pkg.parent.name, project=project
+                        name=pkg.name,
+                        category=pkg.parent.name,
+                        project=project,
                     )
                     if created:
-                        logger.info(f"{project} found in {pkg}")
+                        logger.info("%s found in %s", project, pkg)
                         obj.update(pull=False)

@@ -1,5 +1,6 @@
 from django.urls import include, path
 from django.views.generic import RedirectView, TemplateView
+
 from rest_framework import routers
 
 from . import views

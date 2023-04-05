@@ -1,6 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+
 from rainboard.models import Project
 
 LICENSES = (
@@ -10,7 +11,7 @@ logger = logging.getLogger("rainboard.management.populate")
 
 
 class Command(BaseCommand):
-    help = "Delete personnal projects"
+    help = "Delete personnal projects"  # noqa: A003
 
     def handle(self, *args, **options):
         logger.info("removing unwanted projects:")

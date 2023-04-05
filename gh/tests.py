@@ -1,17 +1,18 @@
 import hmac
-import re
-from hashlib import sha1
 import logging
+import re
 from asyncio import sleep
+from hashlib import sha1
 
-from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 
 import git
+from asgiref.sync import sync_to_async
 from autoslug.utils import slugify
+
 from rainboard.models import Forge, Namespace, Project
 
 LOGGER = logging.getLogger("dashboard.gh.tests")
@@ -34,7 +35,7 @@ class GhTests(TestCase):
     @classmethod
     def setUpClass(cls):
         """Run only once before the tests to avoid getting the objects in each test."""
-        super(GhTests, cls).setUpClass()
+        super().setUpClass()
         cls.namespace, _ = Namespace.objects.get_or_create(
             name="gsaurel",
             slug_gitlab=slugify("gsaurel"),
@@ -66,7 +67,7 @@ class GhTests(TestCase):
 
         LOGGER.info("start gh tests")
 
-    def assertSync(self, branch):
+    def assertSync(self, branch):  # noqa: N802
         """Raise an exception if the branch is not synced between both repos."""
         last_commit_github = self.github.get_branch(branch).commit.sha
         last_commit_gitlab = self.gitlab.commits.list(ref_name=branch)[0].id
@@ -81,7 +82,9 @@ class GhTests(TestCase):
 
             if last_commit_github != last_commit_gitlab:
                 LOGGER.warning(
-                    f"sync: {branch} is not synced, force pushing commit {last_commit_gitlab} on github"
+                    "sync: %s is not synced, force pushing commit %s on github",
+                    branch,
+                    last_commit_gitlab,
                 )
                 git_repo = self.project.git()
 
@@ -102,7 +105,9 @@ class GhTests(TestCase):
                 # Force push the latest gitlab commit on github
                 git_repo.remote(gl_remote_name).fetch()
                 git_repo.git.push(
-                    "-f", gh_remote_name, f"{last_commit_gitlab}:{branch}"
+                    "-f",
+                    gh_remote_name,
+                    f"{last_commit_gitlab}:{branch}",
                 )
 
                 self.assertSync(branch)
@@ -132,25 +137,29 @@ class GhTests(TestCase):
                     "repo": {
                         "owner": {"login": pr_login},
                         "clone_url": await sync_to_async(
-                            self.project.remote_url_github
+                            self.project.remote_url_github,
                         )(),
                     },
                     "sha": last_commit,
-                }
+                },
             },
         }
 
         encoded_data = self.client._encode_json(
-            {} if data is None else data, content_type="application/json"
+            {} if data is None else data,
+            content_type="application/json",
         )
         request_body = self.client._encode_data(
-            encoded_data, content_type="application/json"
+            encoded_data,
+            content_type="application/json",
         )
         msg = force_bytes(request_body)
         signature = (
             "sha1="
             + hmac.new(
-                force_bytes(settings.GITHUB_WEBHOOK_KEY), msg, digestmod=sha1
+                force_bytes(settings.GITHUB_WEBHOOK_KEY),
+                msg,
+                digestmod=sha1,
             ).hexdigest()
         )
         LOGGER.info("posting a simulated gh webhook event")
@@ -166,13 +175,14 @@ class GhTests(TestCase):
     @redact_token
     async def gl_webhook_event(self, event, last_commit="", branch="master", status=""):
         """Simulate receiving an event from a gitlab webhook."""
+        path_with_namespace = f"{self.namespace.slug_gitlab}/{self.project.slug}"
         data = {
             "repository": {
                 "name": self.project.slug,
             },
             "project": {
                 "name": self.project.slug,
-                "path_with_namespace": f"{self.namespace.slug_gitlab}/{self.project.slug}",
+                "path_with_namespace": path_with_namespace,
             },
             "ref": f"refs/heads/{branch}",
             "after": last_commit,
@@ -197,13 +207,15 @@ class GhTests(TestCase):
 
         # Not from github IP
         response = await self.async_client.get(
-            reverse("webhook"), X_FORWARDED_FOR="5.5.5.5"
+            reverse("webhook"),
+            X_FORWARDED_FOR="5.5.5.5",
         )
         self.assertEqual(response.status_code, 302)
 
         # No signature
         response = await self.async_client.get(
-            reverse("webhook"), X_FORWARDED_FOR="140.82.112.1"
+            reverse("webhook"),
+            X_FORWARDED_FOR="140.82.112.1",
         )
         self.assertEqual(response.status_code, 302)
 
@@ -232,19 +244,23 @@ class GhTests(TestCase):
 
         # Not from gitlab IP
         response = await self.async_client.get(
-            reverse("gl-webhook"), X_FORWARDED_FOR="5.5.5.5"
+            reverse("gl-webhook"),
+            X_FORWARDED_FOR="5.5.5.5",
         )
         self.assertEqual(response.status_code, 302)
 
         # No token
         response = await self.async_client.get(
-            reverse("gl-webhook"), X_FORWARDED_FOR="140.93.0.1"
+            reverse("gl-webhook"),
+            X_FORWARDED_FOR="140.93.0.1",
         )
         self.assertEqual(response.status_code, 302)
 
         # Wrong token
         response = await self.async_client.get(
-            reverse("gl-webhook"), X_FORWARDED_FOR="140.93.0.1", X_GITLAB_TOKEN="foo"
+            reverse("gl-webhook"),
+            X_FORWARDED_FOR="140.93.0.1",
+            X_GITLAB_TOKEN="foo",
         )
         self.assertEqual(response.status_code, 403)
 
@@ -339,7 +355,8 @@ class GhTests(TestCase):
             branch_ref = self.github.get_git_ref(ref=f"heads/{target_branch_name}")
         else:
             branch_ref = self.github.create_git_ref(
-                ref=f"refs/heads/{target_branch_name}", sha=source_branch.commit.sha
+                ref=f"refs/heads/{target_branch_name}",
+                sha=source_branch.commit.sha,
             )
         file = self.github.get_contents("README.md", target_branch_name)
         self.github.update_file(
@@ -353,7 +370,9 @@ class GhTests(TestCase):
         target_branch = self.github.get_branch(target_branch_name)
         last_commit_github = target_branch.commit.sha
         response = await self.gh_webhook_event(
-            "push", last_commit_github, target_branch_name
+            "push",
+            last_commit_github,
+            target_branch_name,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
@@ -364,16 +383,20 @@ class GhTests(TestCase):
         # Test sync after deleting a branch
         branch_ref.delete()
         self.assertNotIn(
-            target_branch_name, [b.name for b in self.github.get_branches()]
+            target_branch_name,
+            [b.name for b in self.github.get_branches()],
         )
 
         response = await self.gh_webhook_event(
-            "push", "0000000000000000000000000000000000000000", target_branch_name
+            "push",
+            "0000000000000000000000000000000000000000",
+            target_branch_name,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
         self.assertNotIn(
-            target_branch_name, [b.name for b in self.gitlab.branches.list()]
+            target_branch_name,
+            [b.name for b in self.gitlab.branches.list()],
         )
 
     async def test_branch_gitlab(self):
@@ -388,7 +411,7 @@ class GhTests(TestCase):
             target_branch = self.gitlab.branches.get(target_branch_name)
         else:
             target_branch = self.gitlab.branches.create(
-                {"branch": target_branch_name, "ref": source_branch_name}
+                {"branch": target_branch_name, "ref": source_branch_name},
             )
 
         file = self.gitlab.files.get(file_path="README.md", ref=target_branch_name)
@@ -397,7 +420,9 @@ class GhTests(TestCase):
 
         last_commit_gitlab = self.gitlab.commits.list(ref_name=target_branch_name)[0].id
         response = await self.gl_webhook_event(
-            "Push Hook", last_commit_gitlab, target_branch_name
+            "Push Hook",
+            last_commit_gitlab,
+            target_branch_name,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
@@ -408,16 +433,20 @@ class GhTests(TestCase):
         # Test sync after deleting a branch
         target_branch.delete()
         self.assertNotIn(
-            target_branch_name, [b.name for b in self.gitlab.branches.list()]
+            target_branch_name,
+            [b.name for b in self.gitlab.branches.list()],
         )
 
         response = await self.gl_webhook_event(
-            "Push Hook", "0000000000000000000000000000000000000000", target_branch_name
+            "Push Hook",
+            "0000000000000000000000000000000000000000",
+            target_branch_name,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
         self.assertNotIn(
-            target_branch_name, [b.name for b in self.github.get_branches()]
+            target_branch_name,
+            [b.name for b in self.github.get_branches()],
         )
 
     async def test_pipeline(self):
@@ -425,7 +454,9 @@ class GhTests(TestCase):
         await self.sync()
         last_commit = self.gitlab.commits.list(ref_name="master")[0].id
         response = await self.gl_webhook_event(
-            "Pipeline Hook", last_commit, status="success"
+            "Pipeline Hook",
+            last_commit,
+            status="success",
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(
@@ -445,7 +476,10 @@ class GhTests(TestCase):
         last_commit = self.github.get_branch("devel").commit.sha
         github = await sync_to_async(self.project.github)()
         pr_master = github.create_pull(
-            title="Test pr on master", body="", head="devel", base="master"
+            title="Test pr on master",
+            body="",
+            head="devel",
+            base="master",
         )
         response = await self.gh_webhook_event(
             "pull_request",
@@ -460,17 +494,21 @@ class GhTests(TestCase):
                 c.body
                 for c in pr_master.get_issue_comments()
                 if not_accepted_string in c.body
-            ]
+            ],
         )
         await sleep(30)
         self.assertIn(
-            f"pr/{pr_master.number}", [b.name for b in self.gitlab.branches.list()]
+            f"pr/{pr_master.number}",
+            [b.name for b in self.gitlab.branches.list()],
         )
 
         # Test pr on devel
         last_commit = self.github.get_branch("master").commit.sha
         pr_devel = github.create_pull(
-            title="Test pr on devel", body="", head="master", base="devel"
+            title="Test pr on devel",
+            body="",
+            head="master",
+            base="devel",
         )
         response = await self.gh_webhook_event(
             "pull_request",
@@ -485,21 +523,26 @@ class GhTests(TestCase):
                 c.body
                 for c in pr_devel.get_issue_comments()
                 if not_accepted_string in c.body
-            ]
+            ],
         )
         await sleep(30)
         self.assertIn(
-            f"pr/{pr_devel.number}", [b.name for b in self.gitlab.branches.list()]
+            f"pr/{pr_devel.number}",
+            [b.name for b in self.gitlab.branches.list()],
         )
 
         # Close the pr
         for pr in [pr_master, pr_devel]:
             pr.edit(state="closed")
             response = await self.gh_webhook_event(
-                "pull_request", pr_action="closed", pr_login="foo", pr_number=pr.number
+                "pull_request",
+                pr_action="closed",
+                pr_login="foo",
+                pr_number=pr.number,
             )
             self.assertEqual(response.status_code, 200)
             await sleep(30)
             self.assertNotIn(
-                f"pr/{pr.number}", [b.name for b in self.gitlab.branches.list()]
+                f"pr/{pr.number}",
+                [b.name for b in self.gitlab.branches.list()],
             )
