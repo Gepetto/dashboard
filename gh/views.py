@@ -206,7 +206,7 @@ async def push(  # noqa: C901
     gh_remote_name = f"github/{namespace.slug}"
     git_repo = await sync_to_async(project.git)()
     logger.debug(
-        "%s/%s: Push detected on %s {branch} (commit %s)",
+        "%s/%s: Push detected on %s %s (commit %s)",
         namespace.slug,
         slug,
         source.name,
