@@ -1,28 +1,50 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.isort]
+known_django = "django"
+profile = "black"
+sections = "FUTURE,STDLIB,DJANGO,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 
 [tool.poetry]
+authors = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
+description = "Gepetto Software Development Dashboard"
+license = "BSD-2-Clause"
 name = "dashboard"
 version = "0.1.0"
-description = "Gepetto Software Development Dashboard"
-authors = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
-license = "BSD-2-Clause"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-ndh = "^6.0.0"
+GitPython = "^3.1.30"
+PyGithub = "^1.55"
 django = "^4.2"
+django-auth-ldap = "^3.0.0"
 django-filter = "^21.1"
 django-tables2 = "^2.4.0"
-httpx = "^0.23.0"
-GitPython = "^3.1.30"
 djangorestframework = "^3.12.4"
-django-auth-ldap = "^3.0.0"
-python-gitlab = "^3.0.0"
-PyGithub = "^1.55"
-ipython = "^8.10.0"
-redis = "^4.5.4"
 hiredis = "^2.0.0"
+httpx = "^0.23.0"
+ipython = "^8.10.0"
+ndh = "^6.0.0"
+python = "^3.10"
+python-gitlab = "^3.0.0"
+redis = "^4.5.4"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+coverage = "^7.2.1"
+isort = "^5.12.0"
+pre-commit = "^3.0.3"
+ruff = "^0.0.260"
+
+[tool.ruff]
+extend-exclude = ["migrations"]
+extend-ignore = ["D203", "D213"]
+extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
+target-version = "py310"
+
+[tool.tomlsort]
+all = true
