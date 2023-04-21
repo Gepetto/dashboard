@@ -70,7 +70,9 @@ class GhTests(TestCase):
     def assertSync(self, branch):  # noqa: N802
         """Raise an exception if the branch is not synced between both repos."""
         last_commit_github = self.github.get_branch(branch).commit.sha
-        last_commit_gitlab = self.gitlab.commits.list(ref_name=branch)[0].id
+        last_commit_gitlab = (
+            self.gitlab.commits.list(ref_name=branch, iterator=True).next().id
+        )
         self.assertEqual(last_commit_github, last_commit_gitlab)
 
     @redact_token
@@ -310,7 +312,9 @@ class GhTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
 
-        last_commit_gitlab = self.gitlab.commits.list(ref_name=branch)[0].id
+        last_commit_gitlab = (
+            self.gitlab.commits.list(ref_name=branch, iterator=True).next().id
+        )
         self.assertEqual(last_commit_github, last_commit_gitlab)
 
     async def test_push_github_master(self):
@@ -324,14 +328,16 @@ class GhTests(TestCase):
     async def push_gitlab(self, branch):
         """Test sync after pushing to the given branch on gitlab."""
         await self.sync()
-        last_commit = self.gitlab.commits.list(ref_name=branch)[0].id
+        last_commit = self.gitlab.commits.list(ref_name=branch, iterator=True).next().id
 
         # Push a new commit to gitlab
         file = self.gitlab.files.get(file_path="README.md", ref=branch)
         file.content = last_commit[:8]
         file.save(branch=branch, commit_message=f"Test push on gitlab {branch}")
 
-        last_commit_gitlab = self.gitlab.commits.list(ref_name=branch)[0].id
+        last_commit_gitlab = (
+            self.gitlab.commits.list(ref_name=branch, iterator=True).next().id
+        )
         self.assertNotEqual(last_commit, last_commit_gitlab)
 
         response = await self.gl_webhook_event("Push Hook", last_commit_gitlab, branch)
@@ -440,7 +446,11 @@ class GhTests(TestCase):
         file.content = last_commit[:8]
         file.save(branch=target_branch_name, commit_message="Test new branch on gitlab")
 
-        last_commit_gitlab = self.gitlab.commits.list(ref_name=target_branch_name)[0].id
+        last_commit_gitlab = (
+            self.gitlab.commits.list(ref_name=target_branch_name, iterator=True)
+            .next()
+            .id
+        )
         response = await self.gl_webhook_event(
             "Push Hook",
             last_commit_gitlab,
@@ -474,7 +484,9 @@ class GhTests(TestCase):
     async def test_pipeline(self):
         """Test reporting the gitlab pipeline status to github."""
         await self.sync()
-        last_commit = self.gitlab.commits.list(ref_name="master")[0].id
+        last_commit = (
+            self.gitlab.commits.list(ref_name="master", iterator=True).next().id
+        )
         response = await self.gl_webhook_event(
             "Pipeline Hook",
             last_commit,
