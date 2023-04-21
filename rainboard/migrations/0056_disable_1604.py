@@ -3,16 +3,16 @@
 from django.db import migrations
 
 
-def disable_trusty(apps, schema_editor):
+def disable_xenial(apps, schema_editor):
     Target = apps.get_model("rainboard", "Target")
-    trusty = Target.objects.get(name="16.04")
-    trusty.active = False
-    trusty.save()
+    xenial = Target.objects.get(name="16.04")
+    xenial.active = False
+    xenial.save()
     Robotpkg = apps.get_model("rainboard", "Robotpkg")
     for rpkg in Robotpkg.objects.filter(
         project__slug__in=["eigenpy", "hpp-fcl", "pinocchio", "tsid", "crocoddyl"]
     ):
-        rpkg.extended_target.add(trusty)
+        rpkg.extended_target.add(xenial)
 
 
 class Migration(migrations.Migration):
@@ -21,5 +21,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(disable_trusty),
+        migrations.RunPython(disable_xenial),
     ]

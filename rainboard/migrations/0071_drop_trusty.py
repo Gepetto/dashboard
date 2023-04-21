@@ -3,14 +3,14 @@
 from django.db import migrations
 
 
-def drop_trusty(apps, schema_editor):
+def drop_xenial(apps, schema_editor):
     target = apps.get_model("rainboard", "Target")
     robotpkg = apps.get_model("rainboard", "Robotpkg")
-    trusty = target.objects.get(name="16.04")
+    xenial = target.objects.get(name="16.04")
     for rpkg in robotpkg.objects.filter(
         project__slug__in=["eigenpy", "hpp-fcl", "pinocchio", "tsid", "crocoddyl"],
     ):
-        rpkg.extended_target.remove(trusty)
+        rpkg.extended_target.remove(xenial)
 
 
 class Migration(migrations.Migration):
@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(drop_trusty),
+        migrations.RunPython(drop_xenial),
     ]
