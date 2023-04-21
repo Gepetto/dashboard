@@ -78,7 +78,10 @@ class GhTests(TestCase):
         """Force both repos to be synced."""
         for branch in ("master", "devel"):
             last_commit_github = self.github.get_branch(branch).commit.sha
-            last_commit_gitlab = self.gitlab.commits.list(ref_name=branch)[0].id
+            last_commit_gitlab = self.gitlab.commits.list(
+                ref_name=branch,
+                iterator=True,
+            )[0].id
 
             if last_commit_github != last_commit_gitlab:
                 LOGGER.warning(
@@ -378,7 +381,10 @@ class GhTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
 
-        last_commit_gitlab = self.gitlab.commits.list(ref_name=target_branch_name)[0].id
+        last_commit_gitlab = self.gitlab.commits.list(
+            ref_name=target_branch_name,
+            iterator=True,
+        )[0].id
         self.assertEqual(last_commit_github, last_commit_gitlab)
 
         # Test sync after deleting a branch
@@ -405,7 +411,9 @@ class GhTests(TestCase):
         await self.sync()
         source_branch_name = "master"
         target_branch_name = "test-branch-gitlab"
-        last_commit = self.gitlab.commits.list(ref_name=source_branch_name)[0].id
+        last_commit = self.gitlab.commits.list(
+            ref_name=source_branch_name, iterator=True,
+        )[0].id
 
         # Test sync after creating a new branch
         if target_branch_name in [b.name for b in self.gitlab.branches.list()]:
