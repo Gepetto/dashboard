@@ -459,6 +459,8 @@ class GhTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
 
+        await sleep(5)
+        await self.sync()
         last_commit_github = self.github.get_branch(target_branch_name).commit.sha
         self.assertEqual(last_commit_github, last_commit_gitlab)
 
