@@ -412,7 +412,8 @@ class GhTests(TestCase):
         source_branch_name = "master"
         target_branch_name = "test-branch-gitlab"
         last_commit = self.gitlab.commits.list(
-            ref_name=source_branch_name, iterator=True,
+            ref_name=source_branch_name,
+            iterator=True,
         )[0].id
 
         # Test sync after creating a new branch
