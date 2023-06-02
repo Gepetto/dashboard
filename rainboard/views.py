@@ -133,19 +133,21 @@ def json_doc(request):
     """
     return JsonResponse(
         {
-            "ret": [
-                (
-                    b.project.slug,
-                    b.repo.namespace.slug,
-                    b.name.split("/", maxsplit=2)[2],
-                )
-                for b in models.Branch.objects.exclude(
-                    Q(keep_doc=False)
-                    | Q(project__main_namespace__from_gepetto=False)
-                    | Q(project__robotpkg__isnull=True)
-                    | Q(project__archived=True),
-                )
-            ],
+            "ret": list(
+                {
+                    (
+                        b.project.slug,
+                        b.repo.namespace.slug,
+                        b.name.split("/", maxsplit=2)[2],
+                    )
+                    for b in models.Branch.objects.exclude(
+                        Q(keep_doc=False)
+                        | Q(project__main_namespace__from_gepetto=False)
+                        | Q(project__robotpkg__isnull=True)
+                        | Q(project__archived=True),
+                    )
+                },
+            ),
         },
     )
 
