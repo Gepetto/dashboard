@@ -327,7 +327,7 @@ async def pipeline(request: HttpRequest, rep: str) -> HttpResponse:
         slug=slugify(data["project"]["name"]),
     )
     gh_repo = await sync_to_async(project.github)()
-    ci_web_url = f"{project.url_gitlab()}/pipelines/{pipeline_id}"
+    ci_web_url = f"{project.url_gitlab()}/-/pipelines/{pipeline_id}"
     logger.debug(
         "%s/%s: Pipeline #%s on commit %s for branch %s, status: %s",
         namespace.slug,
