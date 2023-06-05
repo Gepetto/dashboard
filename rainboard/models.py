@@ -78,10 +78,6 @@ GEPETTO_SLUGS = [
     "simple-robotics",
 ]
 
-BAD_ONES = (
-    Q(main_namespace__from_gepetto=False) | Q(robotpkg__isnull=True) | Q(archived=True)
-)
-
 
 class Namespace(NamedModel):
     group = models.BooleanField(default=False)
@@ -249,6 +245,16 @@ class Forge(Links, NamedModel):
                     update_travis(namespace, repository)
 
 
+class ProjectQuerySet(models.QuerySet):
+    def from_gepetto(self):
+        """Consider only our active and maintained projects."""
+        return self.exclude(
+            Q(main_namespace__from_gepetto=False)
+            | Q(robotpkg__isnull=True)
+            | Q(archived=True),
+        )
+
+
 class Project(Links, NamedModel, TimeStampedModel):
     public = models.BooleanField(default=True)
     main_namespace = models.ForeignKey(
@@ -285,6 +291,8 @@ class Project(Links, NamedModel, TimeStampedModel):
     accept_pr_to_master = models.BooleanField(default=False)
     clang_format = models.PositiveSmallIntegerField(default=12)
     clang_default = models.BooleanField(default=True)
+
+    objects = ProjectQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
         self.name = valid_name(self.name)
@@ -1624,7 +1632,7 @@ def ordered_projects():
     """helper for gepetto/buildfarm/generate_all.py"""
     fields = "category", "name", "project__main_namespace__slug"
 
-    projects = Project.objects.exclude(BAD_ONES)
+    projects = Project.objects.from_gepetto()
     rpkgs = list(Robotpkg.objects.filter(project__in=projects).values_list(*fields))
 
     deps_cache = {}

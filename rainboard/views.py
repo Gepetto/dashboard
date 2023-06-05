@@ -38,7 +38,7 @@ class ProjectsView(SingleTableMixin, FilterView):
 
 
 class GepettoProjectsView(ProjectsView):
-    queryset = models.Project.objects.exclude(models.BAD_ONES)
+    queryset = models.Project.objects.from_gepetto()
 
 
 class ProjectView(DetailView):
@@ -178,7 +178,7 @@ def docker(request):
 def graph_svg(request):
     with Path("/tmp/graph").open("w") as f:
         print("digraph { rankdir=LR;", file=f)
-        for project in models.Project.objects.exclude(models.BAD_ONES):
+        for project in models.Project.objects.from_gepetto():
             print(
                 f'{{I{project.pk} [label="{project}" '
                 f'URL="{project.get_absolute_url()}"];}}',
@@ -281,4 +281,4 @@ class BoardView(TemplateView):
     template_name = "rainboard/board.html"
 
     def get_context_data(self, **kwargs):
-        return {"projects": models.Project.objects.exclude(models.BAD_ONES)}
+        return {"projects": models.Project.objects.from_gepetto()

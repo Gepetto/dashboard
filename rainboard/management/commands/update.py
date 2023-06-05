@@ -10,7 +10,6 @@ from django.utils import timezone
 import github
 
 from rainboard.models import (
-    BAD_ONES,
     Branch,
     Forge,
     Image,
@@ -29,7 +28,7 @@ SKIP_LABEL = "skip dashboard"
 
 def update_issues_pr():
     print("\nUpdating issues and pull requests")
-    for project in Project.objects.exclude(BAD_ONES):
+    for project in Project.objects.from_gepetto():
         try:
             gh = project.github()
             main_repo = project.repo_set.filter(
