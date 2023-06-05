@@ -275,13 +275,13 @@ class Project(Links, NamedModel, TimeStampedModel):
         blank=True,
         null=True,
     )
-    homepage = models.URLField(max_length=200, blank=True)
-    description = models.TextField(blank=True)
-    version = models.CharField(max_length=20, blank=True)
+    homepage = models.URLField(max_length=200, blank=True, default="")
+    description = models.TextField(blank=True, default="")
+    version = models.CharField(max_length=20, blank=True, default="")
     updated = models.DateTimeField(blank=True, null=True)
     tests = models.BooleanField(default=True)
     docs = models.BooleanField(default=True)
-    cmake_name = models.CharField(max_length=200, blank=True)
+    cmake_name = models.CharField(max_length=200, blank=True, default="")
     archived = models.BooleanField(default=False)
     suffix = models.CharField(max_length=50, default="", blank=True)
     allow_format_failure = models.BooleanField(default=True)
@@ -657,8 +657,8 @@ class Repo(TimeStampedModel):
         blank=True,
         null=True,
     )
-    homepage = models.URLField(max_length=200, blank=True)
-    url = models.URLField(max_length=200, blank=True)
+    homepage = models.URLField(max_length=200, blank=True, default="")
+    url = models.URLField(max_length=200, blank=True, default="")
     default_branch = models.CharField(max_length=50)
     open_issues = models.PositiveSmallIntegerField(blank=True, null=True)
     open_pr = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -666,7 +666,7 @@ class Repo(TimeStampedModel):
     forked_from = models.PositiveIntegerField(blank=True, null=True)
     clone_url = models.URLField(max_length=200)
     travis_id = models.PositiveIntegerField(blank=True, null=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, default="")
     archived = models.BooleanField(default=False)
 
     def __str__(self):
@@ -1102,7 +1102,7 @@ class Robotpkg(NamedModel):
     master_repository = models.CharField(max_length=200, default="")
     maintainer = models.CharField(max_length=200, default="")
     comment = models.TextField()
-    homepage = models.URLField(max_length=200, blank=True)
+    homepage = models.URLField(max_length=200, blank=True, default="")
 
     license = models.ForeignKey(  # noqa: A003
         License,
