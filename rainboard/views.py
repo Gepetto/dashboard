@@ -281,4 +281,4 @@ class BoardView(TemplateView):
     template_name = "rainboard/board.html"
 
     def get_context_data(self, **kwargs):
-        return {"projects": models.Project.objects.from_gepetto()
+        return {"projects": models.Project.objects.from_gepetto()}
