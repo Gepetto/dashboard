@@ -1203,7 +1203,7 @@ class Image(models.Model):
     robotpkg = models.ForeignKey(Robotpkg, on_delete=models.CASCADE)
     target = models.ForeignKey(Target, on_delete=models.CASCADE)
     created = models.DateTimeField(blank=True, null=True)
-    image = models.CharField(max_length=12, blank=True, null=True)
+    image = models.CharField(max_length=12, blank=True, default="")
     allow_failure = models.BooleanField(default=False)
 
     objects = ImageQuerySet.as_manager()
