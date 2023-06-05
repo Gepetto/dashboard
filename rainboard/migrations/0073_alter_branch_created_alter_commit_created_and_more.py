@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="project",
             name="cmake_name",
-            field=models.CharField(blank=True, max_length=200),
+            field=models.CharField(blank=True, default="", max_length=200),
         ),
         migrations.AlterField(
             model_name="project",
@@ -62,12 +62,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="project",
             name="description",
-            field=models.TextField(blank=True),
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="project",
             name="homepage",
-            field=models.URLField(blank=True),
+            field=models.URLField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="project",
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="project",
             name="version",
-            field=models.CharField(blank=True, max_length=20),
+            field=models.CharField(blank=True, default="", max_length=20),
         ),
         migrations.AlterField(
             model_name="repo",
@@ -87,12 +87,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="repo",
             name="description",
-            field=models.TextField(blank=True),
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="repo",
             name="homepage",
-            field=models.URLField(blank=True),
+            field=models.URLField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="repo",
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="repo",
             name="url",
-            field=models.URLField(blank=True),
+            field=models.URLField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="robotpkg",
@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="robotpkg",
             name="homepage",
-            field=models.URLField(blank=True),
+            field=models.URLField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="robotpkg",
