@@ -97,7 +97,7 @@ class Command(BaseCommand):
         update_robotpkg(settings.RAINBOARD_RPKG)
 
         log("\nUpdating gepetto projects\n")
-        for project in Project.objects.exclude(BAD_ONES):
+        for project in Project.objects.from_gepett():
             log(f" {project}")
             project.update(only_main_branches=False)
 
