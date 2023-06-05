@@ -9,15 +9,7 @@ from django.utils import timezone
 
 import github
 
-from rainboard.models import (
-    Branch,
-    Forge,
-    Image,
-    IssuePr,
-    Project,
-    Repo,
-    Robotpkg,
-)
+from rainboard.models import Branch, Forge, Image, IssuePr, Project, Repo, Robotpkg
 from rainboard.utils import SOURCES, update_robotpkg
 
 # Only show issues and pull requests older than this

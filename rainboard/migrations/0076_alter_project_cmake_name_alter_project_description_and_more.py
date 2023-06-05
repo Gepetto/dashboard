@@ -8,5 +8,4 @@ class Migration(migrations.Migration):
         ("rainboard", "0075_alter_image_image"),
     ]
 
-    operations = [
-    ]
+    operations = []
