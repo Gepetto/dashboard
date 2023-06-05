@@ -289,8 +289,6 @@ class Project(Links, NamedModel, TimeStampedModel):
     min_python_major = models.SmallIntegerField(default=2)
     has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
-    clang_format = models.PositiveSmallIntegerField(default=12)
-    clang_default = models.BooleanField(default=True)
 
     objects = ProjectQuerySet.as_manager()
 
@@ -304,10 +302,6 @@ class Project(Links, NamedModel, TimeStampedModel):
             ret.append("--no-cpp")
         if not self.has_python:
             ret.append("--no-python")
-        if self.clang_default:
-            ret.append("--clang-default")
-        elif self.clang_format == 6:
-            ret.append("--clang-6")
         return " ".join(ret)
 
     def git_path(self):
