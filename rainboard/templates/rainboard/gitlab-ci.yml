@@ -54,6 +54,5 @@ format:
     when: runner_system_failure
   before_script:
     - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
-    - test -f /builds/.clang-format || ln -s /root/.clang-format /builds
   script:
     - entrypoint.sh {{ project.linters }}
