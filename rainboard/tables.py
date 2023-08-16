@@ -8,7 +8,7 @@ from . import models, utils
 
 class StrippedTable(tables.Table):
     class Meta:
-        attrs = {"class": "table table-striped"}
+        attrs = {"class": "table table-striped"}  # noqa: RUF012
 
 
 class ForgeTable(StrippedTable):
