@@ -21,7 +21,7 @@ class DependencyAdmin(admin.ModelAdmin):
 @admin.register(models.Project)
 class ProjectAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug")
-    inlines = [RobotpkgInline]
+    inlines = [RobotpkgInline]  # noqa: RUF012
 
 
 @admin.register(models.Target)
