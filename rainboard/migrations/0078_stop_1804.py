@@ -8,7 +8,7 @@ def drop_1804(apps, schema_editor):
     for rpkg in robotpkg.objects.filter(
         project__slug__in=["eigenpy", "hpp-fcl", "pinocchio"],
     ):
-        r.extended_target.clear()
+        rpkg.extended_target.clear()
 
 
 class Migration(migrations.Migration):
