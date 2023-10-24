@@ -306,7 +306,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         if self.clang_args:
             ret.append("--clang-args")
             ret.append(f"'{self.clang_args}'")
-        return " ".join(ret)
+        return mark_safe(" ".join(ret))
 
     def git_path(self):
         return (
