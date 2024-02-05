@@ -11,7 +11,7 @@ logger = logging.getLogger("rainboard.management.populate")
 
 
 class Command(BaseCommand):
-    help = "Delete personnal projects"  # noqa: A003
+    help = "Delete personnal projects"
 
     def handle(self, *args, **options):
         logger.info("removing unwanted projects:")

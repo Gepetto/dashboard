@@ -269,7 +269,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         null=True,
         blank=True,
     )
-    license = models.ForeignKey(  # noqa: A003
+    license = models.ForeignKey(
         License,
         on_delete=models.SET_NULL,
         blank=True,
@@ -655,7 +655,7 @@ class Repo(TimeStampedModel):
     forge = models.ForeignKey(Forge, on_delete=models.CASCADE)
     namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    license = models.ForeignKey(  # noqa: A003
+    license = models.ForeignKey(
         License,
         on_delete=models.SET_NULL,
         blank=True,
@@ -1108,7 +1108,7 @@ class Robotpkg(NamedModel):
     comment = models.TextField()
     homepage = models.URLField(max_length=200, blank=True, default="")
 
-    license = models.ForeignKey(  # noqa: A003
+    license = models.ForeignKey(
         License,
         on_delete=models.SET_NULL,
         blank=True,
@@ -1227,9 +1227,9 @@ class Image(models.Model):
             "TARGET": self.target,
             "ROBOTPKG": self.robotpkg,
             "CATEGORY": self.robotpkg.category,
-            "REGISTRY": settings.PUBLIC_REGISTRY
-            if self.public
-            else settings.PRIVATE_REGISTRY,
+            "REGISTRY": (
+                settings.PUBLIC_REGISTRY if self.public else settings.PRIVATE_REGISTRY
+            ),
         }
         if not self.robotpkg.project.public:
             ret["IMAGE"] = "robotpkg-jrl"

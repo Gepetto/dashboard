@@ -17,7 +17,7 @@ from rainboard.models import (
 
 
 class Command(BaseCommand):
-    help = "run project creation stuff"  # noqa: A003
+    help = "run project creation stuff"
 
     def add_arguments(self, parser):
         parser.add_argument("org")

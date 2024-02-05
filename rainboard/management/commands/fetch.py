@@ -8,7 +8,7 @@ logger = logging.getLogger("rainboard.management.fetch")
 
 
 class Command(BaseCommand):
-    help = "Fetch all remotes"  # noqa: A003
+    help = "Fetch all remotes"
 
     def handle(self, *args, **options):
         logger.info("Fetching all repos")

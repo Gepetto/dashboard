@@ -14,7 +14,7 @@ logger = logging.getLogger("rainboard.management.populate")
 
 
 class Command(BaseCommand):
-    help = "populates licenses, projets, namespaces and repos from forges"  # noqa: A003
+    help = "populates licenses, projets, namespaces and repos from forges"
 
     def handle(self, *args, **options):
         logger.info("updating licenses")

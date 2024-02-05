@@ -1,4 +1,5 @@
 """Views for dashboard_apps."""
+
 import hmac
 import logging
 import re

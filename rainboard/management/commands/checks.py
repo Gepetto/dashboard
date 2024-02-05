@@ -18,7 +18,7 @@ def exclude_falsy(qs, attr):
 
 
 class Command(BaseCommand):
-    help = "Checks some metadata"  # noqa: A003
+    help = "Checks some metadata"
 
     def handle(self, *args, **options):  # noqa: C901
         for attr_name in ATTRIBUTES:
