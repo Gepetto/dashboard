@@ -22,7 +22,7 @@ repos:
     -   id: isort
         args: ["--filter-files"]
 -   repo: https://github.com/psf/black
-    rev: 23.12.0
+    rev: 24.1.1
     hooks:
     -   id: black
 -   repo: https://github.com/adamchainz/django-upgrade
@@ -36,7 +36,7 @@ repos:
     - id: toml-sort-fix
       exclude: 'poetry.lock'
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.8
+  rev: v0.2.0
   hooks:
     - id: ruff
       args: [--fix, --exit-non-zero-on-fix]

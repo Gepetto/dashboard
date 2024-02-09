@@ -63,7 +63,7 @@ def update_issues_pr():
 
 
 class Command(BaseCommand):
-    help = "Update the DB"  # noqa: A003
+    help = "Update the DB"
 
     def handle(self, *args, **options):
         def log(message):

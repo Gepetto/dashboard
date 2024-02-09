@@ -11,7 +11,7 @@ logger = logging.getLogger("rainboard.robotpkg")
 
 
 class Command(BaseCommand):
-    help = "Populate database with Robotpkg data"  # noqa: A003
+    help = "Populate database with Robotpkg data"
 
     def handle(self, *args, **options):
         path = settings.RAINBOARD_RPKG

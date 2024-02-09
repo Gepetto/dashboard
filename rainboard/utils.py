@@ -34,7 +34,7 @@ def api_next(source, req):
                 if "next" in link:
                     return int(re.search(r"page=(\d+)", link).group(1))
     if source == SOURCES.gitlab:
-        if "X-Next-Page" in req.headers and req.headers["X-Next-Page"]:
+        if req.headers.get("X-Next-Page"):
             return int(req.headers["X-Next-Page"])
         return None
     return None
