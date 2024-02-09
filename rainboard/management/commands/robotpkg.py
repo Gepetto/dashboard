@@ -24,6 +24,7 @@ class Command(BaseCommand):
                 for pkg in itertools.chain(
                     path.glob(f"*/{slug}{project.suffix}"),
                     path.glob(f"*/py-{slug}{project.suffix}"),
+                    path.glob(f"*/{slug}{project.suffix}-ros2"),
                 ):
                     obj, created = Robotpkg.objects.get_or_create(
                         name=pkg.name,
