@@ -1251,10 +1251,13 @@ class Image(models.Model):
 
     def build(self):
         args = self.get_build_args()
-        build_args = sum(
-            (["--build-arg", f"{key}={value}"] for key, value in args.items()),
-            [],
-        )
+        build_args = [
+            item
+            for sublist in (
+                ["--build-arg", f"{key}={value}"] for key, value in args.items()
+            )
+            for item in sublist
+        ]
         return ["docker", "build", "-t", self.get_image_name(), *build_args, "."]
 
     def pull(self):
