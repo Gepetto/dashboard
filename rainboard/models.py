@@ -543,7 +543,10 @@ class Project(Links, NamedModel, TimeStampedModel):
             return images.first()
         if images.count() == 2:
             return next(
-                image for image in images if image.robotpkg.name.startswith("py-")
+                image
+                for image in images
+                if image.robotpkg.name.startswith("py-")
+                or image.robotpkg.name.endswith("-ros2")
             )
         return None
 
