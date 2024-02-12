@@ -89,7 +89,7 @@ class Command(BaseCommand):
         update_robotpkg(settings.RAINBOARD_RPKG)
 
         log("\nUpdating gepetto projects\n")
-        for project in Project.objects.from_gepett():
+        for project in Project.objects.from_gepetto():
             log(f" {project}")
             project.update(only_main_branches=False)
 
