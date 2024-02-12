@@ -1513,12 +1513,12 @@ def update_github(forge, namespace, data):
             "clone_url": data["clone_url"],
         },
     )
-    repo.homepage = data["homepage"]
+    repo.homepage = data["homepage"] or ""
     repo.url = data["html_url"]
     repo.repo_id = data["id"]
     repo.default_branch = data["default_branch"]
     repo.open_issues = data["open_issues"]
-    repo.description = data["description"]
+    repo.description = data["description"] or ""
 
     repo_data = repo.api_data()
     if repo_data and "license" in repo_data and repo_data["license"]:
