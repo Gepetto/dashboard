@@ -25,7 +25,7 @@ from .utils import SOURCES, api_next, invalid_mail, slugify_with_dots, valid_nam
 
 logger = logging.getLogger("rainboard.models")
 
-MAIN_BRANCHES = ["master", "main", "devel"]
+MAIN_BRANCHES = ["master", "main", "stable", "devel"]
 RPKG_URL = "http://robotpkg.openrobots.org"
 DOC_URL = "https://gepettoweb.laas.fr/doc"
 RPKG_LICENSES = {
@@ -363,7 +363,11 @@ class Project(Links, NamedModel, TimeStampedModel):
                 slug=slugify(namespace),
                 defaults={"name": namespace},
             )
-            forge = Forge.objects.get(slug=forge)
+            try:
+                forge = Forge.objects.get(slug=forge)
+            except Forge.DoesNotExist:
+                logger.error('wrong branch "%s" in %s', branch, self.git_path())
+                continue
             repo, created = Repo.objects.get_or_create(
                 forge=forge,
                 namespace=namespace,
@@ -642,7 +646,7 @@ class Project(Links, NamedModel, TimeStampedModel):
         """Show state and link to latest master & devel gitlab pipelines"""
         repo = self.main_gitlab_repo()
         ret = []
-        for branch in ["master", "main", "devel"]:
+        for branch in MAIN_BRANCHES:
             build = repo.cibuild_set.filter(branch__name__endswith=branch).first()
             if build is not None:
                 link = repo.url + f"/-/pipelines/{build.build_id}"
