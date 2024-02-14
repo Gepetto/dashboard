@@ -30,9 +30,7 @@ def update_issues_pr():
 
             # Create new issues and pull requests
             for issue in gh.get_issues(state="open"):
-                days_since_updated = (
-                    timezone.now() - timezone.make_aware(issue.updated_at)
-                ).days
+                days_since_updated = (timezone.now() - issue.updated_at).days
                 if (
                     main_repo is not None
                     and days_since_updated > MIN_DAYS_SINCE_UPDATED
