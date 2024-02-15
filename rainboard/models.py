@@ -1500,7 +1500,7 @@ def update_github(forge, namespace, data):
     project, _ = Project.objects.get_or_create(
         name=valid_name(data["name"]),
         defaults={
-            "homepage": data["homepage"],
+            "homepage": data["homepage"] or "",
             "main_namespace": namespace,
             "main_forge": forge,
         },
