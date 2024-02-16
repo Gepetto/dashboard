@@ -187,13 +187,22 @@ class Forge(Links, NamedModel):
                     defaults={"name": data["name"], "group": data["kind"] == "group"},
                 )
             except IntegrityError:
-                Namespace.objects.get_or_create(
-                    slug=slugify(data["path"]),
-                    defaults={
-                        "name": data["name"] + " 2",
-                        "group": data["kind"] == "group",
-                    },
-                )
+                try:
+                    Namespace.objects.get_or_create(
+                        slug=slugify(data["path"]),
+                        defaults={
+                            "name": data["name"] + " 2",
+                            "group": data["kind"] == "group",
+                        },
+                    )
+                except IntegrityError:
+                    Namespace.objects.get_or_create(
+                        slug=slugify(data["path"]),
+                        defaults={
+                            "name": data["name"] + " 3",
+                            "group": data["kind"] == "group",
+                        },
+                    )
         for data in self.api_list("/users"):
             if data["name"] == "dockering":
                 continue
