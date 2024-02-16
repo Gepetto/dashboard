@@ -1483,7 +1483,7 @@ def update_gitlab(forge, data):
     if "open_issues_count" in data:
         repo.open_issues = data["open_issues_count"]
     repo.default_branch = data["default_branch"]
-    repo.description = data["description"]
+    repo.description = data["description"] or ""
     # TODO license (https://gitlab.com/gitlab-org/gitlab-ce/issues/28267), open_pr
     if "forked_from_project" in data and data["forked_from_project"] is not None:
         repo.forked_from = data["forked_from_project"]["id"]
