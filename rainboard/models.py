@@ -189,7 +189,7 @@ class Forge(Links, NamedModel):
             except IntegrityError:
                 continue
         for data in self.api_list("/users"):
-            if data["name"] == "dockering":
+            if data["bot"]:
                 continue
             Namespace.objects.get_or_create(
                 slug=slugify(data["username"]),
