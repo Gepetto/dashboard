@@ -1454,10 +1454,13 @@ def update_gitlab(forge, data):
         name=valid_name(data["name"]),
         defaults={"main_forge": forge, "public": public},
     )
-    namespace, _ = Namespace.objects.get_or_create(
-        slug__iexact=data["namespace"]["path"],
-        defaults={"name": data["namespace"]["name"]},
-    )
+    try:
+        namespace, _ = Namespace.objects.get_or_create(
+            slug__iexact=data["namespace"]["path"],
+            defaults={"name": data["namespace"]["name"]},
+        )
+    except IntegrityError:
+        return
     repo, _ = Repo.objects.get_or_create(
         forge=forge,
         namespace=namespace,
