@@ -179,8 +179,6 @@ class Forge(Links, NamedModel):
 
     def get_namespaces_gitlab(self):
         for data in self.api_list("/namespaces"):
-            if data["bot"]:
-                continue
             try:
                 Namespace.objects.get_or_create(
                     slug=slugify(data["path"]),
