@@ -44,7 +44,7 @@
       - doxygen-html/
       - coverage/
 {% endif %}
-format:
+linters:
   image:
     name: gepetto/linters
     entrypoint: [""]
@@ -52,7 +52,5 @@ format:
 {% endif %}  retry:
     max: 2
     when: runner_system_failure
-  before_script:
-    - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
   script:
     - entrypoint.sh {{ project.linters }}
