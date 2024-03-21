@@ -8,7 +8,7 @@ variables:
   DOCKER_TAG: "${REGISTRY}/${CI_PROJECT_PATH}"
   PYTHONWARNINGS: "always"
 
-format:
+linters:
   image:
     name: gepetto/linters
     entrypoint: [""]
