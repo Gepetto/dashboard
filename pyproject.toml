@@ -48,11 +48,11 @@ psycopg2 = "^2.9.9"
 
 [tool.ruff]
 extend-exclude = ["migrations"]
+target-version = "py310"
 
 [tool.ruff.lint]
-target-version = "py310"
-lint.extend-ignore = ["D203", "D213"]
-lint.extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
+extend-ignore = ["D203", "D213"]
+extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
 
 [tool.tomlsort]
 all = true
