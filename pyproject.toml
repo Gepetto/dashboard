@@ -2,11 +2,6 @@
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
-[tool.isort]
-known_django = "django"
-profile = "black"
-sections = "FUTURE,STDLIB,DJANGO,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-
 [tool.poetry]
 authors = ["Guilhem Saurel <guilhem.saurel@laas.fr>"]
 description = "Gepetto Software Development Dashboard"
@@ -21,7 +16,7 @@ django = "^5.0.3"
 django-auth-ldap = "^4.6.0"
 django-filter = "^24.1"
 django-tables2 = "^2.7.0"
-djangorestframework = "^3.14.0"
+djangorestframework = "^3.15.0"
 hiredis = "^2.3.2"
 httpx = "^0.24.1"
 ipython = "^8.22.2"
@@ -34,9 +29,7 @@ redis = "^5.0.3"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.3.0"
-coverage = "^7.4.3"
-isort = "^5.13.2"
+coverage = "^7.4.4"
 pre-commit = "^3.6.2"
 ruff = "^0.2.1"
 
@@ -55,6 +48,8 @@ psycopg2 = "^2.9.9"
 
 [tool.ruff]
 extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
 target-version = "py310"
 lint.extend-ignore = ["D203", "D213"]
 lint.extend-select = ["A", "B", "C", "COM", "DJ", "EM", "EXE", "G", "N", "PTH", "RET", "RUF", "UP", "W", "YTT"]
