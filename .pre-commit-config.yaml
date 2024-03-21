@@ -13,7 +13,7 @@ repos:
     - --target-version
     - '4.2'
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.3.2
+  rev: v0.3.3
   hooks:
   - id: ruff
     args:
@@ -42,6 +42,6 @@ repos:
   - id: mixed-line-ending
   - id: trailing-whitespace
 - repo: https://github.com/psf/black
-  rev: 24.2.0
+  rev: 24.3.0
   hooks:
   - id: black
