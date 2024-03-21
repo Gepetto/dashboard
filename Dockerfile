@@ -6,14 +6,13 @@ WORKDIR /app
 
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true PYTHONUNBUFFERED=1 PATH=/root/.local/bin:$PATH
 
-CMD rm -f /opt/openrobots/etc/robotpkg.conf \
- && /srv/dashboard/robotpkg/bootstrap/bootstrap \
- && while ! nc -z postgres 5432; do sleep 1; done \
+CMD while ! nc -z postgres 5432; do sleep 1; done \
  && poetry run ./manage.py migrate \
  && poetry run ./manage.py collectstatic --no-input \
  && poetry run gunicorn \
     --bind 0.0.0.0 \
     dashboard.wsgi
+
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt \
     --mount=type=cache,sharing=locked,target=/root/.cache \
@@ -48,4 +47,10 @@ ADD pyproject.toml poetry.lock ./
 RUN --mount=type=cache,sharing=locked,target=/root/.cache \
     poetry install --with prod --no-root --no-interaction --no-ansi
 
+RUN mkdir -p /srv/dashboard \
+ && git -C /srv/dashboard clone https://github.com/gepetto/robotpkg
+
 ADD . .
+
+RUN rm -f /opt/openrobots/etc/robotpkg.conf \
+ && /srv/dashboard/robotpkg/bootstrap/bootstrap \
