@@ -12,8 +12,6 @@ format:
   image:
     name: gepetto/linters
     entrypoint: [""]
-  before_script:
-    - test -f /builds/setup.cfg || ln -s /root/setup.cfg /builds
   script:
     - entrypoint.sh --no-cpp
 
