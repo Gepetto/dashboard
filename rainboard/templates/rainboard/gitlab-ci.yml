@@ -33,6 +33,8 @@
     - cd /root/robotpkg/{{ image.robotpkg.category }}/{{ image.robotpkg }}{% endwith %}
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.docs %}    - make doc
+    - mkdir -p doc/html
+    - mv doc/html/* doc/doxygen-html/
     - mv doc/doxygen-html ${CI_PROJECT_DIR}
 {% endif %}{% if project.tests%}    - mkdir -p ${CI_PROJECT_DIR}/coverage/
     - gcovr -e CMakeFiles -e _deps -r .
