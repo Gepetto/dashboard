@@ -3,6 +3,10 @@ import logging
 import re
 from subprocess import check_output
 
+import git
+import httpx
+from autoslug import AutoSlugField
+from autoslug.utils import slugify
 from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
@@ -11,11 +15,6 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
-
-import git
-import httpx
-from autoslug import AutoSlugField
-from autoslug.utils import slugify
 from github import Github
 from gitlab import Gitlab
 from ndh.models import Links, NamedModel, TimeStampedModel
@@ -393,7 +392,7 @@ class Project(Links, NamedModel, TimeStampedModel):
             content = f.read()
         for key, value in CMAKE_FIELDS.items():
             search = re.search(
-                r"set\s*\(\s*project_%s\s+([^)]+)*\)" % key,
+                rf"set\s*\(\s*project_{key}\s+([^)]+)*\)",
                 content,
                 re.I,
             )
