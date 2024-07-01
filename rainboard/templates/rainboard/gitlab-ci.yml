@@ -20,7 +20,7 @@
     - build=$(make show-var VARNAME=CONFIGURE_DIRS); cd $(make show-var VARNAME=WRKSRC); cd $build
 {% if project.tests %}    - touch CMakeLists.txt && make && make test
 {% endif %}    - sccache -s
-    - sccache --stop-server
+    - sccache --stop-server || true
 {% for image in robotpkg.valid_images %}{{ image.get_job_name }}:
   <<: *robotpkg-{{ robotpkg }}
   image: {{ image.get_image_name }}
