@@ -5,7 +5,7 @@ from django.db import migrations
 def add_noble(apps, schema_editor):
     Target = apps.get_model("rainboard", "Target")
     Target.objects.create(
-        name="22.04",
+        name="24.04",
         python_major=3,
         python_minor=12,
     )
