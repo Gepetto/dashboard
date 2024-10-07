@@ -307,7 +307,7 @@ class GhTests(TestCase):
         )
 
         await sleep(5)
-        for q in PushQueue.objects.all():
+        async for q in PushQueue.objects.all():
             q.push()
 
         last_commit_github = self.github.get_branch(branch).commit.sha
@@ -537,7 +537,7 @@ class GhTests(TestCase):
                 if not_accepted_string in c.body
             ],
         )
-        for q in PushQueue.objects.all():
+        async for q in PushQueue.objects.all():
             q.push()
         await sleep(30)
         self.assertIn(
