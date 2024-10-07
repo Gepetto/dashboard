@@ -308,7 +308,7 @@ class GhTests(TestCase):
 
         await sleep(5)
         async for q in PushQueue.objects.all():
-            q.push()
+            await sync_to_async(q.push)()
 
         last_commit_github = self.github.get_branch(branch).commit.sha
         self.assertNotEqual(last_commit, last_commit_github)
@@ -395,6 +395,9 @@ class GhTests(TestCase):
         print(f"{response.content=}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
+
+        async for q in PushQueue.objects.all():
+            await sync_to_async(q.push)()
 
         last_commit_gitlab = (
             self.gitlab.commits.list(
@@ -538,7 +541,7 @@ class GhTests(TestCase):
             ],
         )
         async for q in PushQueue.objects.all():
-            q.push()
+            await sync_to_async(q.push)()
         await sleep(30)
         self.assertIn(
             f"pr/{pr_master.number}",
