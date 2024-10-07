@@ -272,14 +272,12 @@ async def push(  # noqa: C901
         elif (
             branch not in gl_remote.refs or str(gl_remote.refs[branch].commit) != commit
         ):
-            logger.info(
-                "%s/%s: Pushing %s on %s on gitlab",
-                namespace.slug,
-                slug,
-                commit,
-                branch,
+            await models.PushQueue.objects.acreate(
+                namespace=namespace,
+                project=project,
+                gl_remote_name=gl_remote_name,
+                branch=branch,
             )
-            await sync_to_async(git_repo.git.push)(gl_remote_name, branch)
         else:
             return HttpResponse("already synced")
     except git.exc.GitCommandError:
