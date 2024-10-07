@@ -532,7 +532,7 @@ class GhTests(TestCase):
                 if not_accepted_string in c.body
             ],
         )
-        await sleep(30)
+        await sleep(90)
         self.assertIn(
             f"pr/{pr_master.number}",
             [b.name for b in self.gitlab.branches.list()],
