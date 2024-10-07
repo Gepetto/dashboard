@@ -11,10 +11,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         while True:
             sleep(60)
-            i = PushQueue.objects.order_by("?")[0]
-            try:
-                i.push()
-                i.delete()
-            except Exception as e:
-                err = f"can't push {i}: {e}"
-                self.stderr.write(err)
+            if i := PushQueue.objects.order_by("?").first():
+                try:
+                    i.push()
+                    i.delete()
+                except Exception as e:
+                    err = f"can't push {i}: {e}"
+                    self.stderr.write(err)
