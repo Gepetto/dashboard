@@ -284,6 +284,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     has_cpp = models.BooleanField(default=True)
     accept_pr_to_master = models.BooleanField(default=False)
     clang_args = models.CharField(max_length=200, blank=True, default="")
+    slug_us = AutoSlugField(populate_from="slug", unique=True)
 
     objects = ProjectQuerySet.as_manager()
 
@@ -317,12 +318,12 @@ class Project(Links, NamedModel, TimeStampedModel):
     def github(self):
         github_forge = Forge.objects.get(slug="github")
         gh = Github(github_forge.token)
-        return gh.get_repo(f"{self.main_namespace.slug_github}/{self.slug}")
+        return gh.get_repo(f"{self.main_namespace.slug_github}/{self.slug_us}")
 
     def gitlab(self):
         gitlab_forge = Forge.objects.get(slug="gitlab")
         gl = Gitlab(gitlab_forge.url, private_token=gitlab_forge.token)
-        return gl.projects.get(f"{self.main_namespace.slug_gitlab}/{self.slug}")
+        return gl.projects.get(f"{self.main_namespace.slug_gitlab}/{self.slug_us}")
 
     def main_repo(self):
         forge = self.main_forge if self.main_forge else get_default_forge(self)
