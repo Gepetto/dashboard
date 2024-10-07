@@ -318,6 +318,11 @@ class GhTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "push event detected")
 
+        await sleep(5)
+        async for q in PushQueue.objects.all():
+            await sync_to_async(q.push)()
+        await sleep(5)
+
         last_commit_gitlab = (
             self.gitlab.commits.list(ref_name=branch, iterator=True).next().id
         )
