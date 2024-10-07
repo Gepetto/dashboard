@@ -54,7 +54,7 @@ async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     return HttpResponse(rep)
 
 
-async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa: C901
+async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
     """Manage Github's Pull Requests."""
     logger.info("process gh pr")
     data = loads(request.body.decode())
@@ -126,24 +126,12 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa:
             url = await sync_to_async(project.remote_url_gitlab)()
             await sync_to_async(git_repo.create_remote)(gl_remote_name, url=url)
 
-        # Push the changes to gitlab
-        logger.info(
-            "%s/%s: Pushing %s on %s on gitlab",
-            namespace.slug,
-            project.slug,
-            commit,
-            branch,
+        models.PushQueue.objects.create(
+            namespace=namespace,
+            project=project,
+            gl_remote_name=gl_remote_name,
+            branch=branch,
         )
-        try:
-            git_repo.git.push(gl_remote_name, branch)
-        except git.exc.GitCommandError:
-            logger.warning(
-                "%s/%s: Failed to push on %s on gitlab, force pushing ...",
-                namespace.slug,
-                project.slug,
-                branch,
-            )
-            git_repo.git.push(gl_remote_name, branch, force=True)
 
     # The pull request was closed, delete the branch pr/XX on Gitlab
     elif event == "closed":
