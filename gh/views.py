@@ -126,7 +126,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
             url = await sync_to_async(project.remote_url_gitlab)()
             await sync_to_async(git_repo.create_remote)(gl_remote_name, url=url)
 
-        models.PushQueue.objects.create(
+        await models.PushQueue.objects.acreate(
             namespace=namespace,
             project=project,
             gl_remote_name=gl_remote_name,

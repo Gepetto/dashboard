@@ -3,7 +3,7 @@ import logging
 import git
 from django.db import models
 
-from ..rainboard.models import Namespace, Project
+from rainboard.models import Namespace, Project
 
 logger = logging.getLogger(__name__)
 
