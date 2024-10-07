@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 default="",
                 editable=False,
                 populate_from="slug",
-                unique=True,
+                unique=False,
             ),
             preserve_default=False,
         ),
