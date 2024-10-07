@@ -8,6 +8,10 @@ from hashlib import sha1
 from ipaddress import ip_address, ip_network
 from json import loads
 
+import git
+import github
+from asgiref.sync import async_to_sync, sync_to_async
+from autoslug.utils import slugify
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.http import HttpRequest
@@ -21,11 +25,6 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404, reverse
 from django.utils.encoding import force_bytes
 from django.views.decorators.csrf import csrf_exempt
-
-import git
-import github
-from asgiref.sync import async_to_sync, sync_to_async
-from autoslug.utils import slugify
 from gitlab import GitlabDeleteError
 
 from dashboard.middleware import ip_laas
@@ -70,7 +69,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa:
     project = await sync_to_async(get_object_or_404)(
         Project,
         main_namespace=namespace,
-        slug=slugify(data["repository"]["name"]),
+        slug=slugify(data["repository"]["name"]).replace("_", "-"),
     )
     git_repo = await sync_to_async(project.git)()
     logger.debug(
