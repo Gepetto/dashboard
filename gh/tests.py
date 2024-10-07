@@ -4,13 +4,14 @@ import re
 from asyncio import sleep
 from hashlib import sha1
 
-import git
-from asgiref.sync import sync_to_async
-from autoslug.utils import slugify
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
+
+import git
+from asgiref.sync import sync_to_async
+from autoslug.utils import slugify
 
 from rainboard.models import Forge, Namespace, Project
 
@@ -316,14 +317,13 @@ class GhTests(TestCase):
         )
         self.assertEqual(last_commit_github, last_commit_gitlab)
 
-    # TODO: broken by PushQueue
-    # async def test_push_github_master(self):
-    # """Test sync after pushing to github on master."""
-    # await self.push_github("master")
-    #
-    # async def test_push_github_devel(self):
-    # """Test sync after pushing to github on devel."""
-    # await self.push_github("devel")
+    async def test_push_github_master(self):
+        """Test sync after pushing to github on master."""
+        await self.push_github("master")
+
+    async def test_push_github_devel(self):
+        """Test sync after pushing to github on devel."""
+        await self.push_github("devel")
 
     async def push_gitlab(self, branch):
         """Test sync after pushing to the given branch on gitlab."""
@@ -355,71 +355,70 @@ class GhTests(TestCase):
         """Test sync after pushing to gitlab on devel."""
         await self.push_gitlab("devel")
 
-    # TODO: broken by PushQueue
-    # async def test_branch_github(self):
-    # """Test sync after creating or deleting a branch on github."""
-    # await self.sync()
-    # source_branch_name = "master"
-    # target_branch_name = "test-branch-github"
-    # last_commit = self.github.get_branch(source_branch_name).commit.sha
+    async def test_branch_github(self):
+        """Test sync after creating or deleting a branch on github."""
+        await self.sync()
+        source_branch_name = "master"
+        target_branch_name = "test-branch-github"
+        last_commit = self.github.get_branch(source_branch_name).commit.sha
 
-    # # Test sync after creating a new branch
-    # source_branch = self.github.get_branch(source_branch_name)
-    # if target_branch_name in [b.name for b in self.github.get_branches()]:
-    # branch_ref = self.github.get_git_ref(ref=f"heads/{target_branch_name}")
-    # else:
-    # branch_ref = self.github.create_git_ref(
-    # ref=f"refs/heads/{target_branch_name}",
-    # sha=source_branch.commit.sha,
-    # )
-    # file = self.github.get_contents("README.md", target_branch_name)
-    # self.github.update_file(
-    # "README.md",
-    # message="Test new branch on github",
-    # content=last_commit[:8],
-    # sha=file.sha,
-    # branch=target_branch_name,
-    # )
+        # Test sync after creating a new branch
+        source_branch = self.github.get_branch(source_branch_name)
+        if target_branch_name in [b.name for b in self.github.get_branches()]:
+            branch_ref = self.github.get_git_ref(ref=f"heads/{target_branch_name}")
+        else:
+            branch_ref = self.github.create_git_ref(
+                ref=f"refs/heads/{target_branch_name}",
+                sha=source_branch.commit.sha,
+            )
+        file = self.github.get_contents("README.md", target_branch_name)
+        self.github.update_file(
+            "README.md",
+            message="Test new branch on github",
+            content=last_commit[:8],
+            sha=file.sha,
+            branch=target_branch_name,
+        )
 
-    # target_branch = self.github.get_branch(target_branch_name)
-    # last_commit_github = target_branch.commit.sha
-    # response = await self.gh_webhook_event(
-    # "push",
-    # last_commit_github,
-    # target_branch_name,
-    # )
-    # print(f"{response.content=}")
-    # self.assertEqual(response.status_code, 200)
-    # self.assertEqual(response.content.decode(), "push event detected")
+        target_branch = self.github.get_branch(target_branch_name)
+        last_commit_github = target_branch.commit.sha
+        response = await self.gh_webhook_event(
+            "push",
+            last_commit_github,
+            target_branch_name,
+        )
+        print(f"{response.content=}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), "push event detected")
 
-    # last_commit_gitlab = (
-    # self.gitlab.commits.list(
-    # ref_name=target_branch_name,
-    # iterator=True,
-    # )
-    # .next()
-    # .id
-    # )
-    # self.assertEqual(last_commit_github, last_commit_gitlab)
+        last_commit_gitlab = (
+            self.gitlab.commits.list(
+                ref_name=target_branch_name,
+                iterator=True,
+            )
+            .next()
+            .id
+        )
+        self.assertEqual(last_commit_github, last_commit_gitlab)
 
-    # # Test sync after deleting a branch
-    # branch_ref.delete()
-    # self.assertNotIn(
-    # target_branch_name,
-    # [b.name for b in self.github.get_branches()],
-    # )
+        # Test sync after deleting a branch
+        branch_ref.delete()
+        self.assertNotIn(
+            target_branch_name,
+            [b.name for b in self.github.get_branches()],
+        )
 
-    # response = await self.gh_webhook_event(
-    # "push",
-    # "0000000000000000000000000000000000000000",
-    # target_branch_name,
-    # )
-    # self.assertEqual(response.status_code, 200)
-    # self.assertEqual(response.content.decode(), "push event detected")
-    # self.assertNotIn(
-    # target_branch_name,
-    # [b.name for b in self.gitlab.branches.list()],
-    # )
+        response = await self.gh_webhook_event(
+            "push",
+            "0000000000000000000000000000000000000000",
+            target_branch_name,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), "push event detected")
+        self.assertNotIn(
+            target_branch_name,
+            [b.name for b in self.gitlab.branches.list()],
+        )
 
     async def test_branch_gitlab(self):
         """Test sync after creating or deleting a branch on gitlab."""
@@ -504,83 +503,82 @@ class GhTests(TestCase):
             ],
         )
 
-    # TODO: broken by PushQueue
-    # async def test_pr(self):
-    # """Test github's pull requests."""
-    # await self.sync()
-    # not_accepted_string = "doesn't usually accept pull requests on the main branch."
+    async def test_pr(self):
+        """Test github's pull requests."""
+        await self.sync()
+        not_accepted_string = "doesn't usually accept pull requests on the main branch."
 
-    # # Test pr on master
-    # last_commit = self.github.get_branch("devel").commit.sha
-    # github = await sync_to_async(self.project.github)()
-    # pr_master = github.create_pull(
-    # title="Test pr on master",
-    # body="",
-    # head="devel",
-    # base="master",
-    # )
-    # response = await self.gh_webhook_event(
-    # "pull_request",
-    # last_commit=last_commit,
-    # pr_action="opened",
-    # pr_login="foo",
-    # pr_number=pr_master.number,
-    # )
-    # self.assertEqual(response.status_code, 200)
-    # self.assertTrue(
-    # [
-    # c.body
-    # for c in pr_master.get_issue_comments()
-    # if not_accepted_string in c.body
-    # ],
-    # )
-    # await sleep(90)
-    # self.assertIn(
-    # f"pr/{pr_master.number}",
-    # [b.name for b in self.gitlab.branches.list()],
-    # )
+        # Test pr on master
+        last_commit = self.github.get_branch("devel").commit.sha
+        github = await sync_to_async(self.project.github)()
+        pr_master = github.create_pull(
+            title="Test pr on master",
+            body="",
+            head="devel",
+            base="master",
+        )
+        response = await self.gh_webhook_event(
+            "pull_request",
+            last_commit=last_commit,
+            pr_action="opened",
+            pr_login="foo",
+            pr_number=pr_master.number,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            [
+                c.body
+                for c in pr_master.get_issue_comments()
+                if not_accepted_string in c.body
+            ],
+        )
+        await sleep(90)
+        self.assertIn(
+            f"pr/{pr_master.number}",
+            [b.name for b in self.gitlab.branches.list()],
+        )
 
-    # # Test pr on devel
-    # last_commit = self.github.get_branch("master").commit.sha
-    # pr_devel = github.create_pull(
-    # title="Test pr on devel",
-    # body="",
-    # head="master",
-    # base="devel",
-    # )
-    # response = await self.gh_webhook_event(
-    # "pull_request",
-    # last_commit=last_commit,
-    # pr_action="opened",
-    # pr_login="foo",
-    # pr_number=pr_devel.number,
-    # )
-    # self.assertEqual(response.status_code, 200)
-    # self.assertFalse(
-    # [
-    # c.body
-    # for c in pr_devel.get_issue_comments()
-    # if not_accepted_string in c.body
-    # ],
-    # )
-    # await sleep(30)
-    # self.assertIn(
-    # f"pr/{pr_devel.number}",
-    # [b.name for b in self.gitlab.branches.list()],
-    # )
+        # Test pr on devel
+        last_commit = self.github.get_branch("master").commit.sha
+        pr_devel = github.create_pull(
+            title="Test pr on devel",
+            body="",
+            head="master",
+            base="devel",
+        )
+        response = await self.gh_webhook_event(
+            "pull_request",
+            last_commit=last_commit,
+            pr_action="opened",
+            pr_login="foo",
+            pr_number=pr_devel.number,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            [
+                c.body
+                for c in pr_devel.get_issue_comments()
+                if not_accepted_string in c.body
+            ],
+        )
+        await sleep(30)
+        self.assertIn(
+            f"pr/{pr_devel.number}",
+            [b.name for b in self.gitlab.branches.list()],
+        )
 
-    # # Close the pr
-    # for pr in [pr_master, pr_devel]:
-    # pr.edit(state="closed")
-    # response = await self.gh_webhook_event(
-    # "pull_request",
-    # pr_action="closed",
-    # pr_login="foo",
-    # pr_number=pr.number,
-    # )
-    # self.assertEqual(response.status_code, 200)
-    # await sleep(30)
-    # self.assertNotIn(
-    # f"pr/{pr.number}",
-    # [b.name for b in self.gitlab.branches.list()],
-    # )
+        # Close the pr
+        for pr in [pr_master, pr_devel]:
+            pr.edit(state="closed")
+            response = await self.gh_webhook_event(
+                "pull_request",
+                pr_action="closed",
+                pr_login="foo",
+                pr_number=pr.number,
+            )
+            self.assertEqual(response.status_code, 200)
+            await sleep(30)
+            self.assertNotIn(
+                f"pr/{pr.number}",
+                [b.name for b in self.gitlab.branches.list()],
+            )
