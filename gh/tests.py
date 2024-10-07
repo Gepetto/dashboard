@@ -4,16 +4,17 @@ import re
 from asyncio import sleep
 from hashlib import sha1
 
+import git
+from asgiref.sync import sync_to_async
+from autoslug.utils import slugify
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 
-import git
-from asgiref.sync import sync_to_async
-from autoslug.utils import slugify
-
 from rainboard.models import Forge, Namespace, Project
+
+from .models import PushQueue
 
 LOGGER = logging.getLogger("dashboard.gh.tests")
 
@@ -305,6 +306,10 @@ class GhTests(TestCase):
             branch=branch,
         )
 
+        await sleep(5)
+        for q in PushQueue.objects.all():
+            q.push()
+
         last_commit_github = self.github.get_branch(branch).commit.sha
         self.assertNotEqual(last_commit, last_commit_github)
 
@@ -532,7 +537,9 @@ class GhTests(TestCase):
                 if not_accepted_string in c.body
             ],
         )
-        await sleep(90)
+        for q in PushQueue.objects.all():
+            q.push()
+        await sleep(30)
         self.assertIn(
             f"pr/{pr_master.number}",
             [b.name for b in self.gitlab.branches.list()],
