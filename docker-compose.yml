@@ -35,6 +35,21 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.rainboard-app.rule: "Host(`rainboard.${DOMAIN_NAME:-localhost}`)"
+  queue:
+    image: memmos.laas.fr:5000/gepetto/dashboard
+    restart: unless-stopped
+    volumes:
+      - "srv:/srv"
+      - /srv/dashboard/repositories:/srv/dashboard/repositories
+      - /srv/dashboard/robotpkg:/srv/dashboard/robotpkg
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/ssmtp:/etc/ssmtp
+    env_file:
+      - .env
+    environment:
+      - DB=postgres
+      - REDIS=true
+    command: poetry run ./manage.py push_queue
   nginx:
     image: nim65s/ndh
     restart: unless-stopped
