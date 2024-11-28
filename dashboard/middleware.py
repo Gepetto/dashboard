@@ -24,10 +24,8 @@ def allowed(request: HttpRequest) -> bool:
     """
     return (
         any(request.path.startswith(f"/{url}/") for url in ALLOWED_URLS)
-        or request.user
-        and request.user.is_authenticated
-        or request.method in permissions.SAFE_METHODS
-        and ip_laas(request)
+        or (request.user and request.user.is_authenticated)
+        or (request.method in permissions.SAFE_METHODS and ip_laas(request))
     )
 
 
