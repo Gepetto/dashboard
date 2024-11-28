@@ -490,7 +490,8 @@ class Project(Links, NamedModel, TimeStampedModel):
                 except ValueError:
                     pass
             if releases:
-                self.version = "%i.%i.%i" % sorted(releases)[-1]
+                vmaj, vmin, vpatch = sorted(releases)[-1]
+                self.version = f"{vmaj}.{vmin}.{vpatch}"
         robotpkg = self.robotpkg_set.order_by("-updated").first()
         branch = self.branch_set.order_by("-updated").first()
         branch_updated = branch is not None and branch.updated is not None
