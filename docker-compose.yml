@@ -17,6 +17,7 @@ services:
     restart: unless-stopped
   app:
     image: memmos.laas.fr:5000/gepetto/dashboard
+    build: .
     restart: unless-stopped
     volumes:
       - "srv:/srv"
@@ -37,6 +38,7 @@ services:
       traefik.http.routers.rainboard-app.rule: "Host(`rainboard.${DOMAIN_NAME:-localhost}`)"
   queue:
     image: memmos.laas.fr:5000/gepetto/dashboard
+    build: .
     restart: unless-stopped
     volumes:
       - "srv:/srv"
