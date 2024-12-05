@@ -1,10 +1,9 @@
 import itertools
 import logging
 
+from autoslug.utils import slugify
 from django.conf import settings
 from django.core.management.base import BaseCommand
-
-from autoslug.utils import slugify
 
 from rainboard.models import (
     Forge,
@@ -23,7 +22,7 @@ class Command(BaseCommand):
         parser.add_argument("org")
         parser.add_argument("project")
 
-    def handle(self, org, project, *args, **options):  # noqa: C901
+    def handle(self, org, project, *args, **options):
         path = settings.RAINBOARD_RPKG
         logger = logging.getLogger("rainboard.management.project")
 
@@ -43,12 +42,12 @@ class Command(BaseCommand):
                     logger.warning("found on github / %s", org)
                     update_github(github, org, data)
                     break
-            for user in Namespace.objects.filter(group=False):
-                for data in github.api_list(f"/users/{user.slug}/repos"):
-                    if slugify(data["name"]) == slug:
-                        logger.warning("found on github / %s", user)
-                        update_github(github, user, data)
-                        break
+            # for user in Namespace.objects.filter(group=False):
+            # for data in github.api_list(f"/users/{user.slug}/repos"):
+            # if slugify(data["name"]) == slug:
+            # logger.warning("found on github / %s", user)
+            # update_github(github, user, data)
+            # break
             gitlab = Forge.objects.get(slug="gitlab")
             for data in gitlab.api_list("/projects"):
                 if slugify(data["name"]) == slug:

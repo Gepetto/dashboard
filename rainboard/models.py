@@ -210,10 +210,10 @@ class Forge(Links, NamedModel):
         for org in Namespace.objects.filter(group=True):
             for data in self.api_list(f"/orgs/{org.slug}/repos"):
                 update_github(self, org, data)
-        for user in Namespace.objects.filter(group=False):
-            for data in self.api_list(f"/users/{user.slug}/repos"):
-                if Project.objects.filter(name=valid_name(data["name"])).exists():
-                    update_github(self, user, data)
+        # for user in Namespace.objects.filter(group=False):
+        # for data in self.api_list(f"/users/{user.slug}/repos"):
+        # if Project.objects.filter(name=valid_name(data["name"])).exists():
+        # update_github(self, user, data)
 
     def get_projects_gitlab(self):
         for data in self.api_list("/projects"):
