@@ -1,4 +1,4 @@
-FROM python:bookworm
+FROM python:3.12-bookworm
 
 EXPOSE 8000
 
