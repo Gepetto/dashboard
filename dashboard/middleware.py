@@ -25,7 +25,7 @@ def allowed(request: HttpRequest) -> bool:
     or if the request comes from a trusted IP.
     """
     return (
-        any(request.path.startswith(f"/{url}/") for url in ALLOWED_URLS)
+        any(request.path.startswith(f"/{url}") for url in ALLOWED_URLS)
         or (request.user and request.user.is_authenticated)
         or (request.method in permissions.SAFE_METHODS and ip_laas(request))
     )
