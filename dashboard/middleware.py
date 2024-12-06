@@ -5,16 +5,18 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import reverse
 from django.utils.decorators import sync_and_async_middleware
-
 from rest_framework import permissions
 
-ALLOWED_URLS = ("admin", "accounts", "gh")
+ALLOWED_URLS = ("admin", "accounts", "gh", "docker", "projects/ordered")
 
 
 def ip_laas(request: HttpRequest) -> bool:
     """check if request comes from settings.LAAS_NETWORKS."""
-    forwarded_for = ip_address(request.headers.get("x-forwarded-for").split(", ")[0])
-    return any(forwarded_for in ip_network(net) for net in settings.LAAS_NETWORKS)
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip is None:
+        return False
+    real_ip = ip_address(real_ip)
+    return any(real_ip in ip_network(net) for net in settings.LAAS_NETWORKS)
 
 
 def allowed(request: HttpRequest) -> bool:
