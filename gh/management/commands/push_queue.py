@@ -16,5 +16,10 @@ class Command(BaseCommand):
                     i.push()
                     i.delete()
                 except Exception as e:
-                    err = f"can't push {i}: {e}"
+                    err = f"can't push {i} ({i.retry}): {e}"
                     self.stderr.write(err)
+                    if i.retry < 10:
+                        i.retry += 1
+                        i.save()
+                    else:
+                        i.delete()

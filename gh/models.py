@@ -20,6 +20,7 @@ class PushQueue(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     gl_remote_name = models.CharField(max_length=255)
     branch = models.CharField(max_length=255)
+    retry = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return (
