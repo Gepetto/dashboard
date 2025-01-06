@@ -54,7 +54,7 @@ async def check_suite(request: HttpRequest, rep: str) -> HttpResponse:
     return HttpResponse(rep)
 
 
-async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
+async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa: C901
     """Manage Github's Pull Requests."""
     logger.info("process gh pr")
     data = loads(request.body.decode())
