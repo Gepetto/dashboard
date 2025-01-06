@@ -245,7 +245,8 @@ class ProjectQuerySet(models.QuerySet):
         return self.exclude(
             Q(main_namespace__from_gepetto=False)
             | Q(robotpkg__isnull=True)
-            | Q(archived=True),
+            | Q(archived=True)
+            | Q(ignore=True),
         )
 
 
@@ -285,6 +286,7 @@ class Project(Links, NamedModel, TimeStampedModel):
     accept_pr_to_master = models.BooleanField(default=False)
     clang_args = models.CharField(max_length=200, blank=True, default="")
     slug_us = AutoSlugField(populate_from="slug", unique=True)
+    ignore = models.BooleanField(default=False)
 
     objects = ProjectQuerySet.as_manager()
 

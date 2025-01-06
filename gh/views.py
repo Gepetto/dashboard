@@ -71,6 +71,8 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:
         main_namespace=namespace,
         slug=slugify(data["repository"]["name"]).replace("_", "-"),
     )
+    if project.ignore:
+        return HttpResponse(rep)
     git_repo = await sync_to_async(project.git)()
     logger.debug(
         "%s/%s: Pull request on %s: %s",
