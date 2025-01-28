@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import re
@@ -616,7 +617,8 @@ class Project(Links, NamedModel, TimeStampedModel):
 
     def cron(self):
         """generate a cron-style interval description to run CI monthly on master"""
-        hour, day = (self.pk // 30) % 24, self.pk % 30 + 1
+        n = int(hashlib.md5(self.name.encode()).hexdigest(), 16)
+        hour, day = (n // 30) % 24, n % 30 + 1
         return f"0 {hour} {day} * *"
 
     def pipeline_schedules(self):
