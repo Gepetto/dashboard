@@ -852,7 +852,7 @@ class Repo(TimeStampedModel):
 
     def get_jobs_gitlab(self):
         for data in self.api_list("/jobs", limit=4):
-            branch_name = f'{self.forge.slug}/{self.namespace.slug}/{data["ref"]}'
+            branch_name = f"{self.forge.slug}/{self.namespace.slug}/{data['ref']}"
             branch, created = Branch.objects.get_or_create(
                 name=branch_name,
                 project=self.project,
@@ -919,7 +919,7 @@ class Repo(TimeStampedModel):
                 ):
                     continue
                 branch_name = (
-                    f'{self.forge.slug}/{self.namespace.slug}/{build["branch"]["name"]}'
+                    f"{self.forge.slug}/{self.namespace.slug}/{build['branch']['name']}"
                 )
                 branch, created = Branch.objects.get_or_create(
                     name=branch_name,
