@@ -59,7 +59,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa:
     logger.info("process gh pr")
     data = loads(request.body.decode())
     event = data["action"]
-    branch = f'pr/{data["number"]}'
+    branch = f"pr/{data['number']}"
     login = slugify(data["pull_request"]["head"]["repo"]["owner"]["login"])
 
     namespace = await sync_to_async(get_object_or_404)(
