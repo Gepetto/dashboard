@@ -69,7 +69,7 @@ async def pull_request(request: HttpRequest, rep: str) -> HttpResponse:  # noqa:
     project = await sync_to_async(get_object_or_404)(
         Project,
         main_namespace=namespace,
-        slug=slugify(data["repository"]["name"]).replace("_", "-"),
+        slug=slugify(data["repository"]["name"]),
     )
     if project.ignore:
         return HttpResponse(rep)
