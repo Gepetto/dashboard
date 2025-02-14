@@ -12,39 +12,39 @@ version = "0.1.0"
 [tool.poetry.dependencies]
 GitPython = "^3.1.44"
 PyGithub = "^2.5.0"
-django = "^5.1.5"
+django = "^5.1.6"
 django-auth-ldap = "^5.1.0"
-django-filter = "^24.3"
+django-filter = "^25.1"
 django-tables2 = "^2.7.5"
 djangorestframework = "^3.15.2"
 hiredis = "^3.1.0"
 httpx = "^0.28.1"
-ipython = "^8.31.0"
+ipython = "^8.32.0"
 ndh = "^6.9.2"
 python = "^3.10"
-python-gitlab = "^5.3.1"
+python-gitlab = "^5.6.0"
 redis = "^5.2.1"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-coverage = "^7.6.1"
-pre-commit = "^4.0.0"
-ruff = "^0.2.1"
+coverage = "^7.6.12"
+pre-commit = "^4.1.0"
+ruff = "^0.9.6"
 
 [tool.poetry.group.noprod]
 optional = true
 
 [tool.poetry.group.noprod.dependencies]
-psycopg2-binary = "^2.9.9"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.group.prod]
 optional = true
 
 [tool.poetry.group.prod.dependencies]
 gunicorn = "^23.0.0"
-psycopg2 = "^2.9.9"
+psycopg2 = "^2.9.10"
 
 [tool.ruff]
 extend-exclude = ["migrations"]
