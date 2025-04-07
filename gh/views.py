@@ -190,6 +190,9 @@ async def push(  # noqa: C901
         slug=slug,
     )
 
+    if project.ignore:
+        return HttpResponse(rep)
+
     branch = data["ref"][11:]  # strip 'refs/heads/'
     commit = data["after"]
     gl_remote_name = f"gitlab/{namespace.slug}"
