@@ -207,15 +207,15 @@ async def push(  # noqa: C901
         commit,
     )
 
-    if branch.startswith(
-        "pr/",
-    ):  # Don't sync pr/XX branches here, they are already handled by pull_request()
-        return HttpResponse(rep)
-
-    if branch.startswith("release/"):  # Don't sync release/X.Y.Z branches at all
-        return HttpResponse(rep)
-
-    if branch.startswith("pre-commit-ci-update-config"):  # Don't sync neither
+    if any(
+        branch.startswith(start)
+        for start in [
+            "pr/",
+            "release/",
+            "pre-commit-ci-update-config",
+            "update_flake_lock_action",
+        ]
+    ):
         return HttpResponse(rep)
 
     # Fetch the latest commit from gitlab
