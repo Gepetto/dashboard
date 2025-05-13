@@ -11,27 +11,30 @@ version = "0.1.0"
 
 [tool.poetry.dependencies]
 GitPython = "^3.1.44"
-PyGithub = "^2.5.0"
-django = "^5.1.8"
-django-auth-ldap = "^5.1.0"
+PyGithub = "^2.6.1"
+django = "^5.2.1"
+django-auth-ldap = "^5.2.0"
 django-filter = "^25.1"
 django-tables2 = "^2.7.5"
-djangorestframework = "^3.15.2"
-hiredis = "^3.1.0"
+djangorestframework = "^3.16.0"
+hiredis = "^3.1.1"
 httpx = "^0.28.1"
-ipython = "^8.32.0"
-ndh = "^6.9.2"
+ipython = [
+  {python = ">=3.10,<3.11", version = "^8.36.0"},
+  {python = ">=3.11,<4.0", version = "^9.2.0"}
+]
+ndh = "^6.10.1"
 python = "^3.10"
 python-gitlab = "^5.6.0"
-redis = "^5.2.1"
+redis = "^6.1.0"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-coverage = "^7.6.12"
-pre-commit = "^4.1.0"
-ruff = "^0.9.6"
+coverage = "^7.8.0"
+pre-commit = "^4.2.0"
+ruff = "^0.11.9"
 
 [tool.poetry.group.noprod]
 optional = true
