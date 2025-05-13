@@ -49,14 +49,14 @@ class RainboardTests(TestCase):
         # Test Middleware
         response = self.client.get(
             reverse("rainboard:project", kwargs={"slug": project.slug}),
-            headers={"x-forwarded-for": "9.9.9.9"},
+            headers={"x-real-ip": "9.9.9.9"},
         )
         self.assertEqual(response.status_code, 302)
         response = self.client.get(
             reverse("rainboard:project", kwargs={"slug": project.slug}),
-            headers={"x-forwarded-for": "140.93.5.4"},
+            headers={"x-real-ip": "140.93.5.4"},
         )
-        # self.assertEqual(response.status_code, 200)  # TODO
+        self.assertEqual(response.status_code, 200)
 
         # Test Views
         content = response.content.decode()
@@ -89,7 +89,7 @@ class RainboardTests(TestCase):
 
         response = self.client.get(
             reverse("rainboard:issues_pr"),
-            headers={"x-forwarded-for": "140.93.5.4"},
+            headers={"x-real-ip": "140.93.5.4"},
         )
         self.assertEqual(response.status_code, 200)
 

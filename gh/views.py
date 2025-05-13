@@ -373,11 +373,11 @@ async def webhook(request: HttpRequest) -> HttpResponse:
     how-to-handle-github-webhooks-using-django.html
     """
     # validate ip source
-    forwarded_for = request.headers.get("x-forwarded-for").split(", ")[0]
+    real_ip = request.headers.get("x-real-ip").split(", ")[0]
     # Fails if API rate limit exceeded
     # networks = httpx.get('https://api.github.com/meta').json()['hooks']
     networks = ["185.199.108.0/22", "140.82.112.0/20"]
-    if not any(ip_address(forwarded_for) in ip_network(net) for net in networks):
+    if not any(ip_address(real_ip) in ip_network(net) for net in networks):
         logger.warning("not from github IP")
         return HttpResponseRedirect(reverse("login"))
 
