@@ -356,7 +356,7 @@ class Project(Links, NamedModel, TimeStampedModel):
                 if branch not in ["main", "master"]:
                     logger.error('wrong branch "%s" in %s', branch, self.git_path())
                 continue
-            forge, namespace, name = branch.split("/", maxsplit=2)
+            forge, namespace, _name = branch.split("/", maxsplit=2)
             namespace, _ = Namespace.objects.get_or_create(
                 slug=slugify(namespace),
                 defaults={"name": namespace},
@@ -1677,7 +1677,7 @@ def ordered_projects():
     def project_sort_key(prj):
         """Generate a key to sort projects: by number of recursive dependencies,
         then python bindings, then name."""
-        cat, pkg, ns, deps = prj
+        _cat, pkg, _ns, deps = prj
         return (len(get_rdeps(deps)), 1 if pkg.startswith("py-") else 0, pkg)
 
     return sorted(rpkgs, key=project_sort_key)
