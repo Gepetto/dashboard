@@ -10,7 +10,7 @@ name = "dashboard"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-GitPython = "^3.1.44"
+GitPython = "^3.1.47"
 PyGithub = "^2.6.1"
 django = "^5.2.13"
 django-auth-ldap = "^5.2.0"
